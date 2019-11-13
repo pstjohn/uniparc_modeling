@@ -153,21 +153,21 @@ class Transformer(layers.Layer):
 
 class Bias(layers.Layer):
     """ Final bias layer added to logits prior to softmax scoring. This layer
-    also clears the _keras_mask attribute from the Transformers in order to
-    allow the custom loss function to work properly. """
+    also applys the input mask from the input to mask non-randomized prediction
+    targets """
 
     def build(self, input_shape):
         self.bias = self.add_weight(name='classifier_bias',
                                     dtype=K.floatx(),
-                                    shape=[input_shape[-1]],
+                                    shape=[input_shape[0][-1]],
                                     initializer=tf.zeros_initializer())
         
     def call(self, inputs):
-        logits = tf.nn.bias_add(inputs, self.bias)
+        logits = tf.nn.bias_add(inputs[0], self.bias)
         return logits
         
     def compute_mask(self, inputs, mask=None):
-        return None
+        return inputs[1]
 
 
 def masked_sparse_cross_entropy_loss(y_true, y_pred):
