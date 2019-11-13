@@ -21,10 +21,10 @@ class PositionEmbedding(layers.Embedding):
     """
         
     def call(self, inputs):
-        idx = tf.cast(tf.where(inputs != 0), dtype=tf.int32)
-        padded_position_indicies = tf.scatter_nd(
-            idx, idx[:, 1] + 1, tf.shape(inputs))
-        return super(PositionEmbedding, self).call(padded_position_indicies)
+        batch_size = tf.shape(inputs)[0]
+        seq_len = inputs.shape[1]
+        idx = tf.tile(tf.expand_dims(tf.range(seq_len), 0), [batch_size, 1]) + 1
+        return super(PositionEmbedding, self).call(idx)
 
 
 class TokenEmbedding(layers.Embedding):
@@ -200,20 +200,20 @@ class BERTLearningRateScheduler(Callback):
         self.final_learning_rate = final_learning_rate
         self.num_warmup_steps = num_warmup_steps
         self.num_training_steps = num_training_steps
-        self.global_step = 0
         
     def on_train_batch_begin(self, batch, logs=None):
         
-        self.global_step += 1
+        logs = logs or {}
+        global_step = logs.get('size', 1)
         
         # Still in warmup
-        if self.global_step <= self.num_warmup_steps:
+        if global_step <= self.num_warmup_steps:
             scheduled_lr = self.initial_learning_rate * (
-                self.global_step / self.num_warmup_steps)
+                global_step / self.num_warmup_steps)
         
         # Linear decay
         else:
-            scheduled_lr = self.initial_learning_rate - self.global_step * (
+            scheduled_lr = self.initial_learning_rate - global_step * (
                 (self.initial_learning_rate - self.final_learning_rate)
                 / (self.num_training_steps - self.num_warmup_steps))
             
