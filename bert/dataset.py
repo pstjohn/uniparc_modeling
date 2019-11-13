@@ -11,7 +11,11 @@ def create_masked_input_dataset(language_model_path,
                                 vocab_size=32000,
                                 mask_index=4,
                                 vocab_start=5,
-                                fix_sequence_length=False):
+                                fix_sequence_length=False,
+                                masking_freq=.15,
+                                mask_token_freq=.8,
+                                mask_random_freq=.1,
+                                ):
 
 
     sp = spm.SentencePieceProcessor()
@@ -52,13 +56,13 @@ def create_masked_input_dataset(language_model_path,
         """
 
         mask_score = tf.random.uniform(input_tensor.shape, maxval=1, dtype=tf.float32)
-        input_mask = mask_score < .15
+        input_mask = mask_score < masking_freq
 
         # Mask with [MASK] token 80% of the time
-        mask_mask = mask_score <= 0.15 * 0.8 
+        mask_mask = mask_score <= 0.15 * mask_token_freq
 
         # Mask with random token 10% of the time
-        mask_random = (mask_score >= 0.15 * 0.9) & input_mask
+        mask_random = (mask_score >= 0.15 * (1. - mask_random_freq)) & input_mask
 
         # Tensors to replace with where input is masked or randomized
         mask_value_tensor = tf.ones(input_tensor.shape, dtype=tf.int32) * mask_index
