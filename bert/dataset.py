@@ -15,7 +15,7 @@ def create_masked_input_dataset(language_model_path,
                                 masking_freq=.15,
                                 mask_token_freq=.8,
                                 mask_random_freq=.1,
-                                ):
+                                filter_bzux=True):
 
 
     sp = spm.SentencePieceProcessor()
@@ -86,13 +86,17 @@ def create_masked_input_dataset(language_model_path,
         return (a, b), c
 
 
-    valid_data = tf.data.TextLineDataset(sequence_path)
-
-    encoded_data = valid_data\
+    dataset = tf.data.TextLineDataset(sequence_path)
+    
+    if filter_bzux:
+        bzux_filter = lambda string: tf.math.logical_not(
+            tf.strings.regex_full_match(string, '[BZUX]'))
+        dataset = dataset.filter(bzux_filter)
+        
+    encoded_data = dataset\
         .map(sp_encode_tf, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
         .map(mask_input_tf, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
-    
     # This argument controls whether to fix the size of the sequences
     tf_seq_len = -1 if not fix_sequence_length else max_sequence_length
 

@@ -189,32 +189,60 @@ def masked_sparse_cross_entropy_loss(y_true, y_pred):
     
 class BERTLearningRateScheduler(Callback):
     def __init__(self, 
-                 initial_learning_rate=1E-4,
+                 learning_rate=1E-4,
                  final_learning_rate=0,
-                 num_warmup_steps=int(1E3),
+                 warmup_updates=int(1E3),
                  num_training_steps=int(1E6)):
         """ Implements the linear learning rate warmup and linear learning rate
         decay used by google in BERT pretraining """
         
-        self.initial_learning_rate = initial_learning_rate
+        self.learning_rate = learning_rate
         self.final_learning_rate = final_learning_rate
-        self.num_warmup_steps = num_warmup_steps
+        self.warmup_updates = warmup_updates
         self.num_training_steps = num_training_steps
         
     def on_train_batch_begin(self, batch, logs=None):
         
         logs = logs or {}
-        global_step = logs.get('size', 1)
+        global_step = logs.get('batch', 1)
         
         # Still in warmup
-        if global_step <= self.num_warmup_steps:
-            scheduled_lr = self.initial_learning_rate * (
-                global_step / self.num_warmup_steps)
+        if global_step <= self.warmup_updates:
+            scheduled_lr = self.learning_rate * (
+                global_step / self.warmup_updates)
         
         # Linear decay
         else:
-            scheduled_lr = self.initial_learning_rate - global_step * (
-                (self.initial_learning_rate - self.final_learning_rate)
-                / (self.num_training_steps - self.num_warmup_steps))
+            scheduled_lr = self.learning_rate - global_step * (
+                (self.learning_rate - self.final_learning_rate)
+                / (self.num_training_steps - self.warmup_updates))
+            
+        K.set_value(self.model.optimizer.lr, scheduled_lr)
+
+
+class InverseSquareRootSchedule(Callback):
+    def __init__(self, 
+                 learning_rate=1E-4,
+                 warmup_updates=16000):
+        """ Implements the linear learning rate warmup and linear learning rate
+        decay used by google in BERT pretraining """
+        
+        self.learning_rate = learning_rate
+        self.warmup_updates = warmup_updates
+        self.decay_factor = learning_rate * warmup_updates**0.5
+        
+    def on_train_batch_begin(self, batch, logs=None):
+        
+        logs = logs or {}
+        global_step = float(logs.get('batch', 1))
+        
+        # Still in warmup
+        if global_step <= self.warmup_updates:
+            scheduled_lr = self.learning_rate * (
+                global_step / self.warmup_updates)
+        
+        # Linear decay
+        else:
+            scheduled_lr = self.decay_factor * global_step**0.5
             
         K.set_value(self.model.optimizer.lr, scheduled_lr)
