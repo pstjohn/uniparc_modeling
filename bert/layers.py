@@ -44,7 +44,7 @@ class Attention(layers.Layer):
     Includes the preceeding dense layers on the value, key, and query matrices
     """
 
-    def __init__(self, units, dropout=0.2, **kwargs):
+    def __init__(self, units, dropout=0.1, **kwargs):
         super(Attention, self).__init__(**kwargs)
         self.units = units
         self.dropout = dropout
@@ -88,16 +88,53 @@ class Attention(layers.Layer):
         config = super(Attention, self).get_config()
         config.update({'units': self.units, 'dropout': self.dropout})
         return config
+    
+
+class Projection(layers.Layer):
+    """ Performs a dense layer, dropout, layer norm and residual update """
+    def __init__(self, units, dropout=0.1, use_residual=True, **kwargs):
+        super(Projection, self).__init__(**kwargs)        
+        self.units = units
+        self.dropout = dropout        
+        self.use_residual = use_residual
+
+    def build(self, input_shape):
+        self.dense_layer = layers.Dense(self.units,
+                                        kernel_initializer=initializer(),
+                                        activation=gelu)
+        self.dropout_layer = layers.Dropout(self.dropout)
+        self.layer_norm = layers.LayerNormalization()
+
+    def call(self, inputs, training=None, ):
+        
+        output, residual = inputs if self.use_residual else (inputs, None)
+        
+        output = self.dense_layer(output)
+        output = self.dropout_layer(output, training=training)
+        
+        if self.use_residual:
+            return self.layer_norm(output + residual)
+        else:
+            return self.layer_norm(output)
+
+    def get_config(self):
+        config = super(Projection, self).get_config()
+        config.update({'units': self.units,
+                       'dropout': self.dropout,
+                       'use_residual': self.use_residual})
+        return config
 
 
 class Transformer(layers.Layer):
     """ Performs the multi-headed attention and normalization of a single
     transformer block """
 
-    def __init__(self, num_heads, dropout=0.1, **kwargs):
+    def __init__(self, num_heads, intermediate_units, dropout=0.1, **kwargs):
         super(Transformer, self).__init__(**kwargs)        
         self.num_heads = num_heads
         self.dropout = dropout
+        self.intermediate_units = intermediate_units
+        
         
     def build(self, input_shape):
 
@@ -107,22 +144,23 @@ class Transformer(layers.Layer):
             f"input dimension {d_model} not divisible by {self.num_heads} "\
             "attention heads"
         
-        self.units = d_model // self.num_heads
+        self.units = d_model
+        self.attention_units = d_model // self.num_heads
         
         self.attention_heads = [
-            Attention(self.units, self.dropout, name='head_{}'.format(i))
+            Attention(self.attention_units, self.dropout, name='head_{}'.format(i))
             for i in range(self.num_heads)]
-
-        self.attention_dense = layers.Dense(d_model,
-                                            kernel_initializer=initializer(),
-                                            activation=gelu)
-        self.projection_dense = layers.Dense(d_model,
-                                             kernel_initializer=initializer(),
-                                             activation=gelu)
         
-        self.attention_layer_norm = layers.LayerNormalization()
-        self.projection_layer_norm = layers.LayerNormalization()
-        self.dropout_layer = layers.Dropout(self.dropout)
+        self.intermediate_layer = layers.Dense(self.intermediate_units,
+                                               kernel_initializer=initializer(),
+                                               activation=gelu)
+        
+        self.attention_projection = Projection(self.units, self.dropout,
+                                               name='attention_projection')
+        
+        self.output_projection = Projection(self.units, self.dropout,
+                                            name='output_projection')
+
 
     def call(self, inputs, mask=None, training=None):
         
@@ -130,24 +168,22 @@ class Transformer(layers.Layer):
         attention_output = tf.concat([attention_layer(inputs, mask=mask) for
                                       attention_layer in self.attention_heads],
                                      axis=-1)
-        attention_output = self.attention_dense(attention_output)
-        attention_output = self.attention_layer_norm(attention_output + inputs)
+        attention_output = self.attention_projection([attention_output, inputs])
         
-        # Projection block
-        projection_output = self.projection_dense(attention_output)
-        projection_output = self.dropout_layer(projection_output,
-                                               training=training)
-        projection_output = self.projection_layer_norm(
-            projection_output + attention_output)
+        intermediate_values = self.intermediate_layer(attention_output)
         
-        return projection_output
+        output = self.output_projection([intermediate_values, attention_output])
+        
+        return output
     
     def compute_mask(self, inputs, mask=None):
         return mask 
 
     def get_config(self):
         config = super(Transformer, self).get_config()
-        config.update({'num_heads': self.num_heads, 'dropout': self.dropout})
+        config.update({'num_heads': self.num_heads,
+                       'intermediate_units': self.intermediate_units,
+                       'dropout': self.dropout})
         return config
 
 

@@ -2,7 +2,6 @@ import numpy as np
 import tensorflow as tf
 import sentencepiece as spm
 
-
 def create_masked_input_dataset(language_model_path,
                                 sequence_path,
                                 max_sequence_length=512,
@@ -15,7 +14,9 @@ def create_masked_input_dataset(language_model_path,
                                 masking_freq=.15,
                                 mask_token_freq=.8,
                                 mask_random_freq=.1,
-                                filter_bzux=True):
+                                filter_bzux=True,
+                                shard_num_workers=None,
+                                shard_worker_index=None):
 
 
     sp = spm.SentencePieceProcessor()
@@ -83,10 +84,13 @@ def create_masked_input_dataset(language_model_path,
     def mask_input_tf(input_tensor):
         a, b, c = tf.py_function(mask_input, inp=[input_tensor],
                                  Tout=[tf.int32, tf.bool, tf.int32])
-        return (a, b), c
+        return (a, b), tf.expand_dims(c, -1)
 
 
     dataset = tf.data.TextLineDataset(sequence_path)
+    
+    if shard_num_workers:
+        dataset = dataset.shard(shard_num_workers, shard_worker_index)
     
     if filter_bzux:
         bzux_filter = lambda string: tf.math.logical_not(
@@ -103,7 +107,7 @@ def create_masked_input_dataset(language_model_path,
     encoded_data = encoded_data\
         .shuffle(buffer_size=buffer_size)\
         .padded_batch(batch_size, padded_shapes=(
-            ([tf_seq_len], [tf_seq_len]), [tf_seq_len]))
+            ([tf_seq_len], [tf_seq_len]), [tf_seq_len, 1]))
         
 
     return encoded_data
