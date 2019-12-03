@@ -1,8 +1,7 @@
 import numpy as np
 import tensorflow as tf
-import sentencepiece as spm
 
-def create_masked_input_dataset(language_model_path,
+def create_masked_input_dataset(encode_fn,
                                 sequence_path,
                                 max_sequence_length=512,
                                 batch_size=20,
@@ -17,28 +16,6 @@ def create_masked_input_dataset(language_model_path,
                                 filter_bzux=True,
                                 shard_num_workers=None,
                                 shard_worker_index=None):
-
-
-    sp = spm.SentencePieceProcessor()
-    sp.Load(language_model_path)
-
-    def sp_encode(line_tensor):
-        encoded_array = np.asarray(
-            sp.SampleEncodeAsIds(line_tensor.numpy(), nbest_size=-1, alpha=0.5))
-
-        # If the protein sequence is too long, take a random slice.
-        if len(encoded_array) > max_sequence_length:
-            offset = np.random.randint(
-                low=0, high=len(encoded_array) - max_sequence_length + 1)
-            encoded_array = encoded_array[offset:(offset + max_sequence_length)]
-
-        return encoded_array
-
-    def sp_decode(line_tensor):
-        return sp.DecodeIds(line_tensor.numpy().tolist())
-
-    def sp_encode_tf(line_tensor):
-        return tf.py_function(sp_encode, inp=[line_tensor], Tout=[tf.int32,])
 
     def mask_input(input_tensor):
         """ Randomly mask the input tensor according to the formula perscribed by BERT. 
@@ -94,11 +71,11 @@ def create_masked_input_dataset(language_model_path,
     
     if filter_bzux:
         bzux_filter = lambda string: tf.math.logical_not(
-            tf.strings.regex_full_match(string, '[BZUX]'))
+            tf.strings.regex_full_match(string, '.*[BZUOX].*'))
         dataset = dataset.filter(bzux_filter)
         
     encoded_data = dataset\
-        .map(sp_encode_tf, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
+        .map(encode_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
         .map(mask_input_tf, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
     # This argument controls whether to fix the size of the sequences

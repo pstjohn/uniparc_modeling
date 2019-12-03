@@ -1,9 +1,10 @@
 #!/bin/bash
-#SBATCH --account=cooptimasoot
-#SBATCH --time=10-00
-#SBATCH --partition=long
-#SBATCH --job-name=albert_base_8000
-#SBATCH --nodes=22
+#SBATCH --account=cbi
+#SBATCH --time=2-00
+#SBATCH --partition=gpu
+#SBATCH --qos=high
+#SBATCH --job-name=albert_base_8000_qos
+#SBATCH --nodes=20
 #SBATCH --ntasks-per-node=2
 #SBATCH --gres=gpu:2
 #SBATCH --output=/scratch/pstjohn/%x.%j.out
