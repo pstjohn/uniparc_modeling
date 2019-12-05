@@ -22,7 +22,7 @@ class PositionEmbedding(layers.Embedding):
         
     def call(self, inputs):
         batch_size = tf.shape(inputs)[0]
-        seq_len = inputs.shape[1]
+        seq_len = tf.shape(inputs)[1]
         idx = tf.tile(tf.expand_dims(tf.range(seq_len), 0), [batch_size, 1]) + 1
         return super(PositionEmbedding, self).call(idx)
 
@@ -40,45 +40,66 @@ class TokenEmbedding(layers.Embedding):
         
 
 class Attention(layers.Layer):
-    """ Implements a single head of the multi-head attention transformer model.
+    """ Implements the multi-head attention transformer model.
     Includes the preceeding dense layers on the value, key, and query matrices
     """
 
-    def __init__(self, units, dropout=0.1, **kwargs):
+    def __init__(self, units, num_heads, dropout=0.1, **kwargs):
         super(Attention, self).__init__(**kwargs)
-        self.units = units
+        self.units = units          # H
+        self.num_heads = num_heads  # N
         self.dropout = dropout
         
-    def build(self, input_shape):       
+    def build(self, input_shape):
+        """ B, S, N, H - batch, fseq_len, num_heads, size_per_head """
+        
+        dense_units = self.units * self.num_heads  # N*H
+        
         self.query_layer = layers.Dense(
-            self.units, kernel_initializer=initializer(), name='query')
+            dense_units, kernel_initializer=initializer(), name='query')
         self.key_layer = layers.Dense(
-            self.units, kernel_initializer=initializer(), name='key')
+            dense_units, kernel_initializer=initializer(), name='key')
         self.value_layer = layers.Dense(
-            self.units, kernel_initializer=initializer(), name='value')
+            dense_units, kernel_initializer=initializer(), name='value')
+        
         self.dropout_layer = layers.Dropout(self.dropout)
         
     def create_attention_mask(self, input_mask):
         mask = tf.cast(input_mask, tf.float32)
-        return tf.linalg.einsum('aj,ak->ajk', mask, mask)
+        attention_mask = tf.linalg.einsum('aj,ak->ajk', mask, mask)
+        return tf.expand_dims(attention_mask, axis=1)  # [B,1,S,S]
+    
+    def transpose_scores(self, input_tensor):
+        input_shape  = tf.shape(input_tensor)
+        output_shape = [input_shape[0], input_shape[1], self.num_heads, self.units]
+        output_tensor = tf.reshape(input_tensor, output_shape)
+        return tf.transpose(a=output_tensor, perm=[0, 2, 1, 3])  # [B,N,S,H]
+
+    def compute_output_shape(self, input_shape):
+        output_shape = [input_shape[0], input_shape[1], self.num_heads * self.units]
+        return output_shape  # [B, S, N*H]
         
     def call(self, inputs, mask=None, training=None):
-        query = self.query_layer(inputs)
-        key   = self.key_layer(inputs)
-        value = self.value_layer(inputs)
-        
+        query = self.transpose_scores(self.query_layer(inputs))  # [B,N,S,H]
+        key   = self.transpose_scores(self.key_layer(inputs))    # [B,N,S,H]
+        value = self.transpose_scores(self.value_layer(inputs))  # [B,N,S,H]
+
         # Equation 1 of "Attention is all you need"
         attention_scores = (tf.matmul(query, key, transpose_b=True) 
-                            / tf.sqrt(float(self.units)))
+                            / tf.sqrt(float(self.units)))  # [B,N,S,S]
 
         # zero out masked values
         attention_mask = self.create_attention_mask(mask)
         attention_scores = attention_scores + (1. - attention_mask) * -10000.0
         
-        attention_probs = tf.nn.softmax(attention_scores)
+        attention_probs = tf.nn.softmax(attention_scores)  # [B,N,S,S]
         attention_probs = self.dropout_layer(attention_probs, training=training)
-        context_layer = tf.matmul(attention_probs, value)
+        context_layer = tf.matmul(attention_probs, value)  # [B,N,S,S]
         
+        input_shape  = tf.shape(inputs)
+        output_shape = [input_shape[0], input_shape[1], self.num_heads*self.units]
+        context_layer = tf.reshape(context_layer, output_shape)
+
         return context_layer
 
     def compute_mask(self, inputs, mask=None):
@@ -86,7 +107,9 @@ class Attention(layers.Layer):
 
     def get_config(self):
         config = super(Attention, self).get_config()
-        config.update({'units': self.units, 'dropout': self.dropout})
+        config.update({'units': self.units, 
+                       'num_heads': self.num_heads,
+                       'dropout': self.dropout})
         return config
     
 
@@ -144,36 +167,28 @@ class Transformer(layers.Layer):
             f"input dimension {d_model} not divisible by {self.num_heads} "\
             "attention heads"
         
-        self.units = d_model
-        self.attention_units = d_model // self.num_heads
+        self.units = d_model // self.num_heads
         
-        self.attention_heads = [
-            Attention(self.attention_units, self.dropout, name='head_{}'.format(i))
-            for i in range(self.num_heads)]
+        self.attention_layer = Attention(self.units, self.num_heads, self.dropout)
         
         self.intermediate_layer = layers.Dense(self.intermediate_units,
                                                kernel_initializer=initializer(),
                                                activation=gelu)
         
-        self.attention_projection = Projection(self.units, self.dropout,
+        self.attention_projection = Projection(d_model, self.dropout,
                                                name='attention_projection')
-        
-        self.output_projection = Projection(self.units, self.dropout,
+        self.output_projection = Projection(d_model, self.dropout,
                                             name='output_projection')
 
 
     def call(self, inputs, mask=None, training=None):
         
         # Multi-head attention block
-        attention_output = tf.concat([attention_layer(inputs, mask=mask) for
-                                      attention_layer in self.attention_heads],
-                                     axis=-1)
+        attention_output = self.attention_layer(inputs, mask=mask)
         attention_output = self.attention_projection([attention_output, inputs])
         
         intermediate_values = self.intermediate_layer(attention_output)
-        
         output = self.output_projection([intermediate_values, attention_output])
-        
         return output
     
     def compute_mask(self, inputs, mask=None):
