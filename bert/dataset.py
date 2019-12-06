@@ -55,13 +55,13 @@ def create_masked_input_dataset(encode_fn,
         # Set true values to zero (pad value) where not masked
         true_tensor = tf.where(input_mask, input_tensor, pad_value_tensor)
 
-        return masked_tensor, input_mask, true_tensor
+        return masked_tensor, true_tensor
 
 
     def mask_input_tf(input_tensor):
-        a, b, c = tf.py_function(mask_input, inp=[input_tensor],
-                                 Tout=[tf.int32, tf.bool, tf.int32])
-        return (a, b), tf.expand_dims(c, -1)
+        a, c = tf.py_function(mask_input, inp=[input_tensor],
+                                 Tout=[tf.int32, tf.int32])
+        return a, c
 
 
     dataset = tf.data.TextLineDataset(sequence_path)
@@ -84,7 +84,7 @@ def create_masked_input_dataset(encode_fn,
     encoded_data = encoded_data\
         .shuffle(buffer_size=buffer_size)\
         .padded_batch(batch_size, padded_shapes=(
-            ([tf_seq_len], [tf_seq_len]), [tf_seq_len, 1]))
+            ([tf_seq_len], [tf_seq_len])))
         
 
     return encoded_data

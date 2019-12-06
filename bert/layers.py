@@ -201,7 +201,7 @@ class Transformer(layers.Layer):
                        'dropout': self.dropout})
         return config
 
-
+    
 class Bias(layers.Layer):
     """ Final bias layer added to logits prior to softmax scoring. This layer
     also applys the input mask from the input to mask non-randomized prediction
@@ -210,34 +210,32 @@ class Bias(layers.Layer):
     def build(self, input_shape):
         self.bias = self.add_weight(name='classifier_bias',
                                     dtype=K.floatx(),
-                                    shape=[input_shape[0][-1]],
+                                    shape=[input_shape[-1]],
                                     initializer=tf.zeros_initializer())
         
     def call(self, inputs):
-        logits = tf.nn.bias_add(inputs[0], self.bias)
+        logits = tf.nn.bias_add(inputs, self.bias)
         return logits
-        
-    def compute_mask(self, inputs, mask=None):
-        return inputs[1]
 
 
-def masked_sparse_cross_entropy_loss(y_true, y_pred):
+def masked_sparse_categorical_crossentropy(y_true, y_pred):
     """ Computes the mean categorical cross_entropy loss across each batch
     example, where masked or randomized tokens are specified by nonzero entries
     in y_true """
+
+    masked_entries = tf.not_equal(y_true, 0)
+    y_true_mask = tf.boolean_mask(y_true, masked_entries)
+    y_pred_mask = tf.boolean_mask(y_pred, masked_entries)
+
+    return tf.reduce_mean(tf.losses.sparse_categorical_crossentropy(
+        y_true_mask, y_pred_mask, from_logits=True))
+
+
+def ECE(y_true, y_pred):
+    """ Exponentiated cross entropy metric """
+    return tf.exp(masked_sparse_categorical_crossentropy(y_true, y_pred))
     
-    idx = tf.where(y_true != 0)
-    y_pred_mask = tf.boolean_mask(y_pred, y_true != 0)
-    y_true_mask = tf.boolean_mask(y_true, y_true != 0)
 
-    crossentropy_losses = tf.nn.sparse_softmax_cross_entropy_with_logits(
-        y_true_mask,
-        y_pred_mask)
-
-    return tf.reshape(tf.math.segment_mean(crossentropy_losses, idx[:, 0]),
-                      (-1, 1))
-
-    
 class BERTLearningRateScheduler(Callback):
     def __init__(self, 
                  learning_rate=1E-4,

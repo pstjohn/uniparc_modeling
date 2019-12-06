@@ -14,8 +14,8 @@ tf.compat.v1.disable_eager_execution()
 
 from bert.dataset import create_masked_input_dataset
 from bert.layers import (PositionEmbedding, Attention, Transformer, TokenEmbedding, Bias,
-                         gelu, masked_sparse_cross_entropy_loss, InverseSquareRootSchedule,
-                         initializer, Projection)
+                         gelu, masked_sparse_categorical_crossentropy, ECE,
+                         InverseSquareRootSchedule, initializer, Projection)
 
 import horovod.tensorflow.keras as hvd
 
@@ -105,7 +105,6 @@ dropout_rate = 0.
 learning_rate = 1E-4
 
 inputs = layers.Input(shape=(max_seq_len,), dtype=tf.int32, batch_size=None)
-input_mask = layers.Input(shape=(max_seq_len,), dtype=tf.bool, batch_size=None)
 
 token_embedding_layer = TokenEmbedding(
     vocab_size, embedding_dimension, embeddings_initializer=initializer(), mask_zero=True)
@@ -123,9 +122,10 @@ for i in range(num_transformer_layers):
 
 out = layers.Dense(embedding_dimension, activation=gelu, kernel_initializer=initializer())(embeddings)
 out = token_embedding_layer(out, transpose=True)
-out = Bias()([out, input_mask])
+out = Bias()(out)
 
-model = tf.keras.Model([inputs, input_mask], [out], name='model')
+model = tf.keras.Model(inputs, out, name='model')
+
 if hvd.rank() == 0:
     model.summary()
     
@@ -134,33 +134,16 @@ if hvd.rank() == 0:
 opt = tf.optimizers.Adam(learning_rate=learning_rate)
 opt = hvd.DistributedOptimizer(opt)
 
-from tensorflow.python.keras.metrics import MeanMetricWrapper
-
-def exponentiated_sparse_categorical_crossentropy(*args, **kwargs):
-    return tf.exp(tf.losses.sparse_categorical_crossentropy(*args, **kwargs))
-
-class ExponentiatedSparseCategoricalCrossentropy(MeanMetricWrapper):
-    def __init__(self,
-                 name='exponentiated_sparse_categorical_crossentropy',
-                 dtype=None,
-                 from_logits=False,
-                 axis=-1):
-        
-        super(ExponentiatedSparseCategoricalCrossentropy, self).__init__(
-            exponentiated_sparse_categorical_crossentropy,
-            name,
-            dtype=dtype,
-            from_logits=from_logits,
-            axis=axis)
-
 # Horovod: Specify `experimental_run_tf_function=False` to ensure TensorFlow
 # uses hvd.DistributedOptimizer() to compute gradients.
+
+true_labels = layers.Input(shape=(None,), dtype=tf.int32, batch_size=None)
 model.compile(
-    loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-    metrics=[tf.keras.metrics.SparseCategoricalAccuracy(),
-             ExponentiatedSparseCategoricalCrossentropy(from_logits=True)],
+    target_tensors=true_labels,    
+    loss=masked_sparse_categorical_crossentropy,
+    metrics=[ECE],
     optimizer=opt,
-    experimental_run_tf_function=False)
+    experimental_run_tf_function=True)
 
 model_name = arguments.modelName
 checkpoint_dir = f'{model_name}_checkpoints'
