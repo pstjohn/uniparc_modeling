@@ -2,10 +2,10 @@
 #SBATCH --account=cooptimasoot
 #SBATCH --time=00:60:00
 #SBATCH --partition=debug
-#SBATCH --job-name=albert_debug
-#SBATCH --nodes=2
-#SBATCH --ntasks-per-node=2
-#SBATCH --gres=gpu:2
+#SBATCH --job-name=albert_debug_1e5
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gres=gpu:1
 #SBATCH --output=/scratch/pstjohn/%x.%j.out
 
 # srun -l hostname
@@ -22,11 +22,11 @@ export TF_FORCE_GPU_ALLOW_GROWTH=true
 export TF_ENABLE_AUTO_MIXED_PRECISION=1
 # export HOROVOD_TIMELINE=/scratch/pstjohn/horovod_timeline_debug.json
 
-conda activate tf2
+conda activate /projects/bpms/pstjohn/envs/tf2
 
 mpirun \
     -bind-to none -map-by slot \
     -x NCCL_DEBUG=INFO -x LD_LIBRARY_PATH -x PATH \
     -mca pml ob1 -mca btl ^openib \
-    python training_horovod_single_aa.py --modelName /scratch/pstjohn/albert_single_aa_debug --batchSize=5 --stepsPerEpoch=1000 --warmup=3000
+    python training_horovod_single_aa.py --modelName /scratch/pstjohn/albert_single_aa_debug_1gpu --batchSize=5 --stepsPerEpoch=1000 --warmup=3000 --lr=0.00001
 

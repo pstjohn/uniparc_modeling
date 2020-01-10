@@ -6,6 +6,7 @@ parser.add_argument('--modelName', default='bert', help='model name for director
 parser.add_argument('--batchSize', type=int, default=20, help='batch size per gpu')
 parser.add_argument('--stepsPerEpoch', type=int, default=10000, help='steps per epoch')
 parser.add_argument('--warmup', type=int, default=16000, help='warmup steps')
+parser.add_argument('--lr', type=float, default=1E-4, help='initial learning rate')
 arguments = parser.parse_args()
 
 import numpy as np
@@ -65,8 +66,8 @@ training_data = create_masked_input_dataset(
     batch_size=arguments.batchSize,
     buffer_size=1024,
     vocab_size=vocab_size,
-    mask_index=4,
-    vocab_start=5,
+    mask_index=1,
+    vocab_start=2,
     fix_sequence_length=True,
     shard_num_workers=hvd.size(),
     shard_worker_index=hvd.rank())
@@ -80,8 +81,8 @@ valid_data = create_masked_input_dataset(
     batch_size=arguments.batchSize,
     buffer_size=1024,
     vocab_size=vocab_size,
-    mask_index=4,
-    vocab_start=5,
+    mask_index=1,
+    vocab_start=2,
     fix_sequence_length=True,
     shard_num_workers=hvd.size(),
     shard_worker_index=hvd.rank())
@@ -131,7 +132,8 @@ if hvd.rank() == 0:
     
 # Horovod: add Horovod DistributedOptimizer.
 # opt = tfa.optimizers.AdamW(weight_decay=0.01, learning_rate=learning_rate)
-opt = tf.optimizers.Adam(learning_rate=learning_rate)
+
+opt = tf.optimizers.Adam(learning_rate=arguments.lr)
 opt = hvd.DistributedOptimizer(opt)
 
 # Horovod: Specify `experimental_run_tf_function=False` to ensure TensorFlow
@@ -162,11 +164,9 @@ callbacks = [
     # Note: This callback must be in the list before the ReduceLROnPlateau,
     # TensorBoard or other metrics-based callbacks.
     hvd.callbacks.MetricAverageCallback(),
-
-    # Horovod: using `lr = 1.0 * hvd.size()` from the very beginning leads to worse final
-    # accuracy. Scale the learning rate `lr = 1.0` ---> `lr = 1.0 * hvd.size()` during
-    # the first three epochs. See https://arxiv.org/abs/1706.02677 for details.
-    InverseSquareRootSchedule(learning_rate=learning_rate, warmup_updates=arguments.warmup),
+    
+    # Add warmup and learning rate decay
+    InverseSquareRootSchedule(arguments.lr, arguments.warmup),
 ]
 
 # Horovod: save checkpoints only on worker 0 to prevent other workers from corrupting them.

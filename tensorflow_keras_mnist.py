@@ -47,7 +47,12 @@ mnist_model = tf.keras.Sequential([
 ])
 
 # Horovod: adjust learning rate based on number of GPUs.
-opt = tf.optimizers.Adam(0.001 * hvd.size())
+lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
+    0.001 * hvd.size(),
+    decay_steps=100000,
+    decay_rate=0.96,
+    staircase=True)
+opt = tf.keras.optimizers.Adam(lr_schedule)
 
 # Horovod: add Horovod DistributedOptimizer.
 opt = hvd.DistributedOptimizer(opt)

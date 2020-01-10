@@ -2,11 +2,12 @@
 #SBATCH --account=cbi
 #SBATCH --time=2-00
 #SBATCH --partition=gpu
-#SBATCH --job-name=albert_base_8000_single_aa
+#SBATCH --job-name=albert_base_single_aa_1e4
 #SBATCH --nodes=20
 #SBATCH --ntasks-per-node=2
 #SBATCH --gres=gpu:2
 #SBATCH --output=/scratch/pstjohn/%x.%j.out
+#SBATCH --exclude=r103u11,r103u05
 
 # srun -l hostname
 
@@ -21,10 +22,10 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/nopt/nrel/apps/cuda/10.0.130/extras/CUP
 export TF_FORCE_GPU_ALLOW_GROWTH=true
 export TF_ENABLE_AUTO_MIXED_PRECISION=1
 
-conda activate tf2
+conda activate /projects/bpms/pstjohn/envs/tf2
 
 mpirun \
     -bind-to none -map-by slot \
     -x NCCL_DEBUG=INFO -x LD_LIBRARY_PATH -x PATH \
     -mca pml ob1 -mca btl ^openib \
-    python training_horovod_single_aa.py --modelName /scratch/pstjohn/albert_base_8000_single_aa --batchSize=5 --stepsPerEpoch=10000 --warmup=30000
+    python training_horovod_single_aa.py --modelName /scratch/pstjohn/albert_base_single_aa --batchSize=5 --stepsPerEpoch=10000 --warmup=16000 --lr=0.0001

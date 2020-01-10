@@ -1,9 +1,8 @@
+import numpy as np
 import tensorflow as tf
 import tensorflow.keras.backend as K
 from tensorflow.keras import layers
 from tensorflow.keras.callbacks import Callback
-
-import numpy as np
 
 initializer = lambda: tf.keras.initializers.TruncatedNormal(stddev=0.02)
 
@@ -234,56 +233,57 @@ def masked_sparse_categorical_crossentropy(y_true, y_pred):
 def ECE(y_true, y_pred):
     """ Exponentiated cross entropy metric """
     return tf.exp(masked_sparse_categorical_crossentropy(y_true, y_pred))
-    
 
-class BERTLearningRateScheduler(Callback):
-    def __init__(self, 
-                 learning_rate=1E-4,
-                 final_learning_rate=0,
-                 warmup_updates=int(1E3),
-                 num_training_steps=int(1E6)):
-        """ Implements the linear learning rate warmup and linear learning rate
-        decay used by google in BERT pretraining """
-        
-        self.learning_rate = learning_rate
-        self.final_learning_rate = final_learning_rate
-        self.warmup_updates = warmup_updates
-        self.num_training_steps = num_training_steps
-        
-    def on_train_batch_begin(self, batch, logs=None):
-        
-        logs = logs or {}
-        global_step = logs.get('batch', 1)
-        
-        # Still in warmup
-        if global_step <= self.warmup_updates:
-            scheduled_lr = self.learning_rate * (
-                global_step / self.warmup_updates)
-        
-        # Linear decay
-        else:
-            scheduled_lr = self.learning_rate - global_step * (
-                (self.learning_rate - self.final_learning_rate)
-                / (self.num_training_steps - self.warmup_updates))
+
+# class InverseSqrtWarmupSchedule(LearningRateSchedule):
+#     """A LearningRateSchedule that uses a linear warmup followed by 
+#     inverse square root decay."""
+
+#     def __init__(self, initial_learning_rate=1E-4, warmup_updates=16000,
+#                  name=None):
+#         super(InverseSqrtWarmupSchedule, self).__init__()
+#         self.initial_learning_rate = initial_learning_rate
+#         self.warmup_updates = warmup_updates
+#         self.name = name
+
+#     def __call__(self, step):
+#         with ops.name_scope_v2(self.name or "InverseSqrtWarmupSchedule") as name:
+#             initial_learning_rate = ops.convert_to_tensor(
+#               self.initial_learning_rate, name="initial_learning_rate")
+#             dtype = initial_learning_rate.dtype
+#             warmup_updates = math_ops.cast(self.warmup_updates, dtype)
+#             global_step = math_ops.cast(step, dtype)
             
-        K.set_value(self.model.optimizer.lr, scheduled_lr)
+    
+#             return tf.cond(global_step <= warmup_updates,
+#                            lambda: (global_step / warmup_updates) * initial_learning_rate,  # in warmup
+#                            lambda: initial_learning_rate * tf.math.sqrt(warmup_updates) / tf.math.sqrt(global_step))
 
+#     def get_config(self):
+#         return {
+#             "initial_learning_rate": self.initial_learning_rate,
+#             "warmup_updates": self.warmup_updates,
+#             "name": self.name
+#         }
 
 class InverseSquareRootSchedule(Callback):
     def __init__(self, 
                  learning_rate=1E-4,
                  warmup_updates=16000):
-        """ Implements the linear learning rate warmup and linear learning rate
-        decay used by google in BERT pretraining """
+        """ Implements the linear learning rate warmup and learning
+        rate decay used by google in BERT pretraining """
         
         self.learning_rate = learning_rate
         self.warmup_updates = warmup_updates
         self.decay_factor = learning_rate * warmup_updates**0.5
         
+    def on_epoch_begin(self, epoch, logs=None):
+        self.current_epoch = epoch
+        
     def on_train_batch_begin(self, batch, logs=None):
         
-        logs = logs or {}
-        global_step = float(logs.get('batch', 1))
+        global_step = (
+            batch + self.current_epoch * self.params['steps'])
         
         # Still in warmup
         if global_step <= self.warmup_updates:
@@ -292,6 +292,6 @@ class InverseSquareRootSchedule(Callback):
         
         # Linear decay
         else:
-            scheduled_lr = self.decay_factor * global_step**0.5
-            
+            scheduled_lr = self.decay_factor * global_step**(-0.5)
+                        
         K.set_value(self.model.optimizer.lr, scheduled_lr)
