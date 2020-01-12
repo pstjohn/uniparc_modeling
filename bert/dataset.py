@@ -1,14 +1,13 @@
 import numpy as np
 import tensorflow as tf
 
-def create_masked_input_dataset(encode_fn,
-                                sequence_path,
+def create_masked_input_dataset(sequence_path,
                                 max_sequence_length=512,
                                 batch_size=20,
                                 buffer_size=1024,
-                                vocab_size=32000,
-                                mask_index=4,
-                                vocab_start=5,
+                                vocab_size=22,
+                                mask_index=1,
+                                vocab_start=2,
                                 fix_sequence_length=False,
                                 masking_freq=.15,
                                 mask_token_freq=.8,
@@ -16,6 +15,24 @@ def create_masked_input_dataset(encode_fn,
                                 filter_bzux=True,
                                 shard_num_workers=None,
                                 shard_worker_index=None):
+    
+    def encode(line_tensor):
+        line = line_tensor.numpy().decode('utf8')
+
+        if len(line) > max_sequence_length:
+            offset = np.random.randint(
+                low=0, high=len(line) - max_sequence_length + 1)
+            line = line[offset:(offset + max_sequence_length)]
+
+        vocab = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K',
+                 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 
+                 'W', 'Y']
+
+        replacement_dict = {key: i + 2 for i, key in enumerate(vocab)}
+        return np.asarray([replacement_dict[item] for item in line])
+
+    def encode_fn(line_tensor):
+        return tf.py_function(encode, inp=[line_tensor], Tout=[tf.int32,])
 
     def mask_input(input_tensor):
         """ Randomly mask the input tensor according to the formula perscribed by BERT. 

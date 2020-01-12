@@ -2,7 +2,6 @@ import numpy as np
 import tensorflow as tf
 import tensorflow.keras.backend as K
 from tensorflow.keras import layers
-from tensorflow.keras.callbacks import Callback
 
 initializer = lambda: tf.keras.initializers.TruncatedNormal(stddev=0.02)
 
@@ -36,7 +35,7 @@ class TokenEmbedding(layers.Embedding):
             return super(TokenEmbedding, self).call(inputs)
         else:
             return tf.matmul(inputs, self.embeddings, transpose_b=True)
-        
+
 
 class Attention(layers.Layer):
     """ Implements the multi-head attention transformer model.
@@ -110,7 +109,7 @@ class Attention(layers.Layer):
                        'num_heads': self.num_heads,
                        'dropout': self.dropout})
         return config
-    
+
 
 class Projection(layers.Layer):
     """ Performs a dense layer, dropout, layer norm and residual update """
@@ -124,6 +123,7 @@ class Projection(layers.Layer):
         self.dense_layer = layers.Dense(self.units,
                                         kernel_initializer=initializer(),
                                         activation=gelu)
+        
         self.dropout_layer = layers.Dropout(self.dropout)
         self.layer_norm = layers.LayerNormalization()
 
@@ -200,7 +200,7 @@ class Transformer(layers.Layer):
                        'dropout': self.dropout})
         return config
 
-    
+
 class Bias(layers.Layer):
     """ Final bias layer added to logits prior to softmax scoring. This layer
     also applys the input mask from the input to mask non-randomized prediction
@@ -215,83 +215,3 @@ class Bias(layers.Layer):
     def call(self, inputs):
         logits = tf.nn.bias_add(inputs, self.bias)
         return logits
-
-
-def masked_sparse_categorical_crossentropy(y_true, y_pred):
-    """ Computes the mean categorical cross_entropy loss across each batch
-    example, where masked or randomized tokens are specified by nonzero entries
-    in y_true """
-
-    masked_entries = tf.not_equal(y_true, 0)
-    y_true_mask = tf.boolean_mask(y_true, masked_entries)
-    y_pred_mask = tf.boolean_mask(y_pred, masked_entries)
-
-    return tf.reduce_mean(tf.losses.sparse_categorical_crossentropy(
-        y_true_mask, y_pred_mask, from_logits=True))
-
-
-def ECE(y_true, y_pred):
-    """ Exponentiated cross entropy metric """
-    return tf.exp(masked_sparse_categorical_crossentropy(y_true, y_pred))
-
-
-# class InverseSqrtWarmupSchedule(LearningRateSchedule):
-#     """A LearningRateSchedule that uses a linear warmup followed by 
-#     inverse square root decay."""
-
-#     def __init__(self, initial_learning_rate=1E-4, warmup_updates=16000,
-#                  name=None):
-#         super(InverseSqrtWarmupSchedule, self).__init__()
-#         self.initial_learning_rate = initial_learning_rate
-#         self.warmup_updates = warmup_updates
-#         self.name = name
-
-#     def __call__(self, step):
-#         with ops.name_scope_v2(self.name or "InverseSqrtWarmupSchedule") as name:
-#             initial_learning_rate = ops.convert_to_tensor(
-#               self.initial_learning_rate, name="initial_learning_rate")
-#             dtype = initial_learning_rate.dtype
-#             warmup_updates = math_ops.cast(self.warmup_updates, dtype)
-#             global_step = math_ops.cast(step, dtype)
-            
-    
-#             return tf.cond(global_step <= warmup_updates,
-#                            lambda: (global_step / warmup_updates) * initial_learning_rate,  # in warmup
-#                            lambda: initial_learning_rate * tf.math.sqrt(warmup_updates) / tf.math.sqrt(global_step))
-
-#     def get_config(self):
-#         return {
-#             "initial_learning_rate": self.initial_learning_rate,
-#             "warmup_updates": self.warmup_updates,
-#             "name": self.name
-#         }
-
-class InverseSquareRootSchedule(Callback):
-    def __init__(self, 
-                 learning_rate=1E-4,
-                 warmup_updates=16000):
-        """ Implements the linear learning rate warmup and learning
-        rate decay used by google in BERT pretraining """
-        
-        self.learning_rate = learning_rate
-        self.warmup_updates = warmup_updates
-        self.decay_factor = learning_rate * warmup_updates**0.5
-        
-    def on_epoch_begin(self, epoch, logs=None):
-        self.current_epoch = epoch
-        
-    def on_train_batch_begin(self, batch, logs=None):
-        
-        global_step = (
-            batch + self.current_epoch * self.params['steps'])
-        
-        # Still in warmup
-        if global_step <= self.warmup_updates:
-            scheduled_lr = self.learning_rate * (
-                global_step / self.warmup_updates)
-        
-        # Linear decay
-        else:
-            scheduled_lr = self.decay_factor * global_step**(-0.5)
-                        
-        K.set_value(self.model.optimizer.lr, scheduled_lr)
