@@ -54,10 +54,10 @@ def create_masked_input_dataset(sequence_path,
         input_mask = mask_score < masking_freq
 
         # Mask with [MASK] token 80% of the time
-        mask_mask = mask_score <= 0.15 * mask_token_freq
+        mask_mask = mask_score <= masking_freq * mask_token_freq
 
         # Mask with random token 10% of the time
-        mask_random = (mask_score >= 0.15 * (1. - mask_random_freq)) & input_mask
+        mask_random = (mask_score >= masking_freq * (1. - mask_random_freq)) & input_mask
 
         # Tensors to replace with where input is masked or randomized
         mask_value_tensor = tf.ones(input_tensor.shape, dtype=tf.int32) * mask_index
