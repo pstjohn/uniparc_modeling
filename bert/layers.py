@@ -87,8 +87,9 @@ class Attention(layers.Layer):
                             / tf.sqrt(float(self.units)))  # [B,N,S,S]
 
         # zero out masked values
-        attention_mask = self.create_attention_mask(mask)
-        attention_scores = attention_scores + (1. - attention_mask) * -10000.0
+        if mask:
+            attention_mask = self.create_attention_mask(mask)
+            attention_scores = attention_scores + (1. - attention_mask) * -10000.0
         
         attention_probs = tf.nn.softmax(attention_scores)  # [B,N,S,S]
         attention_probs = self.dropout_layer(attention_probs, training=training)
@@ -343,3 +344,8 @@ class Bias(layers.Layer):
     def call(self, inputs):
         logits = tf.nn.bias_add(inputs, self.bias)
         return logits
+    
+    
+class DenseNoMask(layers.Dense):
+    def compute_mask(self, inputs, mask=None):
+        return None
