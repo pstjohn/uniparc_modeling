@@ -49,11 +49,9 @@ hvd_rank = hvd.rank() if is_using_hvd() else None
 
 # Create the model
 from bert.model import create_albert_model
-model = create_albert_model(embedding_dimension=128,
-                            max_embedding_sequence_length=1024,
-                            model_dimension=2048,
-                            transformer_dimension=2048 * 4,
-                            num_attention_heads=2048 // 64,
+model = create_albert_model(model_dimension=1024,
+                            transformer_dimension=1024 * 4,
+                            num_attention_heads=1024 // 64,
                             num_transformer_layers=24,
                             vocab_size=22,
                             dropout_rate=0.)
@@ -62,11 +60,11 @@ if hvd_rank or not is_using_hvd() == 0:
     model.summary()
     
 from bert.optimizers import (ECE, masked_sparse_categorical_crossentropy,
-			     BertLinearSchedule)
+                             BertLinearSchedule)
     
 opt = tfa.optimizers.AdamW(learning_rate=arguments.lr,
-			   weight_decay=arguments.weightDecay)
-opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(opt)
+                           weight_decay=arguments.weightDecay)
+# opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(opt)
 
 # Horovod: add Horovod DistributedOptimizer.
 if is_using_hvd():
@@ -89,7 +87,7 @@ checkpoint_dir = f'{model_name}_checkpoints'
 if not os.path.exists(checkpoint_dir):
     os.makedirs(checkpoint_dir)
 
-checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt_{epoch}.h5")
+checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt_{epoch}_{val_ECE:.2f}.h5")
 
 callbacks = [    
     # Add warmup and learning rate decay
@@ -141,5 +139,5 @@ valid_data = create_masked_input_dataset(
 valid_data = valid_data.repeat().prefetch(tf.data.experimental.AUTOTUNE)
 
 model.fit(training_data, steps_per_epoch=arguments.stepsPerEpoch, epochs=10,
-	  verbose=verbose, validation_data=valid_data, validation_steps=100,
-	  callbacks=callbacks)
+          verbose=verbose, validation_data=valid_data, validation_steps=100,
+          callbacks=callbacks)
