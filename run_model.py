@@ -2,20 +2,20 @@ import os
 import argparse
 
 parser = argparse.ArgumentParser(description='BERT model training')
-parser.add_argument('--modelName', default='albert-xlarge', 
-		    help='model name for directory saving')
+parser.add_argument('--modelName', default='albert-xlarge',
+                    help='model name for directory saving')
 parser.add_argument('--batchSize', type=int, default=8, 
-		    help='batch size per gpu')
+                    help='batch size per gpu')
 parser.add_argument('--stepsPerEpoch', type=int, default=10000, 
-		    help='steps per epoch')
+                    help='steps per epoch')
 parser.add_argument('--warmup', type=int, default=10000, 
-		    help='warmup steps')
+                    help='warmup steps')
 parser.add_argument('--lr', type=float, default=1E-4, 
-		    help='initial learning rate')
+                    help='initial learning rate')
 parser.add_argument('--weightDecay', type=float, default=0.01, 
-		    help='AdamW weight decay')
+                    help='AdamW weight decay')
 parser.add_argument('--sequenceLength', type=int, default=1024, 
-		    help='Protein AA sequence length')
+                    help='Protein AA sequence length')
 
 arguments = parser.parse_args()
 
@@ -62,10 +62,10 @@ if hvd_rank or not is_using_hvd() == 0:
     model.summary()
     
 from bert.optimizers import (ECE, masked_sparse_categorical_crossentropy,
-			     BertLinearSchedule)
+                             BertLinearSchedule)
     
 opt = tfa.optimizers.AdamW(learning_rate=arguments.lr,
-			   weight_decay=arguments.weightDecay)
+                           weight_decay=arguments.weightDecay)
 opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(opt)
 
 # Horovod: add Horovod DistributedOptimizer.
@@ -115,7 +115,7 @@ if is_using_hvd():
 if (not is_using_hvd() or hvd_rank == 0):
     callbacks.append(tf.keras.callbacks.CSVLogger(f'{checkpoint_dir}/log.csv'))
     callbacks.append(tf.keras.callbacks.ModelCheckpoint(
-	    filepath=checkpoint_prefix))
+        filepath=checkpoint_prefix))
     
 # Horovod: write logs on worker 0.
 verbose = 1 if (hvd_rank == 0 or not is_using_hvd()) else 0
@@ -141,5 +141,5 @@ valid_data = create_masked_input_dataset(
 valid_data = valid_data.repeat().prefetch(tf.data.experimental.AUTOTUNE)
 
 model.fit(training_data, steps_per_epoch=arguments.stepsPerEpoch, epochs=10,
-	  verbose=verbose, validation_data=valid_data, validation_steps=100,
-	  callbacks=callbacks)
+          verbose=verbose, validation_data=valid_data, validation_steps=100,
+          callbacks=callbacks)
