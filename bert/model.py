@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras import layers
 
-from bert.layers import (PositionEmbedding, Attention, Transformer, TokenEmbedding, Bias,
+from bert.layers import (Attention, Transformer,
                          gelu, initializer, Projection, DenseNoMask)
 
 def create_albert_model(model_dimension=768,
@@ -14,7 +14,7 @@ def create_albert_model(model_dimension=768,
     inputs = layers.Input(shape=(None,), dtype=tf.int32, batch_size=None)
 
     # Amino-acid level embeddings
-    embeddings = TokenEmbedding(
+    embeddings = layers.Embedding(
         vocab_size, model_dimension, embeddings_initializer=initializer(),
         mask_zero=True)(inputs)
     

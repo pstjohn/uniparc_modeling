@@ -26,7 +26,8 @@ import tensorflow_addons as tfa
 tf.compat.v1.disable_eager_execution()
 
 import horovod.tensorflow.keras as hvd
-from bert.hvd_utils import is_using_hvd
+# from bert.hvd_utils import is_using_hvd
+is_using_hvd = lambda: True
 
 # Horovod: initialize Horovod.
 if is_using_hvd():
@@ -34,7 +35,7 @@ if is_using_hvd():
     hvd.init()
 
 # Print runtime config on head node
-if not is_using_hvd() or hvd.rank() == 0:
+if hvd.rank() == 0:
     print(arguments)
 
 # Horovod: pin GPU to be used to process local rank (one GPU per process)
@@ -56,14 +57,19 @@ model = create_albert_model(model_dimension=1024,
                             vocab_size=22,
                             dropout_rate=0.)
 
-if hvd_rank or not is_using_hvd() == 0:
+if hvd_rank == 0:
     model.summary()
     
 from bert.optimizers import (ECE, masked_sparse_categorical_crossentropy,
                              BertLinearSchedule)
-    
-opt = tfa.optimizers.AdamW(learning_rate=arguments.lr,
-                           weight_decay=arguments.weightDecay)
+
+opt = tf.optimizers.Adam(learning_rate=1E-4,
+                           beta_2=0.98,
+                           epsilon=1E-6)
+
+# opt = tfa.optimizers.AdamW(learning_rate=arguments.lr,
+#                            weight_decay=arguments.weightDecay)
+
 # opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(opt)
 
 # Horovod: add Horovod DistributedOptimizer.
@@ -110,13 +116,13 @@ if is_using_hvd():
 
 # Horovod: save checkpoints only on worker 0 to prevent other workers from
 # corrupting them.
-if (not is_using_hvd() or hvd_rank == 0):
+if hvd.rank() == 0:
     callbacks.append(tf.keras.callbacks.CSVLogger(f'{checkpoint_dir}/log.csv'))
     callbacks.append(tf.keras.callbacks.ModelCheckpoint(
         filepath=checkpoint_prefix))
     
 # Horovod: write logs on worker 0.
-verbose = 1 if (hvd_rank == 0 or not is_using_hvd()) else 0
+verbose = 1 if hvd.rank() == 0 else 0
 
 from bert.dataset import create_masked_input_dataset
 
