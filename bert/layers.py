@@ -125,10 +125,10 @@ class RelativeAttention(Attention):
             embeddings_initializer=initializer(),
             name='relative_positions_keys')
         
-        self.relations_values_embedding = layers.Embedding(
-            self.max_relative_position * 2 + 1, self.units,
-            embeddings_initializer=initializer(),
-            name='relative_positions_values')
+#         self.relations_values_embedding = layers.Embedding(
+#             self.max_relative_position * 2 + 1, self.units,
+#             embeddings_initializer=initializer(),
+#             name='relative_positions_values')
                 
     def _generate_relative_positions_matrix(self, length):
         """Generates matrix of relative positions between inputs.
@@ -188,8 +188,8 @@ class RelativeAttention(Attention):
         # generate a_ij^K and a_ij^K from, Shaw et al. 2018 arXiv:1803.02155
         length = tf.shape(inputs)[1]  # B, S, N*H
         relative_positions = self._generate_relative_positions_matrix(length)
-        relations_keys = self.relations_keys_embedding(relative_positions)               
-        relations_values = self.relations_values_embedding(relative_positions)
+        relations_keys = self.relations_keys_embedding(relative_positions)       
+        # relations_values = self.relations_values_embedding(relative_positions)
 
         # Eq. 4 of arXiv:1803.02155
         attention_scores = self._relative_attention_inner(query, key, relations_keys, True) 
@@ -202,8 +202,10 @@ class RelativeAttention(Attention):
         # Eq. 3 of arXiv:1803.02155
         attention_probs = tf.nn.softmax(attention_scores)  # [B,N,S,S]
         attention_probs = self.dropout_layer(attention_probs, training=training)
-        context_layer = self._relative_attention_inner(
-            attention_probs, value, relations_values, False)  # [B,N,S,S]
+        context_layer = tf.matmul(attention_probs, value)  # [B,N,S,S]
+        
+        # context_layer = self._relative_attention_inner(
+        # attention_probs, value, relations_values, False)  # [B,N,S,S]
 
         input_shape  = tf.shape(inputs)
         output_shape = [input_shape[0], input_shape[1], self.num_heads*self.units]
