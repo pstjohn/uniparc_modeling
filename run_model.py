@@ -40,8 +40,7 @@ if hvd.rank() == 0:
 
 # Horovod: pin GPU to be used to process local rank (one GPU per process)
 gpus = tf.config.experimental.list_physical_devices('GPU')
-for gpu in gpus:
-    tf.config.experimental.set_memory_growth(gpu, True)
+print(f"HVD rank: {hvd.rank()}, GPUs: {gpus}")
 if gpus and is_using_hvd():
     tf.config.experimental.set_visible_devices(gpus[hvd.local_rank()], 'GPU')
 
