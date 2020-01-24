@@ -1,12 +1,12 @@
 #!/bin/bash
 #SBATCH --account=invpoly
 #SBATCH --partition=gpu
-#SBATCH --time=1-00
-#SBATCH --nodes=2
+#SBATCH --time=2-00
+#SBATCH --nodes=5
 #SBATCH -c 18
 #SBATCH --gres=gpu:2
-#SBATCH --job-name=albert_test
-#SBATCH --output=/scratch/pstjohn/gpu.%j.out  # %j will be replaced with the job ID
+#SBATCH --job-name=transformer_base_512
+#SBATCH --output=/scratch/pstjohn/%j.%x.out  # %j will be replaced with the job ID
 
 module unload
 unset LD_PRELOAD
@@ -25,12 +25,10 @@ mpirun \
 	-mca pml ob1 -mca btl ^openib \
 	$SINGULARTY_CMD \
 	python run_model.py \
-	--modelName=/scratch/pstjohn/$SLURM_JOB_NAME \
-	--batchSize=16 \
-	--stepsPerEpoch=10000 \
+	--modelName=$SLURM_JOB_NAME \
+	--batchSize=48 \
 	--warmup=10000 \
 	--lr=1E-4 \
-	--weightDecay=0.0 \
-	--sequenceLength=128
-
-
+	--weightDecay=0.00 \
+	--sequenceLength=256 \
+	--tensorboardDirectory=/scratch/pstjohn/tblogs/$SLURM_JOB_NAME

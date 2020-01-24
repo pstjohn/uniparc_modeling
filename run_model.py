@@ -6,8 +6,6 @@ parser.add_argument('--modelName', default='albert-xlarge',
                     help='model name for directory saving')
 parser.add_argument('--batchSize', type=int, default=8, 
                     help='batch size per gpu')
-parser.add_argument('--stepsPerEpoch', type=int, default=10000, 
-                    help='steps per epoch')
 parser.add_argument('--warmup', type=int, default=10000, 
                     help='warmup steps')
 parser.add_argument('--lr', type=float, default=1E-4, 
@@ -16,6 +14,8 @@ parser.add_argument('--weightDecay', type=float, default=0.01,
                     help='AdamW weight decay')
 parser.add_argument('--sequenceLength', type=int, default=1024, 
                     help='Protein AA sequence length')
+parser.add_argument('--scratchDir', default=None, 
+                    help='Directory for tensorboard logs and checkpoints')
 
 arguments = parser.parse_args()
 
@@ -49,10 +49,10 @@ hvd_rank = hvd.rank() if is_using_hvd() else None
 
 # Create the model
 from bert.model import create_albert_model
-model = create_albert_model(model_dimension=1024,
-                            transformer_dimension=1024 * 4,
-                            num_attention_heads=1024 // 64,
-                            num_transformer_layers=24,
+model = create_albert_model(model_dimension=512,
+                            transformer_dimension=512 * 4,
+                            num_attention_heads=512 // 64,
+                            num_transformer_layers=6,
                             vocab_size=22,
                             dropout_rate=0.)
 
@@ -62,12 +62,14 @@ if hvd_rank == 0:
 from bert.optimizers import (ECE, masked_sparse_categorical_crossentropy,
                              BertLinearSchedule)
 
-opt = tf.optimizers.Adam(learning_rate=1E-4,
-                           beta_2=0.98,
-                           epsilon=1E-6)
+# opt = tf.optimizers.Adam(learning_rate=1E-4,
+#                         beta_2=0.98,
+#                         epsilon=1E-6)
 
-# opt = tfa.optimizers.AdamW(learning_rate=arguments.lr,
-#                            weight_decay=arguments.weightDecay)
+opt = tfa.optimizers.AdamW(learning_rate=arguments.lr,
+                           beta_2=0.98,
+                           epsilon=1E-6,
+                           weight_decay=arguments.weightDecay)
 
 # opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(opt)
 
@@ -88,15 +90,13 @@ model.compile(
     experimental_run_tf_function=True)
 
 model_name = arguments.modelName
-checkpoint_dir = f'{model_name}_checkpoints'
+checkpoint_dir = f'{arguments.scratchDir}/{model_name}_checkpoints'
 if not os.path.exists(checkpoint_dir):
     os.makedirs(checkpoint_dir)
 
-checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt_{epoch}_{val_ECE:.2f}.h5")
-
 callbacks = [    
     # Add warmup and learning rate decay
-    BertLinearSchedule(arguments.lr, arguments.warmup, int(1E7)),
+    BertLinearSchedule(arguments.lr, arguments.warmup, int(1E6)),
 ]
 
 if is_using_hvd():
@@ -116,9 +116,22 @@ if is_using_hvd():
 # Horovod: save checkpoints only on worker 0 to prevent other workers from
 # corrupting them.
 if hvd.rank() == 0:
-    callbacks.append(tf.keras.callbacks.CSVLogger(f'{checkpoint_dir}/log.csv'))
-    callbacks.append(tf.keras.callbacks.ModelCheckpoint(
-        filepath=checkpoint_prefix))
+    callbacks += [
+        tf.keras.callbacks.CSVLogger(f'{checkpoint_dir}/log.csv'),
+        tf.keras.callbacks.ModelCheckpoint(
+            filepath=os.path.join(checkpoint_dir, "ckpt.h5"),
+            save_best_only=True,
+            mode='min',
+            monitor='val_ECE'),
+        tf.keras.callbacks.TensorBoard(
+            log_dir=f'{arguments.scratchDir}/tblogs/{model_name}',
+            histogram_freq=0,
+            write_graph=False,
+            update_freq='epoch',
+            profile_batch=0,
+            embeddings_freq=0)
+    ]
+
     
 # Horovod: write logs on worker 0.
 verbose = 1 if hvd.rank() == 0 else 0
@@ -143,6 +156,6 @@ valid_data = create_masked_input_dataset(
 
 valid_data = valid_data.repeat().prefetch(tf.data.experimental.AUTOTUNE)
 
-model.fit(training_data, steps_per_epoch=arguments.stepsPerEpoch, epochs=10,
-          verbose=verbose, validation_data=valid_data, validation_steps=100,
+model.fit(training_data, steps_per_epoch=200, epochs=500,
+          verbose=verbose, validation_data=valid_data, validation_steps=20,
           callbacks=callbacks)
