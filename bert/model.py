@@ -1,5 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras import layers
+from tensorflow.keras.models import load_model
 
 from bert.layers import (Attention, Transformer,
                          gelu, initializer, Projection, DenseNoMask)
@@ -32,5 +33,18 @@ def create_albert_model(model_dimension=768,
                       kernel_initializer=initializer())(embeddings)
 
     model = tf.keras.Model(inputs, out, name='model')
+    
+    return model
+
+
+def load_model_from_checkpoint(checkpoint_file):
+    model = load_model(
+        checkpoint_file,
+        custom_objects={
+            'Transformer': Transformer,
+            'Attention': Attention,
+            'DenseNoMask': DenseNoMask,
+            'masked_sparse_categorical_crossentropy': masked_sparse_categorical_crossentropy,
+            'ECE': ECE})    
     
     return model

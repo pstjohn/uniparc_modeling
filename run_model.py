@@ -16,6 +16,10 @@ parser.add_argument('--sequenceLength', type=int, default=1024,
                     help='Protein AA sequence length')
 parser.add_argument('--scratchDir', default=None, 
                     help='Directory for tensorboard logs and checkpoints')
+parser.add_argument('--checkpoint', default=None, 
+                    help='Restore model from checkpoint')
+parser.add_argument('--initialEpoch', type=int, default=0, 
+                    help='starting epoch')
 
 arguments = parser.parse_args()
 
@@ -48,13 +52,18 @@ hvd_size = hvd.size() if is_using_hvd() else None
 hvd_rank = hvd.rank() if is_using_hvd() else None
 
 # Create the model
-from bert.model import create_albert_model
-model = create_albert_model(model_dimension=512,
-                            transformer_dimension=512 * 4,
-                            num_attention_heads=512 // 64,
-                            num_transformer_layers=6,
-                            vocab_size=22,
-                            dropout_rate=0.)
+if not arguments.checkpoint:
+    from bert.model import create_albert_model
+    model = create_albert_model(model_dimension=512,
+                                transformer_dimension=512 * 4,
+                                num_attention_heads=512 // 64,
+                                num_transformer_layers=6,
+                                vocab_size=22,
+                                dropout_rate=0.)
+else:
+    from bert.model import load_model_from_checkpoint
+    model = load_model_from_checkpoint(arguments.checkpoint)
+
 
 if hvd_rank == 0:
     model.summary()
@@ -117,7 +126,6 @@ if is_using_hvd():
 # corrupting them.
 if hvd.rank() == 0:
     callbacks += [
-        tf.keras.callbacks.CSVLogger(f'{checkpoint_dir}/log.csv'),
         tf.keras.callbacks.ModelCheckpoint(
             filepath=os.path.join(checkpoint_dir, "ckpt.h5"),
             save_best_only=True,
@@ -156,6 +164,7 @@ valid_data = create_masked_input_dataset(
 
 valid_data = valid_data.repeat().prefetch(tf.data.experimental.AUTOTUNE)
 
-model.fit(training_data, steps_per_epoch=200, epochs=500,
+model.fit(training_data, steps_per_epoch=200, epochs=500, 
+          initial_epoch=arguments.initialEpoch,
           verbose=verbose, validation_data=valid_data, validation_steps=20,
           callbacks=callbacks)
