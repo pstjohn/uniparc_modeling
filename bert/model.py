@@ -5,6 +5,8 @@ from tensorflow.keras.models import load_model
 from bert.layers import (Attention, Transformer,
                          gelu, initializer, Projection, DenseNoMask)
 
+from bert.optimizers import masked_sparse_categorical_crossentropy, ECE
+
 def create_albert_model(model_dimension=768,
                         transformer_dimension=3072,
                         num_attention_heads=12,

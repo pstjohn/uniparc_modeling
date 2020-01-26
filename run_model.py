@@ -27,7 +27,7 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_addons as tfa
 
-tf.compat.v1.disable_eager_execution()
+# tf.compat.v1.disable_eager_execution()
 
 import horovod.tensorflow.keras as hvd
 # from bert.hvd_utils import is_using_hvd
@@ -105,7 +105,9 @@ if not os.path.exists(checkpoint_dir):
 
 callbacks = [    
     # Add warmup and learning rate decay
-    BertLinearSchedule(arguments.lr, arguments.warmup, int(1E6)),
+    BertLinearSchedule(
+        arguments.lr, arguments.warmup, int(1E6),
+        write_summary=True if hvd.rank() == 0 else False),
 ]
 
 if is_using_hvd():
@@ -125,6 +127,7 @@ if is_using_hvd():
 # Horovod: save checkpoints only on worker 0 to prevent other workers from
 # corrupting them.
 if hvd.rank() == 0:
+    logdir = f'{arguments.scratchDir}/tblogs/{model_name}'
     callbacks += [
         tf.keras.callbacks.ModelCheckpoint(
             filepath=os.path.join(checkpoint_dir, "ckpt.h5"),
@@ -132,13 +135,16 @@ if hvd.rank() == 0:
             mode='min',
             monitor='val_ECE'),
         tf.keras.callbacks.TensorBoard(
-            log_dir=f'{arguments.scratchDir}/tblogs/{model_name}',
+            log_dir=logdir,
             histogram_freq=0,
             write_graph=False,
             update_freq='epoch',
             profile_batch=0,
             embeddings_freq=0)
     ]
+
+    file_writer = tf.summary.create_file_writer(logdir + "/metrics")
+    file_writer.set_as_default()
 
     
 # Horovod: write logs on worker 0.

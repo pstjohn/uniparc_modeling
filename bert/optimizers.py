@@ -58,6 +58,7 @@ class BertLinearSchedule(Callback):
                  learning_rate=1E-4,
                  warmup_steps=10000,
                  total_steps=1000000,
+                 write_summary=False,
                 ):
         """ Implements the linear learning rate warmup and linear learning rate
         decay used by google in BERT pretraining """
@@ -65,7 +66,7 @@ class BertLinearSchedule(Callback):
         self.learning_rate = learning_rate
         self.warmup_steps = warmup_steps
         self.total_steps = total_steps - warmup_steps    
-        self._hist = []
+        self.write_summary = write_summary
         
     def on_epoch_begin(self, epoch, logs=None):
         self.current_epoch = epoch
@@ -85,6 +86,8 @@ class BertLinearSchedule(Callback):
             scheduled_lr = self.learning_rate * (
                 1 - ((global_step - self.warmup_steps) / self.total_steps))
             
-        self._hist += [(global_step, scheduled_lr)]
+        if self.write_summary:
+            tf.summary.scalar('learning rate', data=scheduled_lr,
+                              step=global_step)
             
         K.set_value(self.model.optimizer.lr, scheduled_lr)
