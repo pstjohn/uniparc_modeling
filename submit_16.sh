@@ -35,7 +35,7 @@ mpirun -np $SLURM_NTASKS \
 	--weightDecay=0.0 \
 	--sequenceLength=128 \
 	--checkpoint='/pylon5/mc5plsp/pstjohn/uniparc_checkpoints/gpu32_bs512_checkpoints/ckpt.h5' \
-	--initialEpoch=53
+	--initialEpoch=0
 
 
 

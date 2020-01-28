@@ -59,6 +59,7 @@ class BertLinearSchedule(Callback):
                  warmup_steps=10000,
                  total_steps=1000000,
                  write_summary=False,
+                 update_freq=50,
                 ):
         """ Implements the linear learning rate warmup and linear learning rate
         decay used by google in BERT pretraining """
@@ -67,6 +68,8 @@ class BertLinearSchedule(Callback):
         self.warmup_steps = warmup_steps
         self.total_steps = total_steps - warmup_steps    
         self.write_summary = write_summary
+        self.update_freq = update_freq
+        
         
     def on_epoch_begin(self, epoch, logs=None):
         self.current_epoch = epoch
@@ -76,8 +79,12 @@ class BertLinearSchedule(Callback):
         global_step = (
             batch + self.current_epoch * self.params['steps'])
         
+        if global_step % self.update_freq is not 0:
+            # Only log / update every update_freq steps
+            return
+            
         # Still in warmup
-        if global_step <= self.warmup_steps:
+        if global_step < self.warmup_steps:
             scheduled_lr = self.learning_rate * (
                 global_step / self.warmup_steps)
         

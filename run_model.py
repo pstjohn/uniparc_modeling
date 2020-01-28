@@ -105,9 +105,7 @@ if not os.path.exists(checkpoint_dir):
 
 callbacks = [    
     # Add warmup and learning rate decay
-    BertLinearSchedule(
-        arguments.lr, arguments.warmup, int(1E6),
-        write_summary=True if hvd.rank() == 0 else False),
+
 ]
 
 if is_using_hvd():
@@ -122,7 +120,11 @@ if is_using_hvd():
     # Note: This callback must be in the list before the ReduceLROnPlateau,
     # TensorBoard or other metrics-based callbacks.
     hvd.callbacks.MetricAverageCallback(),
-]
+
+    BertLinearSchedule(
+        arguments.lr, arguments.warmup, int(1E6),
+        write_summary=True if hvd.rank() == 0 else False),
+    ]
 
 # Horovod: save checkpoints only on worker 0 to prevent other workers from
 # corrupting them.
