@@ -11,7 +11,7 @@ def create_attention_mask(input_shape, input_mask):
     """
     
     mask = tf.cast(tf.expand_dims(input_mask, axis=1), tf.float32)                   # [B, 1, S]
-    ones = tf.expand_dims(tf.ones(shape=from_shape[:2], dtype=tf.float32), axis=-1)  # [B, S, 1]
+    ones = tf.expand_dims(tf.ones(shape=input_shape[:2], dtype=tf.float32), axis=-1)  # [B, S, 1]
     mask = ones * mask  # broadcast along two dimensions
     
     return tf.expand_dims(mask, axis=1)  # [B, 1, S, S]

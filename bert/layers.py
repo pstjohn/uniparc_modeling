@@ -3,7 +3,7 @@ import tensorflow as tf
 import tensorflow.keras.backend as K
 from tensorflow.keras import layers
 
-from attention_utils import create_attention_mask, relative_attention_inner, initializer
+from bert.attention_utils import relative_attention_inner, initializer
 
 def gelu(x):
     """
@@ -60,12 +60,14 @@ class Attention(layers.Layer):
         
         self.dropout_layer = layers.Dropout(self.dropout)
         
-    def create_attention_mask(self, input_mask):
-        mask = tf.cast(input_mask, tf.float32)
-        attention_mask = tf.linalg.einsum('aj,ak->ajk', mask, mask)
-        attention_mask = attention_mask - tf.eye(tf.shape(input_mask)[-1])
-        attention_mask = tf.clip_by_value(attention_mask, 0, 1)
-        return tf.expand_dims(attention_mask, axis=1)  # [B,1,S,S]
+    def create_attention_mask(self, input_shape, input_mask):
+        mask = tf.cast(tf.expand_dims(input_mask, axis=1), tf.float32)                   # [B, 1, S]
+        ones = tf.expand_dims(tf.ones(shape=input_shape[:2], dtype=tf.float32), axis=-1)  # [B, S, 1]
+        mask = ones * mask  # broadcast along two dimensions
+        # Don't allow nodes to attend to themselves
+        mask = mask - tf.eye(tf.shape(input_mask)[-1]) 
+        mask = tf.clip_by_value(mask, 0, 1)
+        return tf.expand_dims(mask, axis=1)  # [B,1,S,S]
     
     def transpose_scores(self, input_tensor):
         input_shape  = tf.shape(input_tensor)
@@ -76,23 +78,25 @@ class Attention(layers.Layer):
     def compute_output_shape(self, input_shape):
         output_shape = [input_shape[0], input_shape[1], self.num_heads * self.units]
         return output_shape  # [B, S, N*H]
+
+    def calculate_attention(self, qk, input_shape):
+        return (tf.matmul(qk, qk, transpose_b=True) 
+                / tf.sqrt(float(self.units)))        
         
     def call(self, inputs, mask=None, training=None):
 
-        input_shape  = tf.shape(inputs)
+        input_shape = tf.shape(inputs) # [B, S, N*H]
         
         # query and key can be the same vector
         qk = self.transpose_scores(self.qk_layer(inputs))  # [B,N,S,H]
         value = self.transpose_scores(self.value_layer(inputs))  # [B,N,S,H]
 
         # Equation 1 of "Attention is all you need"
-        attention_scores = (tf.matmul(qk, qk, transpose_b=True) 
-                            / tf.sqrt(float(self.units)))  # [B,N,S,S]
+        attention_scores = self.calculate_attention(qk, input_shape)  # [B,N,S,S]
 
         # zero out masked values
-        if mask:
-            attention_mask = create_attention_mask(input_shape, mask)
-            attention_scores = attention_scores + (1. - attention_mask) * -10000.0
+        attention_mask = self.create_attention_mask(input_shape, mask)
+        attention_scores = attention_scores + (1. - attention_mask) * -10000.0
         
         attention_probs = tf.nn.softmax(attention_scores)  # [B,N,S,S]
         attention_probs = self.dropout_layer(attention_probs, training=training)
@@ -143,36 +147,12 @@ class RelativeAttention(Attention):
         final_mat = distance_mat_clipped + self.max_relative_position
         return final_mat
 
-    def call(self, inputs, mask=None, training=None):
-        
-        input_shape = tf.shape(inputs)
-        qk = self.transpose_scores(self.qk_layer(inputs))  # [B,N,S,H]
-        value = self.transpose_scores(self.value_layer(inputs))  # [B,N,S,H]
-
-        # generate a_ij^K and a_ij^K from, Shaw et al. 2018 arXiv:1803.02155
-        length = tf.shape(inputs)[1]  # [B,S,N*H]
-        relative_positions = self._generate_relative_positions_matrix(length)
-        relations_keys = self.relations_keys_embedding(relative_positions)       
-
-        # Eq. 4 of arXiv:1803.02155
+    def calculate_attention(self, qk, input_shape):
+        """ Eq. 4 of arXiv:1803.02155 """
+        relative_positions = self._generate_relative_positions_matrix(input_shape[1])
+        relations_keys = self.relations_keys_embedding(relative_positions)
         attention_scores = relative_attention_inner(qk, qk, relations_keys, True) 
-        attention_scores = attention_scores / tf.sqrt(float(self.units))  # [B,N,S,S]
-
-        # zero out masked values
-        if mask:
-            attention_mask = create_attention_mask(input_shape, mask)
-            attention_scores = attention_scores + (1. - attention_mask) * -10000.0
-
-        # Eq. 3 of arXiv:1803.02155 (here we drop the extra relations_value)
-        attention_probs = tf.nn.softmax(attention_scores)  # [B,N,S,S]
-        attention_probs = self.dropout_layer(attention_probs, training=training)
-        context_layer = tf.matmul(attention_probs, value)  # [B,N,S,S]
-        context_layer = tf.transpose(a=context_layer, perm=[0, 2, 1, 3])                   
-
-        output_shape = [input_shape[0], input_shape[1], self.num_heads*self.units]
-        context_layer = tf.reshape(context_layer, output_shape)
-        
-        return context_layer
+        return attention_scores
 
     def get_config(self):
         config = super(RelativeAttention, self).get_config()

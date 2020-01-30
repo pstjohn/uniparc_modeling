@@ -4,7 +4,7 @@
 #SBATCH --ntasks=8
 #SBATCH --gres=gpu:volta16:8
 #SBATCH --time=2-00
-#SBATCH --job-name=gpu16_bs512
+#SBATCH --job-name=round2_lr3_long2
 #SBATCH --output=/pylon5/mc5plsp/pstjohn/job_output/%j.%x
 
 env | grep ^SLURM | egrep 'CPU|TASKS'
@@ -30,12 +30,9 @@ mpirun -np $SLURM_NTASKS \
 	--modelName=$SLURM_JOB_NAME \
 	--scratchDir=/pylon5/mc5plsp/pstjohn/uniparc_checkpoints \
 	--batchSize=128 \
-	--warmup=10000 \
-	--lr=1E-4 \
+	--warmup=1000 \
+	--lr=1E-3 \
 	--weightDecay=0.0 \
 	--sequenceLength=128 \
-	--checkpoint='/pylon5/mc5plsp/pstjohn/uniparc_checkpoints/gpu32_bs512_checkpoints/ckpt.h5' \
-	--initialEpoch=0
-
-
-
+	--checkpoint='/pylon5/mc5plsp/pstjohn/uniparc_checkpoints/round2_lr3_long_checkpoints/ckpt.h5' \
+	--initialEpoch=35

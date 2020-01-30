@@ -12,7 +12,9 @@ def create_albert_model(model_dimension=768,
                         num_attention_heads=12,
                         num_transformer_layers=12,
                         vocab_size=22,
-                        dropout_rate=0.):
+                        dropout_rate=0.,
+                        max_relative_position=64,
+                        weight_share=True):
     
     inputs = layers.Input(shape=(None,), dtype=tf.int32, batch_size=None)
 
@@ -22,14 +24,19 @@ def create_albert_model(model_dimension=768,
         mask_zero=True)(inputs)
     
     # Initialize transformer, use ALBERT-style weight sharing
-    transformer = Transformer(
+    get_transformer = lambda: Transformer(
         num_attention_heads, transformer_dimension,
-        attention_type='attention', max_relative_position=10,
+        attention_type='relative',
+        max_relative_position=max_relative_position,
         dropout=dropout_rate)
+    
+    if weight_share:
+        transformer = get_transformer()
     
     # Stack transformers together
     for i in range(num_transformer_layers):
-        embeddings = transformer(embeddings)
+        layer = transformer if weight_share else get_transformer()
+        embeddings = layer(embeddings)
 
     # Project back to original embedding dimension
     out = DenseNoMask(vocab_size, activation=gelu,
