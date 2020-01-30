@@ -16,32 +16,36 @@ def create_masked_input_dataset(sequence_path,
                                 shard_num_workers=None,
                                 shard_worker_index=None):
     
-    def encode(line_tensor):
-        line = line_tensor.numpy().decode('utf8')
+    vocab = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K',
+             'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 
+             'W', 'Y']
 
-        if len(line) > max_sequence_length:
-            offset = np.random.randint(
-                low=0, high=len(line) - max_sequence_length + 1)
-            line = line[offset:(offset + max_sequence_length)]
+    table = tf.lookup.StaticHashTable(
+        tf.lookup.KeyValueTensorInitializer(
+            keys=vocab, values=tf.range(len(vocab)) + 2),
+        default_value=0)
 
-        vocab = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K',
-                 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 
-                 'W', 'Y']
+    @tf.function
+    def encode(x):
+        chars = tf.strings.bytes_split(x)
 
-        replacement_dict = {key: i + 2 for i, key in enumerate(vocab)}
-        return np.asarray([replacement_dict[item] for item in line])
+        # If chars is greater than max_sequence_length, take a random crop
+        chars = tf.cond(tf.shape(chars) > max_sequence_length,
+                lambda: tf.image.random_crop(chars, (max_sequence_length,)),
+                lambda: chars)
 
-    def encode_fn(line_tensor):
-        return tf.py_function(encode, inp=[line_tensor], Tout=[tf.int32,])
+        return table.lookup(chars)
 
+
+    @tf.function
     def mask_input(input_tensor):
         """ Randomly mask the input tensor according to the formula perscribed by BERT. 
         Randomly masks 15% of input tokens, with 80% recieving the [MASK] token,
         10% randomized, 10% left unchanged. 
-        
+
         Returns
         -------
-        
+
         masked_tensor: (batch_size, seq_length) 
             Tensor with masked values
         input_tensor: (batch_size, seq_length)
@@ -50,7 +54,8 @@ def create_masked_input_dataset(sequence_path,
             Boolean mask that selects the desired inputs.    
         """
 
-        mask_score = tf.random.uniform(input_tensor.shape, maxval=1, dtype=tf.float32)
+        input_shape = tf.shape(input_tensor)
+        mask_score = tf.random.uniform(input_shape, maxval=1, dtype=tf.float32)
         input_mask = mask_score < masking_freq
 
         # Mask with [MASK] token 80% of the time
@@ -60,26 +65,19 @@ def create_masked_input_dataset(sequence_path,
         mask_random = (mask_score >= masking_freq * (1. - mask_random_freq)) & input_mask
 
         # Tensors to replace with where input is masked or randomized
-        mask_value_tensor = tf.ones(input_tensor.shape, dtype=tf.int32) * mask_index
+        mask_value_tensor = tf.ones(input_shape, dtype=tf.int32) * mask_index
         random_value_tensor = tf.random.uniform(
-            input_tensor.shape, minval=vocab_start, maxval=vocab_size, dtype=tf.int32)
-        pad_value_tensor = tf.zeros(input_tensor.shape, dtype=tf.int32)
+            input_shape, minval=vocab_start, maxval=vocab_size, dtype=tf.int32)
+        pad_value_tensor = tf.zeros(input_shape, dtype=tf.int32)
 
         # Use the replacements to mask the input tensor
         masked_tensor = tf.where(mask_mask, mask_value_tensor, input_tensor)
         masked_tensor = tf.where(mask_random, random_value_tensor, masked_tensor)
-        
+
         # Set true values to zero (pad value) where not masked
         true_tensor = tf.where(input_mask, input_tensor, pad_value_tensor)
 
         return masked_tensor, true_tensor
-
-
-    def mask_input_tf(input_tensor):
-        a, c = tf.py_function(mask_input, inp=[input_tensor],
-                                 Tout=[tf.int32, tf.int32])
-        return a, c
-
 
     dataset = tf.data.TextLineDataset(sequence_path)
     
@@ -92,8 +90,8 @@ def create_masked_input_dataset(sequence_path,
         dataset = dataset.filter(bzux_filter)
         
     encoded_data = dataset\
-        .map(encode_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
-        .map(mask_input_tf, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        .map(encode, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
+        .map(mask_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
     # This argument controls whether to fix the size of the sequences
     tf_seq_len = -1 if not fix_sequence_length else max_sequence_length

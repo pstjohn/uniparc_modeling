@@ -22,9 +22,10 @@ def create_albert_model(model_dimension=768,
         mask_zero=True)(inputs)
     
     # Initialize transformer, use ALBERT-style weight sharing
-    transformer = Transformer(num_attention_heads, transformer_dimension,
-                              attention_type='relative', max_relative_position=10,
-                              dropout=dropout_rate)
+    transformer = Transformer(
+        num_attention_heads, transformer_dimension,
+        attention_type='attention', max_relative_position=10,
+        dropout=dropout_rate)
     
     # Stack transformers together
     for i in range(num_transformer_layers):

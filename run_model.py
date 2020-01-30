@@ -71,14 +71,14 @@ if hvd_rank == 0:
 from bert.optimizers import (ECE, masked_sparse_categorical_crossentropy,
                              BertLinearSchedule)
 
-# opt = tf.optimizers.Adam(learning_rate=1E-4,
-#                         beta_2=0.98,
-#                         epsilon=1E-6)
+opt = tf.optimizers.Adam(learning_rate=arguments.lr,
+                         beta_2=0.98,
+                         epsilon=1E-6)
 
-opt = tfa.optimizers.AdamW(learning_rate=arguments.lr,
-                           beta_2=0.98,
-                           epsilon=1E-6,
-                           weight_decay=arguments.weightDecay)
+# opt = tfa.optimizers.AdamW(learning_rate=arguments.lr,
+#                            beta_2=0.98,
+#                            epsilon=1E-6,
+#                            weight_decay=arguments.weightDecay)
 
 # opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(opt)
 
