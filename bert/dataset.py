@@ -2,6 +2,8 @@ import numpy as np
 import tensorflow as tf
 
 def create_masked_input_dataset(sequence_path,
+                                sequence_compression='GZIP',
+                                cache=False,
                                 max_sequence_length=512,
                                 batch_size=20,
                                 buffer_size=1024,
@@ -79,11 +81,14 @@ def create_masked_input_dataset(sequence_path,
 
         return masked_tensor, true_tensor
 
-    dataset = tf.data.TextLineDataset(sequence_path)
+    dataset = tf.data.TextLineDataset(sequence_path, compression_type=sequence_compression)
     
     if shard_num_workers:
         dataset = dataset.shard(shard_num_workers, shard_worker_index)
-    
+        
+    if cache:
+        dataset = dataset.cache()
+        
     if filter_bzux:
         bzux_filter = lambda string: tf.math.logical_not(
             tf.strings.regex_full_match(string, '.*[BZUOX].*'))

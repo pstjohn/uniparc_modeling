@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH -c 18
 #SBATCH --gres=gpu:2
-#SBATCH --job-name=lr4_continue
+#SBATCH --job-name=lr4_continue2
 #SBATCH --output=/scratch/pstjohn/%j.%x.out  # %j will be replaced with the job ID
 
 module unload
@@ -25,11 +25,10 @@ mpirun \
     python run_model.py \
     --modelName=$SLURM_JOB_NAME \
     --scratchDir='/scratch/pstjohn/' \
-    --checkpoint='/scratch/pstjohn/lr4_fixed_code_no_weight_share_checkpoints/ckpt.h5' \
+    --checkpoint='/scratch/pstjohn/lr4_continue_checkpoints/ckpt.h5' \
     --batchSize=48 \
     --warmup=10000 \
     --lr=1E-4 \
     --weightDecay=0.0 \
     --sequenceLength=512 \
-    --initialEpoch=501 \
-    --weightShare=True
+    --initialEpoch=564

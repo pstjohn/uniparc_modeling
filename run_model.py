@@ -126,7 +126,7 @@ if is_using_hvd():
     hvd.callbacks.MetricAverageCallback(),
 
     BertLinearSchedule(
-        arguments.lr, arguments.warmup, int(1E6),
+        arguments.lr, arguments.warmup, int(4E5),
         write_summary=True if hvd.rank() == 0 else False),
     ]
 
@@ -159,7 +159,7 @@ verbose = 1 if hvd.rank() == 0 else 0
 from bert.dataset import create_masked_input_dataset
 
 training_data = create_masked_input_dataset(
-    sequence_path='../uniparc_data/sequences_train.txt',
+    sequence_path='../uniparc_data/train_uniref100.txt.gz',
     max_sequence_length=arguments.sequenceLength,
     batch_size=arguments.batchSize,
     shard_num_workers=hvd_size,
@@ -168,7 +168,8 @@ training_data = create_masked_input_dataset(
 training_data = training_data.repeat().prefetch(tf.data.experimental.AUTOTUNE)
 
 valid_data = create_masked_input_dataset(
-    sequence_path='../uniparc_data/sequences_valid.txt',
+    sequence_path='../uniparc_data/dev_uniref50.txt.gz',
+    cache=True,
     max_sequence_length=arguments.sequenceLength,
     batch_size=arguments.batchSize,
     shard_num_workers=hvd_size,
@@ -176,7 +177,7 @@ valid_data = create_masked_input_dataset(
 
 valid_data = valid_data.repeat().prefetch(tf.data.experimental.AUTOTUNE)
 
-model.fit(training_data, steps_per_epoch=200, epochs=1000, 
+model.fit(training_data, steps_per_epoch=200, epochs=1000,
           initial_epoch=arguments.initialEpoch,
           verbose=verbose, validation_data=valid_data, validation_steps=20,
           callbacks=callbacks)
