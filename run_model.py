@@ -4,6 +4,8 @@ import argparse
 parser = argparse.ArgumentParser(description='BERT model training')
 parser.add_argument('--modelName', default='albert-xlarge',
                     help='model name for directory saving')
+parser.add_argument('--weightShare', type=bool, default=False, 
+                    help='Albert-style weight sharing')
 parser.add_argument('--batchSize', type=int, default=8, 
                     help='batch size per gpu')
 parser.add_argument('--warmup', type=int, default=10000, 
@@ -59,7 +61,9 @@ if not arguments.checkpoint:
                                 num_attention_heads=512 // 64,
                                 num_transformer_layers=6,
                                 vocab_size=22,
-                                dropout_rate=0.)
+                                dropout_rate=0.,
+                                max_relative_position=64,
+                                weight_share=arguments.weightShare)
 else:
     from bert.model import load_model_from_checkpoint
     model = load_model_from_checkpoint(arguments.checkpoint)
@@ -172,7 +176,7 @@ valid_data = create_masked_input_dataset(
 
 valid_data = valid_data.repeat().prefetch(tf.data.experimental.AUTOTUNE)
 
-model.fit(training_data, steps_per_epoch=200, epochs=500, 
+model.fit(training_data, steps_per_epoch=200, epochs=1000, 
           initial_epoch=arguments.initialEpoch,
           verbose=verbose, validation_data=valid_data, validation_steps=20,
           callbacks=callbacks)
