@@ -7,12 +7,13 @@ def create_masked_input_dataset(sequence_path,
                                 batch_size=20,
                                 buffer_size=1024,
                                 mask_index=1,
-                                vocab_start=2,
+                                vocab_start=4,
                                 fix_sequence_length=False,
                                 masking_freq=.15,
                                 mask_token_freq=.8,
                                 mask_random_freq=.1,
                                 filter_bzux=True,
+                                no_mask_pad=1,
                                 shard_num_workers=None,
                                 shard_worker_index=None):
     
@@ -58,7 +59,9 @@ def create_masked_input_dataset(sequence_path,
         """
 
         input_shape = tf.shape(input_tensor)
-        mask_score = tf.random.uniform(input_shape, maxval=1, dtype=tf.float32)
+        mask_score = tf.random.uniform(input_shape - no_mask_pad * 2, maxval=1, dtype=tf.float32)
+        # Ensure that no_mask_pad tokens on edges are not masked
+        mask_score = tf.concat([tf.ones(no_mask_pad), mask_score, tf.ones(no_mask_pad)], 0)
         input_mask = mask_score < masking_freq
 
         # Mask with [MASK] token 80% of the time
