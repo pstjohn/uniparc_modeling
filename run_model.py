@@ -60,7 +60,7 @@ if not arguments.checkpoint:
                                 transformer_dimension=512 * 4,
                                 num_attention_heads=512 // 64,
                                 num_transformer_layers=6,
-                                vocab_size=22,
+                                vocab_size=24,
                                 dropout_rate=0.,
                                 max_relative_position=64,
                                 weight_share=arguments.weightShare)
@@ -79,12 +79,6 @@ opt = tf.optimizers.Adam(learning_rate=arguments.lr,
                          beta_2=0.98,
                          epsilon=1E-6)
 
-# opt = tfa.optimizers.AdamW(learning_rate=arguments.lr,
-#                            beta_2=0.98,
-#                            epsilon=1E-6,
-#                            weight_decay=arguments.weightDecay)
-
-# opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(opt)
 
 # Horovod: add Horovod DistributedOptimizer.
 if is_using_hvd():
@@ -106,11 +100,6 @@ model_name = arguments.modelName
 checkpoint_dir = f'{arguments.scratchDir}/{model_name}_checkpoints'
 if not os.path.exists(checkpoint_dir):
     os.makedirs(checkpoint_dir)
-
-callbacks = [    
-    # Add warmup and learning rate decay
-
-]
 
 if is_using_hvd():
     callbacks += [
@@ -169,7 +158,6 @@ training_data = training_data.repeat().prefetch(tf.data.experimental.AUTOTUNE)
 
 valid_data = create_masked_input_dataset(
     sequence_path='../uniparc_data/dev_uniref50.txt.gz',
-    cache=True,
     max_sequence_length=arguments.sequenceLength,
     batch_size=arguments.batchSize,
     shard_num_workers=hvd_size,

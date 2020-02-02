@@ -3,11 +3,9 @@ import tensorflow as tf
 
 def create_masked_input_dataset(sequence_path,
                                 sequence_compression='GZIP',
-                                cache=False,
                                 max_sequence_length=512,
                                 batch_size=20,
                                 buffer_size=1024,
-                                vocab_size=22,
                                 mask_index=1,
                                 vocab_start=2,
                                 fix_sequence_length=False,
@@ -18,7 +16,7 @@ def create_masked_input_dataset(sequence_path,
                                 shard_num_workers=None,
                                 shard_worker_index=None):
     
-    vocab = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K',
+    vocab = ['^', '$', 'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K',
              'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 
              'W', 'Y']
 
@@ -30,7 +28,10 @@ def create_masked_input_dataset(sequence_path,
     @tf.function
     def encode(x):
         chars = tf.strings.bytes_split(x)
-
+        
+        # Append start and end tokens
+        chars = tf.concat([tf.constant(['^']), chars, tf.constant(['$'])], 0)
+        
         # If chars is greater than max_sequence_length, take a random crop
         chars = tf.cond(tf.shape(chars) > max_sequence_length,
                 lambda: tf.image.random_crop(chars, (max_sequence_length,)),
@@ -69,7 +70,7 @@ def create_masked_input_dataset(sequence_path,
         # Tensors to replace with where input is masked or randomized
         mask_value_tensor = tf.ones(input_shape, dtype=tf.int32) * mask_index
         random_value_tensor = tf.random.uniform(
-            input_shape, minval=vocab_start, maxval=vocab_size, dtype=tf.int32)
+            input_shape, minval=vocab_start, maxval=len(vocab) + 2, dtype=tf.int32)
         pad_value_tensor = tf.zeros(input_shape, dtype=tf.int32)
 
         # Use the replacements to mask the input tensor
@@ -85,10 +86,7 @@ def create_masked_input_dataset(sequence_path,
     
     if shard_num_workers:
         dataset = dataset.shard(shard_num_workers, shard_worker_index)
-        
-    if cache:
-        dataset = dataset.cache()
-        
+
     if filter_bzux:
         bzux_filter = lambda string: tf.math.logical_not(
             tf.strings.regex_full_match(string, '.*[BZUOX].*'))
