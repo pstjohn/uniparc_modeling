@@ -18,6 +18,8 @@ parser.add_argument('--sequenceLength', type=int, default=1024,
                     help='Protein AA sequence length')
 parser.add_argument('--scratchDir', default=None, 
                     help='Directory for tensorboard logs and checkpoints')
+parser.add_argument('--dataDir', default=None, 
+                    help='Directory for training and validation data')
 parser.add_argument('--checkpoint', default=None, 
                     help='Restore model from checkpoint')
 parser.add_argument('--initialEpoch', type=int, default=0, 
@@ -101,6 +103,8 @@ checkpoint_dir = f'{arguments.scratchDir}/{model_name}_checkpoints'
 if not os.path.exists(checkpoint_dir):
     os.makedirs(checkpoint_dir)
 
+callbacks = []
+
 if is_using_hvd():
     callbacks += [
     # Horovod: broadcast initial variable states from rank 0 to all other
@@ -115,7 +119,7 @@ if is_using_hvd():
     hvd.callbacks.MetricAverageCallback(),
 
     BertLinearSchedule(
-        arguments.lr, arguments.warmup, int(4E5),
+        arguments.lr, arguments.warmup, int(5E5),
         write_summary=True if hvd.rank() == 0 else False),
     ]
 
@@ -134,7 +138,7 @@ if hvd.rank() == 0:
             histogram_freq=0,
             write_graph=False,
             update_freq='epoch',
-            profile_batch=0,
+            profile_batch=20,
             embeddings_freq=0)
     ]
 
@@ -148,7 +152,7 @@ verbose = 1 if hvd.rank() == 0 else 0
 from bert.dataset import create_masked_input_dataset
 
 training_data = create_masked_input_dataset(
-    sequence_path='../uniparc_data/train_uniref100.txt.gz',
+    sequence_path=os.path.join(arguments.dataDir, 'train_uniref100.txt.gz'),
     max_sequence_length=arguments.sequenceLength,
     batch_size=arguments.batchSize,
     shard_num_workers=hvd_size,
@@ -157,7 +161,7 @@ training_data = create_masked_input_dataset(
 training_data = training_data.repeat().prefetch(tf.data.experimental.AUTOTUNE)
 
 valid_data = create_masked_input_dataset(
-    sequence_path='../uniparc_data/dev_uniref50.txt.gz',
+    sequence_path=os.path.join(arguments.dataDir, 'dev_uniref50.txt.gz'),
     max_sequence_length=arguments.sequenceLength,
     batch_size=arguments.batchSize,
     shard_num_workers=hvd_size,
@@ -165,7 +169,7 @@ valid_data = create_masked_input_dataset(
 
 valid_data = valid_data.repeat().prefetch(tf.data.experimental.AUTOTUNE)
 
-model.fit(training_data, steps_per_epoch=200, epochs=1000,
+model.fit(training_data, steps_per_epoch=500, epochs=1000,
           initial_epoch=arguments.initialEpoch,
-          verbose=verbose, validation_data=valid_data, validation_steps=20,
+          verbose=verbose, validation_data=valid_data, validation_steps=25,
           callbacks=callbacks)

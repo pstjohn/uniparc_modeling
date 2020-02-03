@@ -4,11 +4,17 @@
 #SBATCH --ntasks=8
 #SBATCH --gres=gpu:volta16:8
 #SBATCH --time=2-00
-#SBATCH --job-name=round2_lr3_long2
+#SBATCH --job-name=16_bs128
 #SBATCH --output=/pylon5/mc5plsp/pstjohn/job_output/%j.%x
 
 env | grep ^SLURM | egrep 'CPU|TASKS'
 echo "slurm ntasks" $SLURM_NTASKS
+
+sourcedir=$SCRATCH/uniparc_data/*
+
+RC=1
+n=0
+rsync -aP $sourcedir $LOCAL/
 
 source /etc/profile.d/modules.sh
 
@@ -29,10 +35,10 @@ mpirun -np $SLURM_NTASKS \
 	python run_model.py \
 	--modelName=$SLURM_JOB_NAME \
 	--scratchDir=/pylon5/mc5plsp/pstjohn/uniparc_checkpoints \
+	--dataDir=$LOCAL \
 	--batchSize=128 \
-	--warmup=1000 \
-	--lr=1E-3 \
+	--warmup=10000 \
+	--lr=1E-4 \
 	--weightDecay=0.0 \
 	--sequenceLength=128 \
-	--checkpoint='/pylon5/mc5plsp/pstjohn/uniparc_checkpoints/round2_lr3_long_checkpoints/ckpt.h5' \
-	--initialEpoch=35
+	--initialEpoch=0
