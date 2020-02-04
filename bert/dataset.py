@@ -80,12 +80,19 @@ def create_masked_input_dataset(sequence_path,
         masked_tensor = tf.where(mask_mask, mask_value_tensor, input_tensor)
         masked_tensor = tf.where(mask_random, random_value_tensor, masked_tensor)
 
+        # Make 1 correspond to the first amino acid in the output.
+        label_offset = vocab_start - 1 
+        input_offset = input_tensor - label_offset        
+        
         # Set true values to zero (pad value) where not masked
-        true_tensor = tf.where(input_mask, input_tensor, pad_value_tensor)
+        true_tensor = tf.where(input_mask, input_offset, pad_value_tensor)
 
         return masked_tensor, true_tensor
 
-    dataset = tf.data.TextLineDataset(sequence_path, compression_type=sequence_compression)
+    dataset = tf.data.TextLineDataset(
+        sequence_path, compression_type=sequence_compression)\
+        .shuffle(buffer_size=buffer_size)\
+        .repeat()
     
     if shard_num_workers:
         dataset = dataset.shard(shard_num_workers, shard_worker_index)
@@ -94,18 +101,15 @@ def create_masked_input_dataset(sequence_path,
         bzux_filter = lambda string: tf.math.logical_not(
             tf.strings.regex_full_match(string, '.*[BZUOX].*'))
         dataset = dataset.filter(bzux_filter)
-        
-    encoded_data = dataset\
-        .map(encode, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
-        .map(mask_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
     # This argument controls whether to fix the size of the sequences
     tf_seq_len = -1 if not fix_sequence_length else max_sequence_length
 
-    encoded_data = encoded_data\
-        .shuffle(buffer_size=buffer_size)\
+    dataset = dataset\
+        .map(encode, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
+        .map(mask_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
         .padded_batch(batch_size, padded_shapes=(
-            ([tf_seq_len], [tf_seq_len])))
+            ([tf_seq_len], [tf_seq_len])))\
+        .prefetch(tf.data.experimental.AUTOTUNE)
         
-
-    return encoded_data
+    return dataset

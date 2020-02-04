@@ -5,7 +5,7 @@ from tensorflow.keras.models import load_model
 from bert.layers import (Attention, Transformer,
                          gelu, initializer, Projection, DenseNoMask)
 
-from bert.optimizers import masked_sparse_categorical_crossentropy, ECE
+from bert.losses import masked_sparse_categorical_crossentropy, ECE
 
 def create_albert_model(model_dimension=768,
                         transformer_dimension=3072,
@@ -38,8 +38,8 @@ def create_albert_model(model_dimension=768,
         layer = transformer if weight_share else get_transformer()
         embeddings = layer(embeddings)
 
-    # Project back to original embedding dimension
-    out = DenseNoMask(vocab_size, activation=gelu,
+    # Project to the 20 AA labels (and zero 'pad' label)
+    out = DenseNoMask(21, activation=gelu,
                       kernel_initializer=initializer())(embeddings)
 
     model = tf.keras.Model(inputs, out, name='model')
