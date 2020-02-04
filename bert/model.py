@@ -39,8 +39,7 @@ def create_albert_model(model_dimension=768,
         embeddings = layer(embeddings)
 
     # Project to the 20 AA labels (and zero 'pad' label)
-    out = DenseNoMask(21, activation=gelu,
-                      kernel_initializer=initializer())(embeddings)
+    out = DenseNoMask(21, kernel_initializer=initializer())(embeddings)
 
     model = tf.keras.Model(inputs, out, name='model')
     
