@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --account=invpoly
+#SBATCH --account=bpms
 #SBATCH --time=2-00
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:2
 #SBATCH --ntasks=1
-#SBATCH --job-name=distribute_debug_large
+#SBATCH --job-name=dist_sl128_nowd
 #SBATCH --output=/scratch/pstjohn/%j.%x.out  # %j will be replaced with the job ID
 
 module unload
@@ -23,10 +23,10 @@ srun $SINGULARTY_CMD \
     --modelName=$SLURM_JOB_NAME \
     --scratchDir='/scratch/pstjohn/' \
     --dataDir='/projects/bpms/pstjohn/uniparc' \
-    --batchSize=48 \
+    --batchSize=256 \
     --warmup=10000 \
     --totalSteps=400000 \
     --stepsPerEpoch=500 \
     --lr=1E-4 \
-    --sequenceLength=512 \
+    --sequenceLength=128 \
     --initialEpoch=0

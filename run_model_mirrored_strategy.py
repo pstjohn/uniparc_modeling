@@ -39,8 +39,25 @@ from bert.model import create_albert_model, load_model_from_checkpoint
 
 
 ## Create the model
-from bert.optimization import create_optimizer
-opt = create_optimizer(arguments.lr, arguments.warmup, arguments.totalSteps)
+# from bert.optimization import create_optimizer
+# optimizer = create_optimizer(arguments.lr, arguments.warmup, arguments.totalSteps)
+
+from bert.optimization import WarmUp
+
+learning_rate_fn = tf.keras.optimizers.schedules.PolynomialDecay(
+    initial_learning_rate=arguments.lr,
+    decay_steps=arguments.totalSteps,
+    end_learning_rate=0.0)
+
+learning_rate_fn = WarmUp(initial_learning_rate=arguments.lr,
+                          decay_schedule_fn=learning_rate_fn,
+                          warmup_steps=arguments.warmup)
+
+optimizer = tf.keras.optimizers.Adam(
+    learning_rate=learning_rate_fn,
+    beta_1=0.9,
+    beta_2=0.999,
+    epsilon=1e-6)
 
 strategy = tf.distribute.MirroredStrategy()
 
@@ -62,7 +79,7 @@ with strategy.scope():
     model.compile(
         loss=masked_sparse_categorical_crossentropy,
         metrics=[ECE],
-        optimizer=opt)
+        optimizer=optimizer)
 
 model.summary()
 
@@ -91,8 +108,6 @@ callbacks = [
         embeddings_freq=0)
 ]
 
-verbose = 2
-
 from bert.dataset import create_masked_input_dataset
 
 # Keep the data preprocessing steps on the CPU
@@ -112,5 +127,5 @@ with tf.device('/CPU:0'):
 model.fit(training_data, steps_per_epoch=arguments.stepsPerEpoch,
           epochs=arguments.totalSteps//arguments.stepsPerEpoch,
           initial_epoch=arguments.initialEpoch,
-          verbose=verbose, validation_data=valid_data, validation_steps=25,
+          verbose=1, validation_data=valid_data, validation_steps=25,
           callbacks=callbacks)
