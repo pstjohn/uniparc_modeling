@@ -26,6 +26,8 @@ parser.add_argument('--initialEpoch', type=int, default=0,
                     help='starting epoch')
 parser.add_argument('--stepsPerEpoch', type=int, default=500, 
                     help='steps per epoch')
+parser.add_argument('--maskingFreq', type=float, default=.15, 
+                    help='overall masking frequency')
 
 arguments = parser.parse_args()
 print(arguments)
@@ -116,12 +118,14 @@ with tf.device('/CPU:0'):
     training_data = create_masked_input_dataset(
         sequence_path=os.path.join(arguments.dataDir, 'train_uniref100.txt.gz'),
         max_sequence_length=arguments.sequenceLength,
-        batch_size=arguments.batchSize)
+        batch_size=arguments.batchSize,
+        masking_freq=arguments.maskingFreq)
 
     valid_data = create_masked_input_dataset(
         sequence_path=os.path.join(arguments.dataDir, 'dev_uniref50.txt.gz'),
         max_sequence_length=arguments.sequenceLength,
-        batch_size=arguments.batchSize)
+        batch_size=arguments.batchSize,
+        masking_freq=arguments.maskingFreq)
 
 
 model.fit(training_data, steps_per_epoch=arguments.stepsPerEpoch,

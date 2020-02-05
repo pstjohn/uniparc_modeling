@@ -6,6 +6,7 @@ from bert.layers import (Attention, Transformer,
                          gelu, initializer, Projection, DenseNoMask)
 
 from bert.losses import masked_sparse_categorical_crossentropy, ECE
+from bert.optimization import WarmUp
 
 def create_albert_model(model_dimension=768,
                         transformer_dimension=3072,
@@ -53,6 +54,8 @@ def load_model_from_checkpoint(checkpoint_file):
             'Transformer': Transformer,
             'Attention': Attention,
             'DenseNoMask': DenseNoMask,
+            'gelu': gelu,
+            'WarmUp': WarmUp,
             'masked_sparse_categorical_crossentropy': masked_sparse_categorical_crossentropy,
             'ECE': ECE})    
     

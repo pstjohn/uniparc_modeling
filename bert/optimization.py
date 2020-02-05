@@ -37,8 +37,12 @@ class WarmUp(tf.keras.optimizers.schedules.LearningRateSchedule):
     self.initial_learning_rate = initial_learning_rate
     self.warmup_steps = warmup_steps
     self.power = power
-    self.decay_schedule_fn = decay_schedule_fn
     self.name = name
+    try:
+        self.decay_schedule_fn = tf.keras.optimizers.schedules.deserialize(decay_schedule_fn)
+
+    except TypeError:
+        self.decay_schedule_fn = decay_schedule_fn            
 
   def __call__(self, step):
     with tf.name_scope(self.name or 'WarmUp') as name:
@@ -58,7 +62,7 @@ class WarmUp(tf.keras.optimizers.schedules.LearningRateSchedule):
   def get_config(self):
     return {
         'initial_learning_rate': self.initial_learning_rate,
-        'decay_schedule_fn': self.decay_schedule_fn,
+        'decay_schedule_fn': tf.keras.optimizers.schedules.serialize(self.decay_schedule_fn),
         'warmup_steps': self.warmup_steps,
         'power': self.power,
         'name': self.name
