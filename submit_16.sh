@@ -4,11 +4,13 @@
 #SBATCH --ntasks=1
 #SBATCH --gres=gpu:volta16:8
 #SBATCH --time=2-00
-#SBATCH --job-name=dist_128_fixed_activation
+#SBATCH --job-name=dist_bs1024_sl128_nowd
 #SBATCH --output=/pylon5/mc5plsp/pstjohn/job_output/%j.%x
 
 env | grep ^SLURM | egrep 'CPU|TASKS'
 echo "slurm ntasks" $SLURM_NTASKS
+
+git log --pretty=oneline -1
 
 source /etc/profile.d/modules.sh
 
