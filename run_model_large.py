@@ -27,10 +27,6 @@ parser.add_argument('--stepsPerEpoch', type=int, default=500,
                     help='steps per epoch')
 parser.add_argument('--maskingFreq', type=float, default=.15, 
                     help='overall masking frequency')
-parser.add_argument('--attentionType', type=str, default='relative', 
-                    help='attention type')
-parser.add_argument('--numberXformerLayers', type=str, default='relative', 
-                    help='attention type')
 arguments = parser.parse_args()
 print(arguments)
 
@@ -43,11 +39,7 @@ from bert.model import create_albert_model, load_model_from_checkpoint
 
 
 ## Create the model
-# from bert.optimization import create_optimizer
-# optimizer = create_optimizer(arguments.lr, arguments.warmup, arguments.totalSteps)
-
 from bert.optimization import WarmUp, create_optimizer
-
 optimizer = create_optimizer(arguments.lr, arguments.warmup, arguments.totalSteps)
 
 # learning_rate_fn = tf.keras.optimizers.schedules.PolynomialDecay(
@@ -74,7 +66,7 @@ with strategy.scope():
                                 num_attention_heads=768 // 64,
                                 num_transformer_layers=24,
                                 vocab_size=24,
-                                dropout_rate=0.1,
+                                dropout_rate=0.0,
                                 max_relative_position=128,
                                 final_layernorm=False)
 
@@ -139,5 +131,5 @@ with tf.device('/CPU:0'):
 model.fit(training_data, steps_per_epoch=arguments.stepsPerEpoch,
           epochs=arguments.totalSteps//arguments.stepsPerEpoch,
           initial_epoch=arguments.initialEpoch,
-          verbose=1, validation_data=valid_data, validation_steps=25,
+          verbose=2, validation_data=valid_data, validation_steps=25,
           callbacks=callbacks)
