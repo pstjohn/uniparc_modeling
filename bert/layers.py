@@ -106,7 +106,7 @@ class Attention(layers.Layer):
         output_shape = [input_shape[0], input_shape[1], self.num_heads*self.units]
         context_layer = tf.reshape(context_layer, output_shape)
 
-        return context_layer, attention_probs
+        return context_layer
 
     def compute_mask(self, inputs, mask=None):
         return mask
@@ -263,12 +263,12 @@ class Transformer(layers.Layer):
     def call(self, inputs, mask=None, training=None):
         
         # Multi-head attention block
-        attention_output, attention_scores = self.attention_layer(inputs, mask=mask)
+        attention_output = self.attention_layer(inputs, mask=mask)
         attention_output = self.attention_projection([attention_output, inputs])
         
         intermediate_values = self.intermediate_layer(attention_output)
         output = self.output_projection([intermediate_values, attention_output])
-        return output, attention_scores
+        return output
     
     def compute_mask(self, inputs, mask=None):
         return mask 

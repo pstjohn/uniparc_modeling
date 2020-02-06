@@ -41,7 +41,7 @@ def create_albert_model(model_dimension=768,
             dropout=dropout_rate,
             use_layernorm=use_layernorm)
             
-        embeddings, attention_scores = transformer(embeddings)
+        embeddings = transformer(embeddings)
 
     # Project to the 20 AA labels (and zero 'pad' label)
     out = DenseNoMask(21, kernel_initializer=initializer())(embeddings)
