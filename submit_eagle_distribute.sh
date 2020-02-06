@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:2
 #SBATCH --ntasks=1
-#SBATCH --job-name=dist_sl128_nowd
+#SBATCH --job-name=dist_sl128_absolute
 #SBATCH --output=/scratch/pstjohn/%j.%x.out  # %j will be replaced with the job ID
 
 module unload
@@ -29,4 +29,5 @@ srun $SINGULARTY_CMD \
     --stepsPerEpoch=500 \
     --lr=1E-4 \
     --sequenceLength=128 \
-    --initialEpoch=0
+    --initialEpoch=0 \
+    --attentionType='absolute'

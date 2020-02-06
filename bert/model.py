@@ -15,7 +15,8 @@ def create_albert_model(model_dimension=768,
                         vocab_size=24,
                         dropout_rate=0.,
                         max_relative_position=64,
-                        weight_share=True):
+                        final_layernorm=True,
+                        attention_type='relative'):
     
     inputs = layers.Input(shape=(None,), dtype=tf.int32, batch_size=None)
 
@@ -23,21 +24,24 @@ def create_albert_model(model_dimension=768,
     embeddings = layers.Embedding(
         vocab_size, model_dimension, embeddings_initializer=initializer(),
         mask_zero=True)(inputs)
-    
-    # Initialize transformer, use ALBERT-style weight sharing
-    get_transformer = lambda: Transformer(
-        num_attention_heads, transformer_dimension,
-        attention_type='relative',
-        max_relative_position=max_relative_position,
-        dropout=dropout_rate)
-    
-    if weight_share:
-        transformer = get_transformer()
-    
+        
     # Stack transformers together
     for i in range(num_transformer_layers):
-        layer = transformer if weight_share else get_transformer()
-        embeddings = layer(embeddings)
+        
+        # Whether to use layernorm on the final layer
+        if not final_layernorm and i == (num_transformer_layers - 1):            
+            use_layernorm=False
+        else:
+            use_layernorm=True
+            
+        transformer = Transformer(
+            num_attention_heads, transformer_dimension,
+            attention_type=attention_type,
+            max_relative_position=max_relative_position,
+            dropout=dropout_rate,
+            use_layernorm=use_layernorm)
+            
+        embeddings, attention_scores = transformer(embeddings)
 
     # Project to the 20 AA labels (and zero 'pad' label)
     out = DenseNoMask(21, kernel_initializer=initializer())(embeddings)

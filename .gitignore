@@ -110,3 +110,4 @@ Untitled*
 gpuhosts.*.txt
 *.h5
 *_checkpoints/
+core.*

@@ -106,7 +106,7 @@ class Attention(layers.Layer):
         output_shape = [input_shape[0], input_shape[1], self.num_heads*self.units]
         context_layer = tf.reshape(context_layer, output_shape)
 
-        return context_layer
+        return context_layer, attention_probs
 
     def compute_mask(self, inputs, mask=None):
         return mask
@@ -162,11 +162,12 @@ class RelativeAttention(Attention):
     
 class Projection(layers.Layer):
     """ Performs a dense layer, dropout, layer norm and residual update """
-    def __init__(self, units, dropout=0.0, use_residual=True, **kwargs):
+    def __init__(self, units, dropout=0.0, use_residual=True, use_layernorm=True, **kwargs):
         super(Projection, self).__init__(**kwargs)        
         self.units = units
         self.dropout = dropout        
         self.use_residual = use_residual
+        self.use_layernorm = use_layernorm
 
     def build(self, input_shape):
         self.dense_layer = layers.Dense(self.units,
@@ -184,15 +185,18 @@ class Projection(layers.Layer):
         output = self.dropout_layer(output, training=training)
         
         if self.use_residual:
-            return self.layer_norm(output + residual)
-        else:
-            return self.layer_norm(output)
+            output = output + residual
+        if self.use_layernorm:
+            output = self.layer_norm(output)
+            
+        return output
 
     def get_config(self):
         config = super(Projection, self).get_config()
         config.update({'units': self.units,
                        'dropout': self.dropout,
-                       'use_residual': self.use_residual})
+                       'use_residual': self.use_residual,
+                       'use_layernorm': self.use_layernorm})
         return config
 
 
@@ -202,6 +206,7 @@ class Transformer(layers.Layer):
                  dropout=0.0,
                  attention_type='attention',
                  max_relative_position=10,
+                 use_layernorm=True,
                  **kwargs):
         """Performs the multi-headed attention and normalization of a single
         transformer block.
@@ -214,6 +219,7 @@ class Transformer(layers.Layer):
             attention_type - 'attention' or 'relative'. Wether to use 
                 relative positional encodings from arXiv:1803.02155.
             max_relative_position - for relative positions
+            use_layernorm - whether to use layernorm in the final layer
         """
         
         super(Transformer, self).__init__(**kwargs)
@@ -222,6 +228,7 @@ class Transformer(layers.Layer):
         self.intermediate_units = intermediate_units
         self.attention_type = attention_type
         self.max_relative_position = max_relative_position
+        self.use_layernorm = use_layernorm
         
     def build(self, input_shape):
 
@@ -235,6 +242,7 @@ class Transformer(layers.Layer):
         
         if self.attention_type == 'attention':
             self.attention_layer = Attention(self.units, self.num_heads, self.dropout)
+            
         elif self.attention_type == 'relative':
             self.attention_layer = RelativeAttention(
                 self.units, self.num_heads, self.max_relative_position,
@@ -246,19 +254,21 @@ class Transformer(layers.Layer):
         
         self.attention_projection = Projection(d_model, self.dropout,
                                                name='attention_projection')
+        
         self.output_projection = Projection(d_model, self.dropout,
-                                            name='output_projection')
+                                            name='output_projection',
+                                            use_layernorm=self.use_layernorm)
 
 
     def call(self, inputs, mask=None, training=None):
         
         # Multi-head attention block
-        attention_output = self.attention_layer(inputs, mask=mask)
+        attention_output, attention_scores = self.attention_layer(inputs, mask=mask)
         attention_output = self.attention_projection([attention_output, inputs])
         
         intermediate_values = self.intermediate_layer(attention_output)
         output = self.output_projection([intermediate_values, attention_output])
-        return output
+        return output, attention_scores
     
     def compute_mask(self, inputs, mask=None):
         return mask 
@@ -269,7 +279,8 @@ class Transformer(layers.Layer):
                        'intermediate_units': self.intermediate_units,
                        'dropout': self.dropout,
                        'attention_type': self.attention_type,
-                       'max_relative_position': self.max_relative_position})
+                       'max_relative_position': self.max_relative_position,
+                       'use_layernorm': self.use_layernorm})
         return config
 
 

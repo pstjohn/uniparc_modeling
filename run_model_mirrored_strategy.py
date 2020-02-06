@@ -1,5 +1,6 @@
 import os
 import argparse
+import shutil
 
 parser = argparse.ArgumentParser(description='BERT model training')
 parser.add_argument('--modelName', default='albert-xlarge',
@@ -28,6 +29,14 @@ parser.add_argument('--stepsPerEpoch', type=int, default=500,
                     help='steps per epoch')
 parser.add_argument('--maskingFreq', type=float, default=.15, 
                     help='overall masking frequency')
+parser.add_argument('--attentionType', type=str, default='relative', 
+                    help='attention type')
+parser.add_argument('--modelDimension', type=int, default=512, 
+                    help='attention dimension')
+parser.add_argument('--numberXformerLayers', type=int, default=6, 
+                    help='number of tranformer layers')
+parser.add_argument('--dropout', type=float, default=0.0, 
+                    help='dropout')
 
 arguments = parser.parse_args()
 print(arguments)
@@ -65,18 +74,16 @@ strategy = tf.distribute.MirroredStrategy()
 
 with strategy.scope():
     
-    if not arguments.checkpoint:
-        model = create_albert_model(model_dimension=512,
-                                    transformer_dimension=512 * 4,
-                                    num_attention_heads=512 // 64,
-                                    num_transformer_layers=6,
-                                    vocab_size=24,
-                                    dropout_rate=0.,
-                                    max_relative_position=64,
-                                    weight_share=arguments.weightShare)
-        
-    else:
-        model = load_model_from_checkpoint(arguments.checkpoint)
+    model = create_albert_model(model_dimension=arguments.modelDimension,
+                                transformer_dimension=arguments.modelDimension * 4,
+                                num_attention_heads=arguments.modelDimension // 64,
+                                num_transformer_layers=arguments.numberXformerLayers,
+                                vocab_size=24,
+                                dropout_rate=arguments.dropout,
+                                max_relative_position=64)
+    
+    if arguments.checkpoint:
+        model.load_weights(arguments.checkpoint)
 
     model.compile(
         loss=masked_sparse_categorical_crossentropy,
@@ -89,16 +96,20 @@ model.summary()
 callbacks = []
 
 model_name = arguments.modelName
-checkpoint_dir = f'{arguments.scratchDir}/{model_name}_checkpoints'
+checkpoint_dir = f'{arguments.scratchDir}/{model_name}/'
 logdir = f'{arguments.scratchDir}/tblogs/{model_name}'
 
 if not os.path.exists(checkpoint_dir):
     os.makedirs(checkpoint_dir)
 
+# Make sure this script is available later
+shutil.copy(__file__, checkpoint_dir)
+
 callbacks = [
     tf.keras.callbacks.ModelCheckpoint(
-        filepath=os.path.join(checkpoint_dir, "ckpt.h5"),
+        filepath=os.path.join(checkpoint_dir, "saved_weights"),
         save_best_only=True,
+        save_weights_only=True,
         mode='min',
         monitor='val_ECE'),
     tf.keras.callbacks.TensorBoard(
