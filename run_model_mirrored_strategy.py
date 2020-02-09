@@ -80,7 +80,8 @@ with strategy.scope():
                                 num_transformer_layers=arguments.numberXformerLayers,
                                 vocab_size=24,
                                 dropout_rate=arguments.dropout,
-                                max_relative_position=64)
+                                max_relative_position=64,
+                                final_layernorm=False)
     
     if arguments.checkpoint:
         model.load_weights(arguments.checkpoint)
