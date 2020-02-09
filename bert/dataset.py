@@ -1,6 +1,16 @@
 import numpy as np
 import tensorflow as tf
 
+    
+vocab = ['^', '$', 'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K',
+         'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
+
+encoding_table = tf.lookup.StaticHashTable(
+    tf.lookup.KeyValueTensorInitializer(
+        keys=vocab, values=tf.range(len(vocab)) + 2),
+    default_value=0)
+
+
 def create_masked_input_dataset(sequence_path,
                                 sequence_compression='GZIP',
                                 max_sequence_length=512,
@@ -16,15 +26,6 @@ def create_masked_input_dataset(sequence_path,
                                 no_mask_pad=1,
                                 shard_num_workers=None,
                                 shard_worker_index=None):
-    
-    vocab = ['^', '$', 'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K',
-             'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 
-             'W', 'Y']
-
-    table = tf.lookup.StaticHashTable(
-        tf.lookup.KeyValueTensorInitializer(
-            keys=vocab, values=tf.range(len(vocab)) + 2),
-        default_value=0)
 
     @tf.function
     def encode(x):
@@ -38,7 +39,7 @@ def create_masked_input_dataset(sequence_path,
                 lambda: tf.image.random_crop(chars, (max_sequence_length,)),
                 lambda: chars)
 
-        return table.lookup(chars)
+        return encoding_table.lookup(chars)
 
 
     @tf.function
