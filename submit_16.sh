@@ -4,7 +4,7 @@
 #SBATCH --ntasks=1
 #SBATCH --gres=gpu:volta16:8
 #SBATCH --time=2-00
-#SBATCH --job-name=continue_sl1024_bs32
+#SBATCH --job-name=continue_sl1024_bs128
 #SBATCH --output=/pylon5/mc5plsp/pstjohn/job_output/%j.%x
 
 env | grep ^SLURM | egrep 'CPU|TASKS'
@@ -30,7 +30,7 @@ srun $SINGULARTY_CMD \
     --scratchDir='/pylon5/mc5plsp/pstjohn/uniparc_checkpoints' \
     --dataDir='/pylon5/mc5plsp/pstjohn/uniparc_data' \
     --checkpoint='/pylon5/mc5plsp/pstjohn/uniparc_checkpoints/continue2_sl1024/saved_weights' \
-    --batchSize=32 \
+    --batchSize=64 \
     --warmup=10000 \
     --totalSteps=400000 \
     --stepsPerEpoch=500 \

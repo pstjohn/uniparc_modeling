@@ -131,13 +131,15 @@ with tf.device('/CPU:0'):
         sequence_path=os.path.join(arguments.dataDir, 'train_uniref100.txt.gz'),
         max_sequence_length=arguments.sequenceLength,
         batch_size=arguments.batchSize,
-        masking_freq=arguments.maskingFreq)
+        masking_freq=arguments.maskingFreq,
+        fix_sequence_length=True)
 
     valid_data = create_masked_input_dataset(
         sequence_path=os.path.join(arguments.dataDir, 'dev_uniref50.txt.gz'),
         max_sequence_length=arguments.sequenceLength,
         batch_size=arguments.batchSize,
-        masking_freq=arguments.maskingFreq)
+        masking_freq=arguments.maskingFreq,
+        fix_sequence_length=True)
 
 
 model.fit(training_data, steps_per_epoch=arguments.stepsPerEpoch,
