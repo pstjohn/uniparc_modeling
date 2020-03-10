@@ -2,9 +2,9 @@
 #SBATCH --partition=GPU-AI
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --gres=gpu:volta16:8
+#SBATCH --gres=gpu:volta32:8
 #SBATCH --time=2-00
-#SBATCH --job-name=continue_sl512_bs256
+#SBATCH --job-name=continue4_sl1024
 #SBATCH --output=/pylon5/mc5plsp/pstjohn/job_output/%j.%x
 
 env | grep ^SLURM | egrep 'CPU|TASKS'
@@ -30,11 +30,11 @@ srun $SINGULARTY_CMD \
     --scratchDir='/pylon5/mc5plsp/pstjohn/uniparc_checkpoints' \
     --dataDir='/pylon5/mc5plsp/pstjohn/uniparc_data' \
     --checkpoint='/pylon5/mc5plsp/pstjohn/uniparc_checkpoints/continue2_sl1024/saved_weights' \
-    --batchSize=256 \
+    --batchSize=128 \
     --warmup=10000 \
     --totalSteps=400000 \
     --stepsPerEpoch=500 \
     --lr=1E-4 \
     --maskingFreq=0.05 \
-    --sequenceLength=512 \
-    --initialEpoch=518
+    --sequenceLength=1024 \
+    --initialEpoch=500
