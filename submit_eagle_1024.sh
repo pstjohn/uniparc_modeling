@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH --account=bpms
-#SBATCH --time=2-00
+#SBATCH --time=60:00
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:2
 #SBATCH --ntasks=1
-#SBATCH --job-name=sl1024_bs48
+#SBATCH --job-name=sl1024_bs48_debug
 #SBATCH --output=/scratch/pstjohn/%j.%x.out  # %j will be replaced with the job ID
 
 module unload
