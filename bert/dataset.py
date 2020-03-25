@@ -2,13 +2,17 @@ import numpy as np
 import tensorflow as tf
 
     
-vocab = ['^', '$', 'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K',
+vocab = ['', '^', '$', 'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K',
          'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
 
+# empty string should be matched to zero, others should start at 2. 
+# Mask index is 1
+values = tf.concat([tf.zeros((1), dtype=tf.int32),
+                    tf.range(len(vocab) - 1) + 2], axis=0)
+
 encoding_table = tf.lookup.StaticHashTable(
-    tf.lookup.KeyValueTensorInitializer(
-        keys=vocab, values=tf.range(len(vocab)) + 2),
-    default_value=0)
+    tf.lookup.KeyValueTensorInitializer(keys=vocab, values=values),
+    default_value=1) # Missing values should just be the mask token
 
 
 def create_masked_input_dataset(sequence_path,
