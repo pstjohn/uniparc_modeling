@@ -2,13 +2,15 @@
 #SBATCH --partition=GPU-AI
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --gres=gpu:volta32:16
+#SBATCH --gres=gpu:volta16:8
 #SBATCH --time=2-00
-#SBATCH --job-name=will_this_run
+#SBATCH --job-name=continue_sl512_bs256
 #SBATCH --output=/pylon5/mc5plsp/pstjohn/job_output/%j.%x
 
 env | grep ^SLURM | egrep 'CPU|TASKS'
 echo "slurm ntasks" $SLURM_NTASKS
+
+git log --pretty=oneline -1
 
 source /etc/profile.d/modules.sh
 
@@ -27,10 +29,12 @@ srun $SINGULARTY_CMD \
     --modelName=$SLURM_JOB_NAME \
     --scratchDir='/pylon5/mc5plsp/pstjohn/uniparc_checkpoints' \
     --dataDir='/pylon5/mc5plsp/pstjohn/uniparc_data' \
-    --batchSize=4096 \
+    --checkpoint='/pylon5/mc5plsp/pstjohn/uniparc_checkpoints/continue2_sl1024/saved_weights' \
+    --batchSize=256 \
     --warmup=10000 \
     --totalSteps=400000 \
     --stepsPerEpoch=500 \
     --lr=1E-4 \
-    --sequenceLength=128 \
-    --initialEpoch=0
+    --maskingFreq=0.05 \
+    --sequenceLength=512 \
+    --initialEpoch=518

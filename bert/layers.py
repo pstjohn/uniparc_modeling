@@ -53,8 +53,10 @@ class Attention(layers.Layer):
         
         dense_units = self.units * self.num_heads  # N*H
         
-        self.qk_layer = layers.Dense(
-            dense_units, kernel_initializer=initializer(), name='qk')
+        self.query_layer = layers.Dense(
+            dense_units, kernel_initializer=initializer(), name='query')
+        self.key_layer = layers.Dense(
+            dense_units, kernel_initializer=initializer(), name='key')        
         self.value_layer = layers.Dense(
             dense_units, kernel_initializer=initializer(), name='value')
         
@@ -79,8 +81,8 @@ class Attention(layers.Layer):
         output_shape = [input_shape[0], input_shape[1], self.num_heads * self.units]
         return output_shape  # [B, S, N*H]
 
-    def calculate_attention(self, qk, input_shape):
-        return (tf.matmul(qk, qk, transpose_b=True) 
+    def calculate_attention(self, query, key, input_shape):
+        return (tf.matmul(query, key, transpose_b=True) 
                 / tf.sqrt(float(self.units)))        
         
     def call(self, inputs, mask=None, training=None):
@@ -88,11 +90,12 @@ class Attention(layers.Layer):
         input_shape = tf.shape(inputs) # [B, S, N*H]
         
         # query and key can be the same vector
-        qk = self.transpose_scores(self.qk_layer(inputs))  # [B,N,S,H]
+        query = self.transpose_scores(self.query_layer(inputs))  # [B,N,S,H]
+        key = self.transpose_scores(self.key_layer(inputs))  # [B,N,S,H]        
         value = self.transpose_scores(self.value_layer(inputs))  # [B,N,S,H]
 
         # Equation 1 of "Attention is all you need"
-        attention_scores = self.calculate_attention(qk, input_shape)  # [B,N,S,S]
+        attention_scores = self.calculate_attention(query, key, input_shape)  # [B,N,S,S]
 
         # zero out masked values
         attention_mask = self.create_attention_mask(input_shape, mask)
@@ -147,11 +150,11 @@ class RelativeAttention(Attention):
         final_mat = distance_mat_clipped + self.max_relative_position
         return final_mat
 
-    def calculate_attention(self, qk, input_shape):
+    def calculate_attention(self, query, key, input_shape):
         """ Eq. 4 of arXiv:1803.02155 """
         relative_positions = self._generate_relative_positions_matrix(input_shape[1])
         relations_keys = self.relations_keys_embedding(relative_positions)
-        attention_scores = relative_attention_inner(qk, qk, relations_keys, True) 
+        attention_scores = relative_attention_inner(query, key, relations_keys, True) 
         return attention_scores
 
     def get_config(self):
