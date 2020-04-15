@@ -1,3 +1,5 @@
+# PSJ note: this file is from https://github.com/tensorflow/models/blob/master/official/nlp/optimization.py
+
 # Copyright 2019 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +26,7 @@ import tensorflow as tf
 
 
 class WarmUp(tf.keras.optimizers.schedules.LearningRateSchedule):
-  """Applys a warmup schedule on a given learning rate decay schedule."""
+  """Applies a warmup schedule on a given learning rate decay schedule."""
 
   def __init__(
       self,
@@ -37,12 +39,8 @@ class WarmUp(tf.keras.optimizers.schedules.LearningRateSchedule):
     self.initial_learning_rate = initial_learning_rate
     self.warmup_steps = warmup_steps
     self.power = power
+    self.decay_schedule_fn = decay_schedule_fn
     self.name = name
-    try:
-        self.decay_schedule_fn = tf.keras.optimizers.schedules.deserialize(decay_schedule_fn)
-
-    except TypeError:
-        self.decay_schedule_fn = decay_schedule_fn            
 
   def __call__(self, step):
     with tf.name_scope(self.name or 'WarmUp') as name:
@@ -62,7 +60,7 @@ class WarmUp(tf.keras.optimizers.schedules.LearningRateSchedule):
   def get_config(self):
     return {
         'initial_learning_rate': self.initial_learning_rate,
-        'decay_schedule_fn': tf.keras.optimizers.schedules.serialize(self.decay_schedule_fn),
+        'decay_schedule_fn': self.decay_schedule_fn,
         'warmup_steps': self.warmup_steps,
         'power': self.power,
         'name': self.name
@@ -109,12 +107,14 @@ class AdamWeightDecay(tf.keras.optimizers.Adam):
                epsilon=1e-7,
                amsgrad=False,
                weight_decay_rate=0.0,
+               include_in_weight_decay=None,
                exclude_from_weight_decay=None,
                name='AdamWeightDecay',
                **kwargs):
     super(AdamWeightDecay, self).__init__(
         learning_rate, beta_1, beta_2, epsilon, amsgrad, name, **kwargs)
     self.weight_decay_rate = weight_decay_rate
+    self._include_in_weight_decay = include_in_weight_decay
     self._exclude_from_weight_decay = exclude_from_weight_decay
 
   @classmethod
@@ -127,7 +127,7 @@ class AdamWeightDecay(tf.keras.optimizers.Adam):
   def _prepare_local(self, var_device, var_dtype, apply_state):
     super(AdamWeightDecay, self)._prepare_local(var_device, var_dtype,
                                                 apply_state)
-    apply_state['weight_decay_rate'] = tf.constant(
+    apply_state[(var_device, var_dtype)]['weight_decay_rate'] = tf.constant(
         self.weight_decay_rate, name='adam_weight_decay_rate')
 
   def _decay_weights_op(self, var, learning_rate, apply_state):
@@ -135,14 +135,17 @@ class AdamWeightDecay(tf.keras.optimizers.Adam):
     if do_decay:
       return var.assign_sub(
           learning_rate * var *
-          apply_state['weight_decay_rate'],
+          apply_state[(var.device, var.dtype.base_dtype)]['weight_decay_rate'],
           use_locking=self._use_locking)
     return tf.no_op()
 
-  def apply_gradients(self, grads_and_vars, name=None):
+  def apply_gradients(self,
+                      grads_and_vars,
+                      name=None):
     grads, tvars = list(zip(*grads_and_vars))
-    (grads, _) = tf.clip_by_global_norm(grads, clip_norm=1.0)
-    return super(AdamWeightDecay, self).apply_gradients(zip(grads, tvars))
+    return super(AdamWeightDecay, self).apply_gradients(
+        zip(grads, tvars),
+        name=name)
 
   def _get_lr(self, var_device, var_dtype, apply_state):
     """Retrieves the learning rate with the given state."""
@@ -182,6 +185,12 @@ class AdamWeightDecay(tf.keras.optimizers.Adam):
     """Whether to use L2 weight decay for `param_name`."""
     if self.weight_decay_rate == 0:
       return False
+
+    if self._include_in_weight_decay:
+      for r in self._include_in_weight_decay:
+        if re.search(r, param_name) is not None:
+          return True
+
     if self._exclude_from_weight_decay:
       for r in self._exclude_from_weight_decay:
         if re.search(r, param_name) is not None:
