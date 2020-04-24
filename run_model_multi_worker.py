@@ -30,6 +30,10 @@ os.environ['TF_CONFIG'] = tf_config
 import tensorflow as tf
 strategy = tf.distribute.experimental.MultiWorkerMirroredStrategy()
 
+from tensorflow.keras.mixed_precision import experimental as mixed_precision
+policy = mixed_precision.Policy('mixed_float16')
+mixed_precision.set_policy(policy)
+
 # Parse input arguments
 parser = argparse.ArgumentParser(description='BERT model training')
 parser.add_argument('--modelName', default='albert-xlarge',
@@ -152,8 +156,8 @@ with strategy.scope():
 callbacks = []
 
 model_name = arguments.modelName
-checkpoint_dir = f'{arguments.scratchDir}/{model_name}/'
-logdir = f'{arguments.scratchDir}/tblogs/{model_name}'
+checkpoint_dir = os.path.join(arguments.scratchDir, model_name)
+logdir = os.path.join(arguments.scratchDir, 'tblogs', model_name)
 
 # Only do these on the head node
 if index == 0:

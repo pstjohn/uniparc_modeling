@@ -19,11 +19,11 @@ export OMP_NUM_THREADS=4
 
 cd $MEMBERWORK/bie108
 
-jsrun -n ${NODES} -g 6 -c 42 -r1 -a1 -b none python $HOME/uniparc_modeling/run_model_multi_worker.py \
+jsrun -n ${NODES} -g 6 -c 42 -r1 -a1 -b none python3 $HOME/uniparc_modeling/run_model_multi_worker.py \
     --modelName=$LSB_JOBNAME.$LSB_JOBID \
     --scratchDir="$MEMBERWORK/bie108/uniparc_checkpoints" \
     --dataDir="$PROJWORK/bie108/split_uniref100" \
-    --checkpoint="$MEMBERWORK/bie108/uniparc_checkpoints/$LSB_JOBNAME.$LSB_JOBID" \    
+    --checkpoint="$MEMBERWORK/bie108/uniparc_checkpoints/$LSB_JOBNAME.$LSB_JOBID" \
     --batchSize=3000 \
     --warmup=16000 \
     --totalSteps=400000 \

@@ -63,11 +63,11 @@ class Attention(layers.Layer):
         self.dropout_layer = layers.Dropout(self.dropout)
         
     def create_attention_mask(self, input_shape, input_mask):
-        mask = tf.cast(tf.expand_dims(input_mask, axis=1), tf.float32)                   # [B, 1, S]
-        ones = tf.expand_dims(tf.ones(shape=input_shape[:2], dtype=tf.float32), axis=-1)  # [B, S, 1]
+        mask = tf.cast(tf.expand_dims(input_mask, axis=1), tf.float16)                   # [B, 1, S]
+        ones = tf.expand_dims(tf.ones(shape=input_shape[:2], dtype=tf.float16), axis=-1)  # [B, S, 1]
         mask = ones * mask  # broadcast along two dimensions
         # Don't allow nodes to attend to themselves
-        mask = mask - tf.eye(tf.shape(input_mask)[-1]) 
+        mask = mask - tf.eye(tf.shape(input_mask)[-1], dtype=tf.float16) 
         mask = tf.clip_by_value(mask, 0, 1)
         return tf.expand_dims(mask, axis=1)  # [B,1,S,S]
     
@@ -153,7 +153,7 @@ class RelativeAttention(Attention):
     def calculate_attention(self, query, key, input_shape):
         """ Eq. 4 of arXiv:1803.02155 """
         relative_positions = self._generate_relative_positions_matrix(input_shape[1])
-        relations_keys = self.relations_keys_embedding(relative_positions)
+        relations_keys = tf.cast(self.relations_keys_embedding(relative_positions), tf.float16)
         attention_scores = relative_attention_inner(query, key, relations_keys, True) 
         return attention_scores
 

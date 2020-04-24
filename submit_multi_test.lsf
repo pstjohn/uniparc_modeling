@@ -3,11 +3,12 @@
 #BSUB -P BIE108
 #BSUB -W 00:25
 #BSUB -nnodes 2
-#BSUB -J multinode_test_new_restore
+#BSUB -J multinode_test_mixed_precision
 #BSUB -o job_output/%J.out
 #BSUB -e job_output/%J.err
 
 NODES=$(cat ${LSB_DJOB_HOSTFILE} | sort | uniq | grep -v login | grep -v batch | wc -l)
+BATCH_SIZE=$(($NODES * 6 * 16))
 
 module load ibm-wml-ce/1.7.0-1
 conda activate tf2-ibm
@@ -18,12 +19,11 @@ export OMP_NUM_THREADS=4
 
 cd $MEMBERWORK/bie108
 
-jsrun -n ${NODES} -g 6 -c 42 -r1 -a1 -b none python $HOME/uniparc_modeling/run_model_multi_worker.py \
+jsrun -n ${NODES} -g 6 -c 42 -r1 -a1 -b none python3 $HOME/uniparc_modeling/run_model_multi_worker.py \
     --modelName=$LSB_JOBNAME.$LSB_JOBID \
     --scratchDir="$MEMBERWORK/bie108/uniparc_checkpoints" \
     --dataDir="$PROJWORK/bie108/split_uniref100" \
-    --checkpoint="$MEMBERWORK/bie108/uniparc_checkpoints/multinode_test_profile.34760" \
-    --batchSize=192 \
+    --batchSize=$BATCH_SIZE \
     --warmup=10 \
     --totalSteps=100 \
     --stepsPerEpoch=10 \
@@ -31,6 +31,8 @@ jsrun -n ${NODES} -g 6 -c 42 -r1 -a1 -b none python $HOME/uniparc_modeling/run_m
     --lr=1E-4 \
     --maskingFreq=0.15 \
     --sequenceLength=512 \
-    --modelDimension=512 \
-    --numberXformerLayers=6 \
+    --modelDimension=768 \
+    --numberXformerLayers=12 \
     --initialEpoch=0
+
+#     --checkpoint="$MEMBERWORK/bie108/uniparc_checkpoints/multinode_test_profile.34760" \
