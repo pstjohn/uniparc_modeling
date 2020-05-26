@@ -27,6 +27,8 @@ parser.add_argument('--initialEpoch', type=int, default=0,
                     help='starting epoch')
 parser.add_argument('--stepsPerEpoch', type=int, default=500, 
                     help='steps per epoch')
+parser.add_argument('--validationSteps', type=int, default=25, 
+                    help='validation steps')
 parser.add_argument('--maskingFreq', type=float, default=.15, 
                     help='overall masking frequency')
 parser.add_argument('--attentionType', type=str, default='relative', 
@@ -44,30 +46,62 @@ print(arguments)
 import numpy as np
 import tensorflow as tf
 
+from tensorflow.keras.mixed_precision import experimental as mixed_precision
+policy = mixed_precision.Policy('mixed_float16')
+mixed_precision.set_policy(policy)
+
 from bert.losses import ECE, masked_sparse_categorical_crossentropy
 from bert.model import create_albert_model, load_model_from_checkpoint
-
+from bert.dataset import create_masked_input_dataset
 
 ## Create the model
-from bert.optimization import create_optimizer
-optimizer = create_optimizer(arguments.lr, arguments.warmup, arguments.totalSteps)
+# from bert.optimization import create_optimizer
+# optimizer = create_optimizer(arguments.lr, arguments.warmup, arguments.totalSteps)
 
-# from bert.optimization import WarmUp
+from bert.optimization import WarmUp
+import tensorflow_addons.optimizers as tfa_optimizers
 
-# learning_rate_fn = tf.keras.optimizers.schedules.PolynomialDecay(
-#     initial_learning_rate=arguments.lr,
-#     decay_steps=arguments.totalSteps,
-#     end_learning_rate=0.0)
+lr_schedule = tf.keras.optimizers.schedules.PolynomialDecay(
+    initial_learning_rate=arguments.lr,
+    decay_steps=arguments.totalSteps,
+    end_learning_rate=0.0)
 
-# learning_rate_fn = WarmUp(initial_learning_rate=arguments.lr,
-#                           decay_schedule_fn=learning_rate_fn,
-#                           warmup_steps=arguments.warmup)
+lr_schedule = WarmUp(
+    initial_learning_rate=arguments.lr,
+    decay_schedule_fn=lr_schedule,
+    warmup_steps=arguments.warmup)
 
-# optimizer = tf.keras.optimizers.Adam(
-#     learning_rate=learning_rate_fn,
-#     beta_1=0.9,
-#     beta_2=0.999,
-#     epsilon=1e-6)
+optimizer = tfa_optimizers.LAMB(
+    learning_rate=lr_schedule,
+    weight_decay_rate=0.01,
+    beta_1=0.9,
+    beta_2=0.999,
+    epsilon=1e-6,
+    exclude_from_weight_decay=['layer_norm', 'bias'])
+
+train_data_dir = os.path.join(arguments.dataDir, 'train_uniref100_split')
+train_data_files = [os.path.join(train_data_dir, f) for f in os.listdir(train_data_dir)]
+
+valid_data_dir = os.path.join(arguments.dataDir, 'dev_uniref50_split')
+valid_data_files = [os.path.join(valid_data_dir, f) for f in os.listdir(valid_data_dir)]
+
+training_data = create_masked_input_dataset(
+    sequence_path=train_data_files,
+    max_sequence_length=arguments.sequenceLength,
+    batch_size=arguments.batchSize,
+    masking_freq=arguments.maskingFreq,
+    fix_sequence_length=True)
+
+training_data = training_data.repeat().prefetch(tf.data.experimental.AUTOTUNE)    
+
+valid_data = create_masked_input_dataset(
+    sequence_path=valid_data_files,        
+    max_sequence_length=arguments.sequenceLength,
+    batch_size=arguments.batchSize,
+    masking_freq=arguments.maskingFreq,
+    fix_sequence_length=True)
+
+valid_data = valid_data.repeat().prefetch(tf.data.experimental.AUTOTUNE)
 
 strategy = tf.distribute.MirroredStrategy()
 
@@ -121,28 +155,9 @@ callbacks = [
         embeddings_freq=0)
 ]
 
-from bert.dataset import create_masked_input_dataset
-
-# Keep the data preprocessing steps on the CPU
-with tf.device('/CPU:0'):
-    
-    training_data = create_masked_input_dataset(
-        sequence_path=os.path.join(arguments.dataDir, 'train_uniref100.txt.gz'),
-        max_sequence_length=arguments.sequenceLength,
-        batch_size=arguments.batchSize,
-        masking_freq=arguments.maskingFreq,
-        fix_sequence_length=True)
-
-    valid_data = create_masked_input_dataset(
-        sequence_path=os.path.join(arguments.dataDir, 'dev_uniref50.txt.gz'),
-        max_sequence_length=arguments.sequenceLength,
-        batch_size=arguments.batchSize,
-        masking_freq=arguments.maskingFreq,
-        fix_sequence_length=True)
-
-
 model.fit(training_data, steps_per_epoch=arguments.stepsPerEpoch,
           epochs=arguments.totalSteps//arguments.stepsPerEpoch,
           initial_epoch=arguments.initialEpoch,
-          verbose=1, validation_data=valid_data, validation_steps=25,
+          verbose=1, validation_data=valid_data,
+          validation_steps=arguments.validationSteps,
           callbacks=callbacks)

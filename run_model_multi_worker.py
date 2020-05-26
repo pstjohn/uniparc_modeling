@@ -83,21 +83,25 @@ from bert.optimization import create_optimizer
 optimizer = create_optimizer(arguments.lr, arguments.warmup, arguments.totalSteps)
 
 # from bert.optimization import WarmUp
+# import tensorflow_addons.optimizers as tfa_optimizers
 
-# learning_rate_fn = tf.keras.optimizers.schedules.PolynomialDecay(
+# lr_schedule = tf.keras.optimizers.schedules.PolynomialDecay(
 #     initial_learning_rate=arguments.lr,
 #     decay_steps=arguments.totalSteps,
 #     end_learning_rate=0.0)
 
-# learning_rate_fn = WarmUp(initial_learning_rate=arguments.lr,
-#                           decay_schedule_fn=learning_rate_fn,
-#                           warmup_steps=arguments.warmup)
+# lr_schedule = WarmUp(
+#     initial_learning_rate=arguments.lr,
+#     decay_schedule_fn=lr_schedule,
+#     warmup_steps=arguments.warmup)
 
-# optimizer = tf.keras.optimizers.Adam(
-#     learning_rate=learning_rate_fn,
+# optimizer = tfa_optimizers.LAMB(
+#     learning_rate=lr_schedule,
+#     weight_decay_rate=0.01,
 #     beta_1=0.9,
 #     beta_2=0.999,
-#     epsilon=1e-6)
+#     epsilon=1e-6,
+#     exclude_from_weight_decay=['layer_norm', 'bias'])
 
 # Training data path -- here the data's been sharded to allow multi-worker splits
 train_data_dir = os.path.join(arguments.dataDir, 'train_uniref100_split')
@@ -105,28 +109,27 @@ train_data_files = [os.path.join(train_data_dir, f) for f in os.listdir(train_da
 
 valid_data_dir = os.path.join(arguments.dataDir, 'dev_uniref50_split')
 valid_data_files = [os.path.join(valid_data_dir, f) for f in os.listdir(valid_data_dir)]
-
-with strategy.scope():
     
 #    with tf.device('/CPU:0'):
-    training_data = create_masked_input_dataset(
-        sequence_path=train_data_files,
-        max_sequence_length=arguments.sequenceLength,
-        batch_size=arguments.batchSize,
-        masking_freq=arguments.maskingFreq,
-        fix_sequence_length=True)
+training_data = create_masked_input_dataset(
+    sequence_path=train_data_files,
+    max_sequence_length=arguments.sequenceLength,
+    batch_size=arguments.batchSize,
+    masking_freq=arguments.maskingFreq,
+    fix_sequence_length=True)
 
-    training_data = training_data.repeat().prefetch(tf.data.experimental.AUTOTUNE)    
+training_data = training_data.repeat().prefetch(tf.data.experimental.AUTOTUNE)    
 
-    valid_data = create_masked_input_dataset(
-        sequence_path=valid_data_files,        
-        max_sequence_length=arguments.sequenceLength,
-        batch_size=arguments.batchSize,
-        masking_freq=arguments.maskingFreq,
-        fix_sequence_length=True)
+valid_data = create_masked_input_dataset(
+    sequence_path=valid_data_files,        
+    max_sequence_length=arguments.sequenceLength,
+    batch_size=arguments.batchSize,
+    masking_freq=arguments.maskingFreq,
+    fix_sequence_length=True)
 
-    valid_data = valid_data.repeat().prefetch(tf.data.experimental.AUTOTUNE)
-    
+valid_data = valid_data.repeat().prefetch(tf.data.experimental.AUTOTUNE)
+
+with strategy.scope():
     ## Create the model
     model = create_albert_model(model_dimension=arguments.modelDimension,
                                 transformer_dimension=arguments.modelDimension * 4,
@@ -136,6 +139,11 @@ with strategy.scope():
                                 dropout_rate=arguments.dropout,
                                 max_relative_position=64,
                                 final_layernorm=False)
+
+    model.compile(
+        loss=masked_sparse_categorical_crossentropy,
+        metrics=[ECE],
+        optimizer=optimizer)
     
     if arguments.checkpoint:
         checkpoint = tf.train.latest_checkpoint(arguments.checkpoint)
@@ -147,20 +155,17 @@ with strategy.scope():
                 re.findall('.(\d{3})-', os.path.basename(checkpoint))[0])
             print('loading checkpoint {} ...'.format(os.path.basename(checkpoint)))
 
-    model.compile(
-        loss=masked_sparse_categorical_crossentropy,
-        metrics=[ECE],
-        optimizer=optimizer)
 
 ## Create keras callbacks
 callbacks = []
 
 model_name = arguments.modelName
-checkpoint_dir = os.path.join(arguments.scratchDir, model_name)
-logdir = os.path.join(arguments.scratchDir, 'tblogs', model_name)
 
 # Only do these on the head node
 if index == 0:
+
+    checkpoint_dir = os.path.join(arguments.scratchDir, model_name)
+    logdir = os.path.join(arguments.scratchDir, 'tblogs', model_name)
     
     # Print model structure to stdout
     model.summary()
@@ -172,6 +177,11 @@ if index == 0:
     # Make sure this script is available later
     shutil.copy(__file__, checkpoint_dir)
 
+else:
+    
+    checkpoint_dir = os.path.join('/tmp', model_name)
+    logdir = os.path.join('/tmp', 'tblogs', model_name)
+    
 
 callbacks = [
     tf.keras.callbacks.ModelCheckpoint(
@@ -192,6 +202,7 @@ callbacks = [
 model.fit(training_data, steps_per_epoch=arguments.stepsPerEpoch,
           epochs=arguments.totalSteps//arguments.stepsPerEpoch,
           initial_epoch=arguments.initialEpoch,
-          verbose=1, validation_data=valid_data,
+          verbose=1 if index == 0 else 0, 
+          validation_data=valid_data,
           validation_steps=arguments.validationSteps,
           callbacks=callbacks)

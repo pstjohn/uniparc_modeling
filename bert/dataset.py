@@ -97,6 +97,7 @@ def create_masked_input_dataset(sequence_path,
     dataset = tf.data.TextLineDataset(
         sequence_path, compression_type=sequence_compression)\
         .shuffle(buffer_size=buffer_size)\
+        .repeat()
     
     if shard_num_workers:
         dataset = dataset.shard(shard_num_workers, shard_worker_index)

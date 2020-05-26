@@ -4,6 +4,7 @@ import tensorflow.keras.backend as K
 from tensorflow.keras import layers
 
 from bert.attention_utils import relative_attention_inner, initializer
+from bert.layernorm import MixedLayerNormalization
 
 def gelu(x):
     """
@@ -178,7 +179,7 @@ class Projection(layers.Layer):
                                         activation=gelu)
         
         self.dropout_layer = layers.Dropout(self.dropout)
-        self.layer_norm = layers.LayerNormalization()
+        self.layer_norm = MixedLayerNormalization()
 
     def call(self, inputs, training=None):
         
