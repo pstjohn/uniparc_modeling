@@ -79,29 +79,21 @@ optimizer = tfa_optimizers.LAMB(
     epsilon=1e-6,
     exclude_from_weight_decay=['layer_norm', 'bias'])
 
-train_data_dir = os.path.join(arguments.dataDir, 'train_uniref100_split')
-train_data_files = [os.path.join(train_data_dir, f) for f in os.listdir(train_data_dir)]
-
-valid_data_dir = os.path.join(arguments.dataDir, 'dev_uniref50_split')
-valid_data_files = [os.path.join(valid_data_dir, f) for f in os.listdir(valid_data_dir)]
-
 training_data = create_masked_input_dataset(
-    sequence_path=train_data_files,
+    sequence_path=os.path.join(
+        arguments.dataDir, 'train_uniref100_split/train_100_*.txt.gz'),
     max_sequence_length=arguments.sequenceLength,
     batch_size=arguments.batchSize,
     masking_freq=arguments.maskingFreq,
     fix_sequence_length=True)
-
-training_data = training_data.repeat().prefetch(tf.data.experimental.AUTOTUNE)    
 
 valid_data = create_masked_input_dataset(
-    sequence_path=valid_data_files,        
+    sequence_path=os.path.join(
+        arguments.dataDir, 'dev_uniref50_split/dev_50_*.txt.gz'),
     max_sequence_length=arguments.sequenceLength,
     batch_size=arguments.batchSize,
     masking_freq=arguments.maskingFreq,
     fix_sequence_length=True)
-
-valid_data = valid_data.repeat().prefetch(tf.data.experimental.AUTOTUNE)
 
 strategy = tf.distribute.MirroredStrategy()
 
@@ -151,7 +143,7 @@ callbacks = [
         histogram_freq=0,
         write_graph=False,
         update_freq='epoch',
-        profile_batch=0,
+        profile_batch=2,
         embeddings_freq=0)
 ]
 

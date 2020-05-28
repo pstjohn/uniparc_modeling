@@ -28,7 +28,8 @@ print(tf_config)
 os.environ['TF_CONFIG'] = tf_config
 
 import tensorflow as tf
-strategy = tf.distribute.experimental.MultiWorkerMirroredStrategy()
+strategy = tf.distribute.experimental.MultiWorkerMirroredStrategy(
+    communication=tf.distribute.experimental.CollectiveCommunication.NCCL)
 
 from tensorflow.keras.mixed_precision import experimental as mixed_precision
 policy = mixed_precision.Policy('mixed_float16')
@@ -74,7 +75,8 @@ print(arguments)
 
 import numpy as np
 
-from bert.losses import ECE, masked_sparse_categorical_crossentropy
+from bert.losses import (ECE, masked_sparse_categorical_crossentropy,
+                         masked_sparse_categorical_accuracy)
 from bert.model import create_albert_model, load_model_from_checkpoint
 from bert.dataset import create_masked_input_dataset
 
@@ -95,6 +97,13 @@ optimizer = create_optimizer(arguments.lr, arguments.warmup, arguments.totalStep
 #     decay_schedule_fn=lr_schedule,
 #     warmup_steps=arguments.warmup)
 
+# optimizer = tfa_optimizers.AdamW(
+#     learning_rate=lr_schedule,
+#     weight_decay=0.01,
+#     beta_1=0.9,
+#     beta_2=0.999,
+#     epsilon=1e-6)
+
 # optimizer = tfa_optimizers.LAMB(
 #     learning_rate=lr_schedule,
 #     weight_decay_rate=0.01,
@@ -104,30 +113,23 @@ optimizer = create_optimizer(arguments.lr, arguments.warmup, arguments.totalStep
 #     exclude_from_weight_decay=['layer_norm', 'bias'])
 
 # Training data path -- here the data's been sharded to allow multi-worker splits
-train_data_dir = os.path.join(arguments.dataDir, 'train_uniref100_split')
-train_data_files = [os.path.join(train_data_dir, f) for f in os.listdir(train_data_dir)]
 
-valid_data_dir = os.path.join(arguments.dataDir, 'dev_uniref50_split')
-valid_data_files = [os.path.join(valid_data_dir, f) for f in os.listdir(valid_data_dir)]
-    
 #    with tf.device('/CPU:0'):
 training_data = create_masked_input_dataset(
-    sequence_path=train_data_files,
+    sequence_path=os.path.join(
+        arguments.dataDir, 'train_uniref100_split/train_100_*.txt.gz'),
     max_sequence_length=arguments.sequenceLength,
     batch_size=arguments.batchSize,
     masking_freq=arguments.maskingFreq,
     fix_sequence_length=True)
-
-training_data = training_data.repeat().prefetch(tf.data.experimental.AUTOTUNE)    
 
 valid_data = create_masked_input_dataset(
-    sequence_path=valid_data_files,        
+    sequence_path=os.path.join(
+        arguments.dataDir, 'dev_uniref50_split/dev_50_*.txt.gz'),
     max_sequence_length=arguments.sequenceLength,
     batch_size=arguments.batchSize,
     masking_freq=arguments.maskingFreq,
     fix_sequence_length=True)
-
-valid_data = valid_data.repeat().prefetch(tf.data.experimental.AUTOTUNE)
 
 with strategy.scope():
     ## Create the model
@@ -142,7 +144,7 @@ with strategy.scope():
 
     model.compile(
         loss=masked_sparse_categorical_crossentropy,
-        metrics=[ECE],
+        metrics=[ECE, masked_sparse_categorical_accuracy],
         optimizer=optimizer)
     
     if arguments.checkpoint:

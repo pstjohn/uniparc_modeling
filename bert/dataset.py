@@ -2,17 +2,16 @@ import numpy as np
 import tensorflow as tf
 
     
-vocab = ['', '^', '$', 'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K',
-         'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
+vocab = ['', 'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K',
+         'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y',
+         '^', '$']
 
-# empty string should be matched to zero, others should start at 2. 
-# Mask index is 1
-values = tf.concat([tf.zeros((1), dtype=tf.int32),
-                    tf.range(len(vocab) - 1) + 2], axis=0)
+values = tf.range(len(vocab))
+mask_index = len(vocab)  # Mask is the last entry
 
 encoding_table = tf.lookup.StaticHashTable(
     tf.lookup.KeyValueTensorInitializer(keys=vocab, values=values),
-    default_value=1) # Missing values should just be the mask token
+    default_value=mask_index) # Missing values should just be the mask token
 
 
 def create_masked_input_dataset(sequence_path,
@@ -20,8 +19,6 @@ def create_masked_input_dataset(sequence_path,
                                 max_sequence_length=512,
                                 batch_size=20,
                                 buffer_size=1024,
-                                mask_index=1,
-                                vocab_start=4,
                                 fix_sequence_length=False,
                                 masking_freq=.15,
                                 mask_token_freq=.8,
@@ -30,6 +27,9 @@ def create_masked_input_dataset(sequence_path,
                                 no_mask_pad=1,
                                 shard_num_workers=None,
                                 shard_worker_index=None):
+            
+    # This argument controls whether to fix the size of the sequences
+    tf_seq_len = -1 if not fix_sequence_length else max_sequence_length    
 
     @tf.function
     def encode(x):
@@ -75,42 +75,45 @@ def create_masked_input_dataset(sequence_path,
         # Mask with random token 10% of the time
         mask_random = (mask_score >= masking_freq * (1. - mask_random_freq)) & input_mask
 
-        # Tensors to replace with where input is masked or randomized
+        # Tensors to replace with where input is masked or randomized.
+        # Only add amino acid tokens as randoms
         mask_value_tensor = tf.ones(input_shape, dtype=tf.int32) * mask_index
         random_value_tensor = tf.random.uniform(
-            input_shape, minval=vocab_start, maxval=len(vocab) + 2, dtype=tf.int32)
+            input_shape, minval=1, maxval=20, dtype=tf.int32)
         pad_value_tensor = tf.zeros(input_shape, dtype=tf.int32)
 
         # Use the replacements to mask the input tensor
         masked_tensor = tf.where(mask_mask, mask_value_tensor, input_tensor)
         masked_tensor = tf.where(mask_random, random_value_tensor, masked_tensor)
 
-        # Make 1 correspond to the first amino acid in the output.
-        label_offset = vocab_start - 1 
-        input_offset = input_tensor - label_offset        
-        
         # Set true values to zero (pad value) where not masked
-        true_tensor = tf.where(input_mask, input_offset, pad_value_tensor)
+        true_tensor = tf.where(input_mask, input_tensor, pad_value_tensor)
 
         return masked_tensor, true_tensor
-
-    dataset = tf.data.TextLineDataset(
-        sequence_path, compression_type=sequence_compression)\
-        .shuffle(buffer_size=buffer_size)\
-        .repeat()
+    
+    
+    def parse(filename):
+        """Combine operations together into a single function"""
+        
+        d = tf.data.TextLineDataset(filename, compression_type=sequence_compression)
+        d = d.shuffle(buffer_size=buffer_size)
+        
+        if filter_bzux:
+            bzux_filter = lambda string: tf.math.logical_not(
+                tf.strings.regex_full_match(string, '.*[BZUOX].*'))
+            d = d.filter(bzux_filter)
+        
+        return d
+    
+    
+    dataset = tf.data.Dataset.list_files(sequence_path)
     
     if shard_num_workers:
         dataset = dataset.shard(shard_num_workers, shard_worker_index)
-
-    if filter_bzux:
-        bzux_filter = lambda string: tf.math.logical_not(
-            tf.strings.regex_full_match(string, '.*[BZUOX].*'))
-        dataset = dataset.filter(bzux_filter)
-
-    # This argument controls whether to fix the size of the sequences
-    tf_seq_len = -1 if not fix_sequence_length else max_sequence_length
-
+    
     dataset = dataset\
+        .interleave(parse, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
+        .repeat()\
         .map(encode, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
         .map(mask_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
         .padded_batch(batch_size, padded_shapes=(

@@ -63,12 +63,12 @@ class Attention(layers.Layer):
         
         self.dropout_layer = layers.Dropout(self.dropout)
         
-    def create_attention_mask(self, input_shape, input_mask):
-        mask = tf.cast(tf.expand_dims(input_mask, axis=1), tf.float16)                   # [B, 1, S]
-        ones = tf.expand_dims(tf.ones(shape=input_shape[:2], dtype=tf.float16), axis=-1)  # [B, S, 1]
+    def create_attention_mask(self, input_shape, input_mask, dtype):
+        mask = tf.cast(tf.expand_dims(input_mask, axis=1), dtype)                   # [B, 1, S]
+        ones = tf.expand_dims(tf.ones(shape=input_shape[:2], dtype=dtype), axis=-1)  # [B, S, 1]
         mask = ones * mask  # broadcast along two dimensions
         # Don't allow nodes to attend to themselves
-        mask = mask - tf.eye(tf.shape(input_mask)[-1], dtype=tf.float16) 
+        mask = mask - tf.eye(tf.shape(input_mask)[-1], dtype=dtype) 
         mask = tf.clip_by_value(mask, 0, 1)
         return tf.expand_dims(mask, axis=1)  # [B,1,S,S]
     
@@ -84,7 +84,7 @@ class Attention(layers.Layer):
 
     def calculate_attention(self, query, key, input_shape):
         return (tf.matmul(query, key, transpose_b=True) 
-                / tf.sqrt(float(self.units)))        
+                / tf.sqrt(tf.cast(self.units, query.dtype)))
         
     def call(self, inputs, mask=None, training=None):
 
@@ -99,7 +99,7 @@ class Attention(layers.Layer):
         attention_scores = self.calculate_attention(query, key, input_shape)  # [B,N,S,S]
 
         # zero out masked values
-        attention_mask = self.create_attention_mask(input_shape, mask)
+        attention_mask = self.create_attention_mask(input_shape, mask, query.dtype)
         attention_scores = attention_scores + (1. - attention_mask) * -10000.0
         
         attention_probs = tf.nn.softmax(attention_scores)  # [B,N,S,S]
@@ -154,7 +154,7 @@ class RelativeAttention(Attention):
     def calculate_attention(self, query, key, input_shape):
         """ Eq. 4 of arXiv:1803.02155 """
         relative_positions = self._generate_relative_positions_matrix(input_shape[1])
-        relations_keys = tf.cast(self.relations_keys_embedding(relative_positions), tf.float16)
+        relations_keys = tf.cast(self.relations_keys_embedding(relative_positions), query.dtype)
         attention_scores = relative_attention_inner(query, key, relations_keys, True) 
         return attention_scores
 
