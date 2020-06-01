@@ -208,7 +208,7 @@ class Transformer(layers.Layer):
     def __init__(self, num_heads, 
                  intermediate_units, 
                  dropout=0.0,
-                 attention_type='attention',
+                 attention_type='absolute',
                  max_relative_position=10,
                  use_layernorm=True,
                  **kwargs):
@@ -244,7 +244,7 @@ class Transformer(layers.Layer):
         
         self.units = d_model // self.num_heads
         
-        if self.attention_type == 'attention':
+        if self.attention_type == 'absolute':
             self.attention_layer = Attention(self.units, self.num_heads, self.dropout)
             
         elif self.attention_type == 'relative':

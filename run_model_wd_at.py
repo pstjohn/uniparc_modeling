@@ -1,3 +1,5 @@
+# Vary weight decay and attention type
+
 import os
 import re
 import argparse
@@ -69,6 +71,11 @@ parser.add_argument('--numberXformerLayers', type=int, default=6,
                     help='number of tranformer layers')
 parser.add_argument('--dropout', type=float, default=0.0, 
                     help='dropout')
+parser.add_argument('--weightDecay', type=str, default='true', 
+                    help='weightDecay')
+parser.add_argument('--attentionType', type=str, default='relative', 
+                    help='attentionType')
+
 
 arguments = parser.parse_args()
 print(arguments)
@@ -77,40 +84,41 @@ import numpy as np
 
 from bert.losses import (ECE, masked_sparse_categorical_crossentropy,
                          masked_sparse_categorical_accuracy)
-from bert.model import create_albert_model
+from bert.model import create_model
 from bert.dataset import create_masked_input_dataset
 
-## Create the optimizer
-from bert.optimization import create_optimizer
-optimizer = create_optimizer(arguments.lr, arguments.warmup, arguments.totalSteps)
+# Create the optimizer
+from bert.optimization import WarmUp, AdamWeightDecay
 
-# from bert.optimization import WarmUp
-# import tensorflow_addons.optimizers as tfa_optimizers
+lr_schedule = tf.keras.optimizers.schedules.PolynomialDecay(
+    initial_learning_rate=arguments.lr,
+    decay_steps=arguments.totalSteps,
+    end_learning_rate=0.0)
 
-# lr_schedule = tf.keras.optimizers.schedules.PolynomialDecay(
-#     initial_learning_rate=arguments.lr,
-#     decay_steps=arguments.totalSteps,
-#     end_learning_rate=0.0)
+lr_schedule = WarmUp(
+    initial_learning_rate=arguments.lr,
+    decay_schedule_fn=lr_schedule,
+    warmup_steps=arguments.warmup)
 
-# lr_schedule = WarmUp(
-#     initial_learning_rate=arguments.lr,
-#     decay_schedule_fn=lr_schedule,
-#     warmup_steps=arguments.warmup)
 
-# optimizer = tfa_optimizers.AdamW(
-#     learning_rate=lr_schedule,
-#     weight_decay=0.01,
-#     beta_1=0.9,
-#     beta_2=0.999,
-#     epsilon=1e-6)
+if arguments.weightDecay == 'true':
+    optimizer = AdamWeightDecay(
+        learning_rate=lr_schedule,
+        weight_decay_rate=0.01,
+        beta_1=0.9,
+        beta_2=0.999,
+        epsilon=1e-6,
+        exclude_from_weight_decay=['layer_norm', 'bias'])
+    
+elif arguments.weightDecay == 'false':
+    optimizer = tf.keras.optimizers.Adam(
+        learning_rate=lr_schedule,
+        beta_1=0.9,
+        beta_2=0.999,
+        epsilon=1e-6)
 
-# optimizer = tfa_optimizers.LAMB(
-#     learning_rate=lr_schedule,
-#     weight_decay_rate=0.01,
-#     beta_1=0.9,
-#     beta_2=0.999,
-#     epsilon=1e-6,
-#     exclude_from_weight_decay=['layer_norm', 'bias'])
+else:
+    raise RuntimeError(f'invalid weight decay: {arguments.weightDecay}')
 
 # Training data path -- here the data's been sharded to allow multi-worker splits
 
@@ -131,16 +139,20 @@ valid_data = create_masked_input_dataset(
     masking_freq=arguments.maskingFreq,
     fix_sequence_length=True)
 
-with strategy.scope():
-    ## Create the model
-    model = create_albert_model(model_dimension=arguments.modelDimension,
-                                transformer_dimension=arguments.modelDimension * 4,
-                                num_attention_heads=arguments.modelDimension // 64,
-                                num_transformer_layers=arguments.numberXformerLayers,
-                                vocab_size=24,
-                                dropout_rate=arguments.dropout,
-                                max_relative_position=64,
-                                final_layernorm=False)
+from tensorflow.keras import layers
+from bert.layers import DenseNoMask
+
+with strategy.scope():   
+    
+    model = create_model(model_dimension=arguments.modelDimension,
+                         transformer_dimension=arguments.modelDimension * 4,
+                         num_attention_heads=arguments.modelDimension // 64,
+                         num_transformer_layers=arguments.numberXformerLayers,
+                         vocab_size=24,
+                         dropout_rate=arguments.dropout,
+                         max_relative_position=64,
+                         max_sequence_length=512,
+                         attention_type=arguments.attentionType)
 
     model.compile(
         loss=masked_sparse_categorical_crossentropy,
@@ -192,6 +204,7 @@ callbacks = [
         save_weights_only=True,
         mode='min',
         monitor='val_ECE'),
+    
     tf.keras.callbacks.TensorBoard(
         log_dir=logdir,
         histogram_freq=0,
