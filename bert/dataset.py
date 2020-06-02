@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-
+from functools import partial
     
 vocab = ['', 'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K',
          'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y',
@@ -12,6 +12,20 @@ mask_index = len(vocab)  # Mask is the last entry
 encoding_table = tf.lookup.StaticHashTable(
     tf.lookup.KeyValueTensorInitializer(keys=vocab, values=values),
     default_value=mask_index) # Missing values should just be the mask token
+
+
+def encode(x, max_sequence_length):
+    chars = tf.strings.bytes_split(x)
+
+    # Append start and end tokens
+    chars = tf.concat([tf.constant(['^']), chars, tf.constant(['$'])], 0)
+
+    # If chars is greater than max_sequence_length, take a random crop
+    chars = tf.cond(tf.shape(chars) > max_sequence_length,
+            lambda: tf.image.random_crop(chars, (max_sequence_length,)),
+            lambda: chars)
+
+    return encoding_table.lookup(chars)
 
 
 def create_masked_input_dataset(sequence_path,
@@ -30,21 +44,6 @@ def create_masked_input_dataset(sequence_path,
             
     # This argument controls whether to fix the size of the sequences
     tf_seq_len = -1 if not fix_sequence_length else max_sequence_length    
-
-    @tf.function
-    def encode(x):
-        chars = tf.strings.bytes_split(x)
-        
-        # Append start and end tokens
-        chars = tf.concat([tf.constant(['^']), chars, tf.constant(['$'])], 0)
-        
-        # If chars is greater than max_sequence_length, take a random crop
-        chars = tf.cond(tf.shape(chars) > max_sequence_length,
-                lambda: tf.image.random_crop(chars, (max_sequence_length,)),
-                lambda: chars)
-
-        return encoding_table.lookup(chars)
-
 
     @tf.function
     def mask_input(input_tensor):
@@ -114,7 +113,8 @@ def create_masked_input_dataset(sequence_path,
     dataset = dataset\
         .interleave(parse, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
         .repeat()\
-        .map(encode, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
+        .map(partial(encode, max_sequence_length=max_sequence_length),
+             num_parallel_calls=tf.data.experimental.AUTOTUNE)\
         .map(mask_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
         .padded_batch(batch_size, padded_shapes=(
             ([tf_seq_len], [tf_seq_len])))\
