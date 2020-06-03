@@ -1,5 +1,3 @@
-# Vary weight decay and attention type
-
 import os
 import re
 import argparse
@@ -151,7 +149,7 @@ with strategy.scope():
                          vocab_size=24,
                          dropout_rate=arguments.dropout,
                          max_relative_position=64,
-                         max_sequence_length=512,
+                         max_sequence_length=arguments.sequenceLength,
                          attention_type=arguments.attentionType)
 
     model.compile(
