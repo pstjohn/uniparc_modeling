@@ -24,7 +24,8 @@ tf_config = json.dumps({
     'task': {'type': 'worker', 'index': index} 
 })
 
-print(tf_config)
+print(tf_config, flush=True)
+
 os.environ['TF_CONFIG'] = tf_config
 
 import tensorflow as tf
@@ -76,7 +77,7 @@ parser.add_argument('--attentionType', type=str, default='relative',
 
 
 arguments = parser.parse_args()
-print(arguments)
+print(arguments, flush=True)
 
 import numpy as np
 
@@ -120,7 +121,7 @@ else:
 
 # Training data path -- here the data's been sharded to allow multi-worker splits
 
-#    with tf.device('/CPU:0'):
+#with tf.device('/CPU:0'):
 training_data = create_masked_input_dataset(
     sequence_path=os.path.join(
         arguments.dataDir, 'train_uniref100_split/train_100_*.txt.gz'),
@@ -154,7 +155,7 @@ with strategy.scope():
 
     model.compile(
         loss=masked_sparse_categorical_crossentropy,
-        metrics=[ECE, masked_sparse_categorical_accuracy],
+        metrics=[ECE],
         optimizer=optimizer)
     
     if arguments.checkpoint:

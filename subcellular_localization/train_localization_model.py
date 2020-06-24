@@ -121,12 +121,14 @@ def create_model():
                                 max_relative_position=64,
                                 final_layernorm=False)
     
-    model.load_weights(tf.train.latest_checkpoint(
-        arguments.checkpointDir)).expect_partial()
+    if arguments.checkpointDir is not None:
+        model.load_weights(tf.train.latest_checkpoint(
+            arguments.checkpointDir)).expect_partial()
+
     model.trainable = True
     
     final_embedding = model.layers[-2].input
-    residue_predictions = tf.keras.layers.Dense(num_targets, activation='sigmoid')(final_embedding)
+    residue_predictions = tf.keras.layers.Dense(num_targets)(final_embedding)
     protein_predictions = tf.keras.layers.GlobalMaxPooling1D()(residue_predictions)
 
     localization_model = tf.keras.Model(model.inputs, protein_predictions)
@@ -138,17 +140,8 @@ with strategy.scope():
 
     model = create_model()
     
-    metrics = [
-        tf.keras.metrics.BinaryAccuracy(name='accuracy'),
-        tf.keras.metrics.Precision(name='precision'),
-        tf.keras.metrics.Recall(name='recall'),
-        tf.keras.metrics.AUC(name='pr_auc', curve='PR'),
-        #tfa.metrics.F1Score(num_classes=num_targets, name='f1')
-    ]
-    
     model.compile(
-        loss=tf.keras.losses.BinaryCrossentropy(from_logits=False),
-        metrics=metrics,
+        loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
         optimizer=optimizer)
     
 
@@ -172,11 +165,11 @@ shutil.copy(__file__, checkpoint_dir)
 
 callbacks = [
     tf.keras.callbacks.ModelCheckpoint(
-        filepath=os.path.join(checkpoint_dir, "weights.{epoch:03d}-{val_pr_auc:.2f}"),
+        filepath=os.path.join(checkpoint_dir, "weights.{epoch:03d}-{val_loss:.3f}"),
         save_best_only=True,
         save_weights_only=True,
-        mode='max',
-        monitor='val_pr_auc'),
+        mode='min',
+        monitor='val_loss'),
     
     tf.keras.callbacks.TensorBoard(
         log_dir=logdir,

@@ -3,7 +3,7 @@
 #BSUB -P BIE108
 #BSUB -W 2:00
 #BSUB -nnodes 1
-#BSUB -J 12_layer_localization_resampled
+#BSUB -J 12_layer_localization_resampled_no_pretrain
 #BSUB -o /ccs/home/pstjohn/job_output/%J.out
 #BSUB -e /ccs/home/pstjohn/job_output/%J.err
 
@@ -22,7 +22,6 @@ jsrun -n 1 -g 6 -c 42 -r1 -a1 -b none python3 train_localization_model.py \
     --modelName=$LSB_JOBNAME.$LSB_JOBID \
     --scratchDir="$MEMBERWORK/bie108/uniparc_checkpoints" \
     --dataDir="$PROJWORK/bie108/swissprot" \
-    --checkpointDir="$MEMBERWORK/bie108/uniparc_checkpoints/12_layer_bs24_adamw_20200527" \
     --batchSize=$((6 * 24)) \
     --warmup=250 \
     --lr=.00002 \
