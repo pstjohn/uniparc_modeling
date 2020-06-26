@@ -2,17 +2,17 @@
 
 #BSUB -P BIE108
 #BSUB -W 6:00
-#BSUB -nnodes 16 
+#BSUB -nnodes 16
 #BSUB -q batch-hm
-#BSUB -J 12_layer_relative_adam_20200623
+#BSUB -J 12_layer_relative_adam_20200625
 #BSUB -o /ccs/home/pstjohn/job_output/%J.out
 #BSUB -e /ccs/home/pstjohn/job_output/%J.err
 
 NODES=$(cat ${LSB_DJOB_HOSTFILE} | sort | uniq | grep -v login | grep -v batch | wc -l)
-BATCH_SIZE=$(($NODES * 6 * 40))
+BATCH_SIZE=$(($NODES * 6 * 48))
 
 module load ibm-wml-ce/1.7.0-3
-conda activate /ccs/home/pstjohn/member_work/conda_envs/tf2.2
+conda activate tf21-ibm
 export PYTHONPATH=$HOME/uniparc_modeling:$PYTHONPATH
 export NCCL_DEBUG=INFO
 export TF_ENABLE_AUTO_MIXED_PRECISION=1
@@ -30,7 +30,7 @@ jsrun -n ${NODES} -g 6 -c 42 -r1 -a1 -b none python3 run_model_wd_at.py \
     --batchSize=$BATCH_SIZE \
     --warmup=3125 \
     --totalSteps=125000 \
-    --stepsPerEpoch=250 \
+    --stepsPerEpoch=500 \
     --validationSteps=5 \
     --lr=0.00176 \
     --maskingFreq=0.15 \

@@ -83,7 +83,7 @@ import numpy as np
 
 from bert.losses import (ECE, masked_sparse_categorical_crossentropy,
                          masked_sparse_categorical_accuracy)
-from bert.model import create_model
+from bert.model import create_model, create_albert_model
 from bert.dataset import create_masked_input_dataset
 
 # Create the optimizer
@@ -121,27 +121,43 @@ else:
 
 # Training data path -- here the data's been sharded to allow multi-worker splits
 
-#with tf.device('/CPU:0'):
-training_data = create_masked_input_dataset(
-    sequence_path=os.path.join(
-        arguments.dataDir, 'train_uniref100_split/train_100_*.txt.gz'),
-    max_sequence_length=arguments.sequenceLength,
-    batch_size=arguments.batchSize,
-    masking_freq=arguments.maskingFreq,
-    fix_sequence_length=True)
-
-valid_data = create_masked_input_dataset(
-    sequence_path=os.path.join(
-        arguments.dataDir, 'dev_uniref50_split/dev_50_*.txt.gz'),
-    max_sequence_length=arguments.sequenceLength,
-    batch_size=arguments.batchSize,
-    masking_freq=arguments.maskingFreq,
-    fix_sequence_length=True)
+with tf.device('/CPU:0'):
+    
+    training_data = create_masked_input_dataset(
+        sequence_path=os.path.join(
+            arguments.dataDir, 'train_uniref100_split/train_100_*.txt'),
+        max_sequence_length=arguments.sequenceLength,
+        batch_size=arguments.batchSize,
+        masking_freq=arguments.maskingFreq,
+        fix_sequence_length=True,
+        sequence_compression=None,
+        file_buffer_size=2048,
+        buffer_size=10000,
+        filter_bzux=False)
+    
+    valid_data = create_masked_input_dataset(
+        sequence_path=os.path.join(
+            arguments.dataDir, 'dev_uniref50_split/dev_50_*.txt'),
+        max_sequence_length=arguments.sequenceLength,
+        batch_size=arguments.batchSize,
+        masking_freq=arguments.maskingFreq,
+        fix_sequence_length=True,
+        sequence_compression=None,
+        filter_bzux=False)
 
 from tensorflow.keras import layers
 from bert.layers import DenseNoMask
 
 with strategy.scope():   
+
+#    model = create_albert_model(model_dimension=arguments.modelDimension,
+#                                transformer_dimension=arguments.modelDimension * 4,
+#                                num_attention_heads=arguments.modelDimension // 64,
+#                                num_transformer_layers=arguments.numberXformerLayers,
+#                                vocab_size=24,
+#                                dropout_rate=arguments.dropout,
+#                                max_relative_position=64,
+#                                final_layernorm=False)
     
     model = create_model(model_dimension=arguments.modelDimension,
                          transformer_dimension=arguments.modelDimension * 4,
