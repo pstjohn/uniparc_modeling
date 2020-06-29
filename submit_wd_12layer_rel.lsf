@@ -26,13 +26,13 @@ jsrun -n ${NODES} -g 6 -c 42 -r1 -a1 -b none python3 run_model_wd_at.py \
     --modelName=$LSB_JOBNAME.$LSB_JOBID \
     --scratchDir="$MEMBERWORK/bie108/uniparc_checkpoints" \
     --dataDir="$PROJWORK/bie108/split_uniref100" \
-    --checkpoint="$MEMBERWORK/bie108/uniparc_checkpoints/$LSB_JOBNAME.$LSB_JOBID" \
+    --checkpoint="/gpfs/alpine/scratch/pstjohn/bie108/uniparc_checkpoints/12_layer_relative_adam_20200625_highlr.184212/" \
     --batchSize=$BATCH_SIZE \
-    --warmup=3125 \
+    --warmup=500 \
     --totalSteps=125000 \
     --stepsPerEpoch=500 \
     --validationSteps=5 \
-    --lr=0.00176 \
+    --lr=1E-4 \
     --maskingFreq=0.15 \
     --sequenceLength=512 \
     --modelDimension=768 \

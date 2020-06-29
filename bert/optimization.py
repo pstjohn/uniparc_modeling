@@ -52,10 +52,14 @@ class WarmUp(tf.keras.optimizers.schedules.LearningRateSchedule):
       warmup_learning_rate = (
           self.initial_learning_rate *
           tf.math.pow(warmup_percent_done, self.power))
-      return tf.cond(global_step_float < warmup_steps_float,
+
+      learning_rate = tf.cond(global_step_float < warmup_steps_float,
                      lambda: warmup_learning_rate,
                      lambda: self.decay_schedule_fn(step),
                      name=name)
+
+      tf.summary.scalar('learning rate', data=learning_rate, step=tf.cast(step, tf.int64))
+      return learning_rate
 
   def get_config(self):
     return {

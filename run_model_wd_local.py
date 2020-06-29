@@ -8,24 +8,17 @@ import json
 ## Initialize the TF_CONFIG environment variable based on process rank
 # From https://code.ornl.gov/olcf-analytics/summit/distributed-deep-learning-examples/tree/master/examples/tensorflow
 # Get a list of compute nodes allocated for your job
-get_cnodes = "echo $(cat {} | sort | uniq | grep -v batch | grep -v login)".format(os.environ['LSB_DJOB_HOSTFILE'])
-cnodes = subprocess.check_output(get_cnodes, shell=True)
-cnodes = str(cnodes)[2:-3].split(' ')
-nodes_list = [c + ":2222" for c in cnodes] # Add a port number
-
-# Get the rank of the compute node that is running on
-index = int(os.environ['PMIX_RANK'])
+index = 0
 
 # Set the TF_CONFIG environment variable to configure the cluster setting.
 tf_config = json.dumps({
     'cluster': {
-        'worker': nodes_list
+        'worker': ['localhost:2222']
     },
     'task': {'type': 'worker', 'index': index} 
 })
 
-print(tf_config, flush=True)
-
+print(tf_config)
 os.environ['TF_CONFIG'] = tf_config
 
 import tensorflow as tf
@@ -80,8 +73,6 @@ parser.add_argument('--weightDecay', type=str, default='true',
                     help='weightDecay')
 parser.add_argument('--attentionType', type=str, default='relative', 
                     help='attentionType')
-parser.add_argument('--restart', type=str, default='false', 
-                    help='ignore checkpoint epoch')
 
 
 arguments = parser.parse_args()
@@ -97,40 +88,35 @@ from bert.dataset import create_masked_input_dataset
 # Create the optimizer
 from bert.optimization import WarmUp, AdamWeightDecay
 
-def create_optimizer():
-    lr_schedule = tf.keras.optimizers.schedules.PolynomialDecay(
-        initial_learning_rate=arguments.lr,
-        decay_steps=arguments.totalSteps,
-        end_learning_rate=0.0)
+lr_schedule = tf.keras.optimizers.schedules.PolynomialDecay(
+    initial_learning_rate=arguments.lr,
+    decay_steps=arguments.totalSteps,
+    end_learning_rate=0.0)
 
-    lr_schedule = WarmUp(
-        initial_learning_rate=arguments.lr,
-        decay_schedule_fn=lr_schedule,
-        warmup_steps=arguments.warmup)
+lr_schedule = WarmUp(
+    initial_learning_rate=arguments.lr,
+    decay_schedule_fn=lr_schedule,
+    warmup_steps=arguments.warmup)
 
 
-    if arguments.weightDecay == 'true':
-        optimizer = AdamWeightDecay(
-            learning_rate=lr_schedule,
-            weight_decay_rate=0.01,
-            beta_1=0.9,
-            beta_2=0.999,
-            epsilon=1e-6,
-            exclude_from_weight_decay=['layer_norm', 'bias'])
+if arguments.weightDecay == 'true':
+    optimizer = AdamWeightDecay(
+        learning_rate=lr_schedule,
+        weight_decay_rate=0.01,
+        beta_1=0.9,
+        beta_2=0.999,
+        epsilon=1e-6,
+        exclude_from_weight_decay=['layer_norm', 'bias'])
+    
+elif arguments.weightDecay == 'false':
+    optimizer = tf.keras.optimizers.Adam(
+        learning_rate=lr_schedule,
+        beta_1=0.9,
+        beta_2=0.999,
+        epsilon=1e-6)
 
-    elif arguments.weightDecay == 'false':
-        optimizer = tf.keras.optimizers.Adam(
-            learning_rate=lr_schedule,
-            beta_1=0.9,
-            beta_2=0.999,
-            epsilon=1e-6)
-        
-    else:
-        raise RuntimeError(f'invalid weight decay: {arguments.weightDecay}')
-        
-    return optimizer
-
-optimizer = create_optimizer()           
+else:
+    raise RuntimeError(f'invalid weight decay: {arguments.weightDecay}')
 
 # Training data path -- here the data's been sharded to allow multi-worker splits
 
@@ -181,34 +167,25 @@ with strategy.scope():
                          max_relative_position=64,
                          max_sequence_length=arguments.sequenceLength,
                          attention_type=arguments.attentionType)
-    
-    if arguments.checkpoint:
-        checkpoint = tf.train.latest_checkpoint(arguments.checkpoint)
 
-        print(f'loading checkpoint: {checkpoint}')
-
-        # Support for 'killable' queue, where initially there's no checkpoint
-        if checkpoint is not None:
-            model.load_weights(checkpoint)
-            print('loading checkpoint {} ...'.format(os.path.basename(checkpoint)))
-
-            if arguments.restart == 'false':
-                arguments.initialEpoch = int(
-                    re.findall('.(\d{3})-', os.path.basename(checkpoint))[0])
-                
     model.compile(
         loss=masked_sparse_categorical_crossentropy,
         metrics=[ECE],
         optimizer=optimizer)
+    
+    if arguments.checkpoint:
+        checkpoint = tf.train.latest_checkpoint(arguments.checkpoint)
 
-    if arguments.restart != 'false':
-        # Make sure we create the optimizer and recompile
-        optimizer = create_optimizer()  
-        model.compile(
-            loss=masked_sparse_categorical_crossentropy,
-            metrics=[ECE],
-            optimizer=optimizer)
-        print(optimizer.weights)
+        # Support for 'killable' queue, where initially there's no checkpoint
+        if checkpoint is not None:
+            print('loading checkpoint {} ...'.format(checkpoint))
+            model.load_weights(checkpoint)
+
+            if arguments.initialEpoch == -1:
+                arguments.initialEpoch = int(
+                    re.findall('.(\d{3})-', os.path.basename(checkpoint))[0])
+		print(f'resuming from epoch {arguments.initialEpoch}')
+
 
 ## Create keras callbacks
 callbacks = []
@@ -236,12 +213,8 @@ if index == 0:
 
 else:
     
-    checkpoint_dir = os.path.join('/tmp', model_name, f'worker_{index}')
-    logdir = os.path.join('/tmp', 'tblogs', model_name, f'worker_{index}')
-    from pathlib import Path
-    Path(checkpoint_dir).mkdir(parents=True, exist_ok=True)
-    Path(logdir).mkdir(parents=True, exist_ok=True)
-
+    checkpoint_dir = os.path.join('/tmp', model_name)
+    logdir = os.path.join('/tmp', 'tblogs', model_name)
     
 
 callbacks = [
