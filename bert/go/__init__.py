@@ -1,0 +1,1 @@
+from bert.go.ontology import Ontology

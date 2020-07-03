@@ -13,6 +13,20 @@ encoding_table = tf.lookup.StaticHashTable(
     tf.lookup.KeyValueTensorInitializer(keys=vocab, values=values),
     default_value=mask_index) # Missing values should just be the mask token
 
+def encode(x, max_sequence_length):
+    chars = tf.strings.bytes_split(x)
+
+    # Append start and end tokens
+    chars = tf.concat([tf.constant(['^']), chars, tf.constant(['$'])], 0)
+
+    # If chars is greater than max_sequence_length, take a random crop
+    chars = tf.cond(tf.shape(chars) > max_sequence_length,
+            lambda: tf.image.random_crop(chars, (max_sequence_length,)),
+            lambda: chars)
+
+    return encoding_table.lookup(chars)
+
+
 def create_masked_input_dataset(sequence_path,
                                 sequence_compression='GZIP',
                                 max_sequence_length=512,
@@ -29,18 +43,6 @@ def create_masked_input_dataset(sequence_path,
     # This argument controls whether to fix the size of the sequences
     tf_seq_len = -1 if not fix_sequence_length else max_sequence_length    
 
-    def encode(x):
-        chars = tf.strings.bytes_split(x)
-    
-        # Append start and end tokens
-        chars = tf.concat([tf.constant(['^']), chars, tf.constant(['$'])], 0)
-    
-        # If chars is greater than max_sequence_length, take a random crop
-        chars = tf.cond(tf.shape(chars) > max_sequence_length,
-                lambda: tf.image.random_crop(chars, (max_sequence_length,)),
-                lambda: chars)
-    
-        return encoding_table.lookup(chars)
 
 
     def mask_input(input_tensor):
@@ -90,7 +92,7 @@ def create_masked_input_dataset(sequence_path,
 
     @tf.function
     def encode_and_mask(x):
-        return mask_input(encode(x))
+        return mask_input(encode(x, max_sequence_length))
 
        
     file_ds = tf.data.Dataset.list_files(sequence_path)\
