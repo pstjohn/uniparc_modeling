@@ -1,0 +1,35 @@
+#!/bin/bash
+
+#BSUB -P BIE108
+#BSUB -W 6:00
+#BSUB -nnodes 1
+#BSUB -q batch-hm
+#BSUB -J go_finetuning_new_split_1024_ont1_noinit
+#BSUB -o /ccs/home/pstjohn/job_output/%J.out
+#BSUB -e /ccs/home/pstjohn/job_output/%J.err
+
+NODES=$(cat ${LSB_DJOB_HOSTFILE} | sort | uniq | grep -v login | grep -v batch | wc -l)
+BATCH_SIZE=$(($NODES * 6 * 16))
+
+module load ibm-wml-ce/1.7.0-3
+conda activate tf21-ibm
+export PYTHONPATH=$HOME/uniparc_modeling:$PYTHONPATH
+export NCCL_DEBUG=INFO
+export TF_ENABLE_AUTO_MIXED_PRECISION=1
+export OMP_NUM_THREADS=4
+
+mkdir -p  $MEMBERWORK/bie108/$LSB_JOBNAME/$LSB_JOBID
+cd  $MEMBERWORK/bie108/$LSB_JOBNAME/$LSB_JOBID
+cp $HOME/uniparc_modeling/go_annotation/run_go_model_noinit.py .
+
+jsrun -n ${NODES} -g 6 -c 42 -r1 -a1 -b none python3 run_go_model_noinit.py \
+    --modelName=$LSB_JOBNAME.$LSB_JOBID \
+    --scratchDir="$MEMBERWORK/bie108/uniparc_checkpoints" \
+    --checkpoint="/gpfs/alpine/scratch/pstjohn/bie108/uniparc_checkpoints/12_layer_relative_adam_20200625.186949/" \
+    --batchSize=$BATCH_SIZE \
+    --lr=3E-5 \
+    --sequenceLength=1024 \
+    --stepsPerEpoch=500 \
+    --validationSteps=25 \
+    --ontThres=1 \
+    --epochs=100

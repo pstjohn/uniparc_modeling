@@ -113,17 +113,22 @@ class Ontology(object):
     
     def get_ancestors(self, terms):
         """ Includes the query terms themselves """
+        if type(terms) is str:
+            terms = (terms,)
+            
         return set.union(set(terms), *(nx.ancestors(self.G, term) for term in terms))
     
 
-    def get_descendants(self, term):
+    def get_descendants(self, terms):
         """ Includes the query term """
-        return set.union(set([term]), nx.descendants(self.G, term))
+        if type(terms) is str:
+            terms = (terms,)
+            
+        return set.union(set(terms), *(nx.descendants(self.G, term) for term in terms))    
     
-    
-    def get_canoconical_terms(self, terms):
-        subgraph = self.G.subgraph(self.get_ancestor_list(terms))
-        return {node for node, degree in subgraph.out_degree if degree == 0}
+#     def get_canoconical_terms(self, terms):
+#         subgraph = self.G.subgraph(self.get_ancestor_list(terms))
+#         return {node for node, degree in subgraph.out_degree if degree == 0}
     
     
     def termlist_to_array(self, terms, dtype=bool):
@@ -131,11 +136,23 @@ class Ontology(object):
         arr = np.zeros(self.total_nodes, dtype=dtype)
         arr[np.asarray(self.terms_to_indices(terms))] = 1
         return arr
-
     
-    def get_descendent_array(self):
-        return [self.terms_to_indices(self.get_descendants(node))
-                for node, index in self.G.nodes(data='index') if index]
+
+    def array_to_termlist(self, array):
+        """ Return term ids where array evaluates to True. Uses np.where """
+        return [self.term_index[i] for i in np.where(array)[1]]
+    
+    def iter_ancestor_array(self):
+        """ Constructs the necessary arrays for the tensorflow segment operation.
+        Returns a generator of (node_id, ancestor_id) pairs. Use via
+        `segments, ids = zip(*self.iter_ancestor_array())` """
+
+        for node, node_index in self.G.nodes(data='index'):
+            if node_index is not None:
+                for ancestor_index in self.terms_to_indices(
+                    self.get_ancestors(node)):
+                    
+                    yield node_index, ancestor_index
 
     
     def get_head_node_indices(self):
@@ -144,3 +161,7 @@ class Ontology(object):
     
     
 # notes, use nx.shortest_path_length(G, root) to find depth? score accuracy by tree depth?
+
+# BP = ont.G.subgraph(ont.get_descendants('GO:0008150'))
+# MF = ont.G.subgraph(ont.get_descendants('GO:0003674'))
+# CC = ont.G.subgraph(ont.get_descendants('GO:0005575'))
