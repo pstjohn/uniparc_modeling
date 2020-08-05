@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style> /* set the CSS */
+
+svg {
+  margin-bottom: 2em;
+  overflow: scroll;
+}
+    
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 2px;
+}
+    
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+
+</style>
+<body>
+
+<!-- load the d3.js library -->    	
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script>
+
+var data = {'BP': {'name': 'biological_process', 'namespace': 'biological_process', 'index': 6, 'id': 'GO:0008150', 'children': [{'name': 'metabolic process', 'namespace': 'biological_process', 'index': 5875, 'id': 'GO:0008152', 'children': [{'name': 'nitrogen compound metabolic process', 'namespace': 'biological_process', 'index': 5949, 'id': 'GO:0006807', 'children': [{'name': 'organonitrogen compound metabolic process', 'namespace': 'biological_process', 'index': 327, 'id': 'GO:1901564', 'children': [{'name': 'purine-containing compound metabolic process', 'namespace': 'biological_process', 'index': 5144, 'id': 'GO:0072521'}]}]}, {'name': 'biosynthetic process', 'namespace': 'biological_process', 'index': 2607, 'id': 'GO:0009058', 'children': [{'name': 'organic substance biosynthetic process', 'namespace': 'biological_process', 'index': 5613, 'id': 'GO:1901576', 'children': [{'name': 'lipid biosynthetic process', 'namespace': 'biological_process', 'index': 5721, 'id': 'GO:0008610'}, {'name': 'organic acid biosynthetic process', 'namespace': 'biological_process', 'index': 10382, 'id': 'GO:0016053'}, {'name': 'thioester biosynthetic process', 'namespace': 'biological_process', 'index': 16209, 'id': 'GO:0035384'}, {'name': 'organophosphate biosynthetic process', 'namespace': 'biological_process', 'index': 5923, 'id': 'GO:0090407', 'children': [{'name': 'ribose phosphate biosynthetic process', 'namespace': 'biological_process', 'index': 4977, 'id': 'GO:0046390', 'children': [{'name': 'ribonucleotide biosynthetic process', 'namespace': 'biological_process', 'index': 7666, 'id': 'GO:0009260'}]}]}, {'name': 'carbohydrate derivative biosynthetic process', 'namespace': 'biological_process', 'index': 4988, 'id': 'GO:1901137'}, {'name': 'organic cyclic compound biosynthetic process', 'namespace': 'biological_process', 'index': 1281, 'id': 'GO:1901362'}, {'name': 'organonitrogen compound biosynthetic process', 'namespace': 'biological_process', 'index': 71, 'id': 'GO:1901566', 'children': [{'name': 'purine-containing compound biosynthetic process', 'namespace': 'biological_process', 'index': 5175, 'id': 'GO:0072522'}]}]}]}, {'name': 'cellular metabolic process', 'namespace': 'biological_process', 'index': 1572, 'id': 'GO:0044237', 'children': [{'name': 'cellular aromatic compound metabolic process', 'namespace': 'biological_process', 'index': 5134, 'id': 'GO:0006725'}, {'name': 'sulfur compound metabolic process', 'namespace': 'biological_process', 'index': 114, 'id': 'GO:0006790', 'children': [{'name': 'thioester metabolic process', 'namespace': 'biological_process', 'index': 5730, 'id': 'GO:0035383'}]}, {'name': 'phosphorus metabolic process', 'namespace': 'biological_process', 'index': 4971, 'id': 'GO:0006793', 'children': [{'name': 'phosphate-containing compound metabolic process', 'namespace': 'biological_process', 'index': 4958, 'id': 'GO:0006796'}, {'name': 'organophosphate metabolic process', 'namespace': 'biological_process', 'index': 4959, 'id': 'GO:0019637', 'children': [{'name': 'nucleoside phosphate metabolic process', 'namespace': 'biological_process', 'index': 5899, 'id': 'GO:0006753', 'children': [{'name': 'nucleotide metabolic process', 'namespace': 'biological_process', 'index': 5172, 'id': 'GO:0009117', 'children': [{'name': 'purine nucleotide metabolic process', 'namespace': 'biological_process', 'index': 5171, 'id': 'GO:0006163', 'children': [{'name': 'purine nucleotide biosynthetic process', 'namespace': 'biological_process', 'index': 5173, 'id': 'GO:0006164'}, {'name': 'purine ribonucleotide metabolic process', 'namespace': 'biological_process', 'index': 5727, 'id': 'GO:0009150', 'children': [{'name': 'acyl-CoA metabolic process', 'namespace': 'biological_process', 'index': 5077, 'id': 'GO:0006637', 'children': [{'name': 'malonyl-CoA metabolic process', 'namespace': 'biological_process', 'index': 32356, 'id': 'GO:2001293'}]}, {'name': 'purine ribonucleotide biosynthetic process', 'namespace': 'biological_process', 'index': 5184, 'id': 'GO:0009152'}]}]}, {'name': 'nucleotide biosynthetic process', 'namespace': 'biological_process', 'index': 5174, 'id': 'GO:0009165'}, {'name': 'ribonucleotide metabolic process', 'namespace': 'biological_process', 'index': 7663, 'id': 'GO:0009259'}]}, {'name': 'nucleoside bisphosphate metabolic process', 'namespace': 'biological_process', 'index': 15214, 'id': 'GO:0033865', 'children': [{'name': 'nucleoside bisphosphate biosynthetic process', 'namespace': 'biological_process', 'index': 15215, 'id': 'GO:0033866', 'children': [{'name': 'ribonucleoside bisphosphate biosynthetic process', 'namespace': 'biological_process', 'index': 10297, 'id': 'GO:0034030', 'children': [{'name': 'acyl-CoA biosynthetic process', 'namespace': 'biological_process', 'index': 5079, 'id': 'GO:0071616', 'children': [{'name': 'malonyl-CoA biosynthetic process', 'namespace': 'biological_process', 'index': 32358, 'id': 'GO:2001295'}]}]}]}, {'name': 'ribonucleoside bisphosphate metabolic process', 'namespace': 'biological_process', 'index': 5728, 'id': 'GO:0033875'}, {'name': 'purine nucleoside bisphosphate metabolic process', 'namespace': 'biological_process', 'index': 5729, 'id': 'GO:0034032', 'children': [{'name': 'purine nucleoside bisphosphate biosynthetic process', 'namespace': 'biological_process', 'index': 10298, 'id': 'GO:0034033'}]}]}, {'name': 'nucleoside phosphate biosynthetic process', 'namespace': 'biological_process', 'index': 7637, 'id': 'GO:1901293'}]}, {'name': 'ribose phosphate metabolic process', 'namespace': 'biological_process', 'index': 7759, 'id': 'GO:0019693'}]}]}, {'name': 'cellular nitrogen compound metabolic process', 'namespace': 'biological_process', 'index': 5135, 'id': 'GO:0034641', 'children': [{'name': 'cellular amide metabolic process', 'namespace': 'biological_process', 'index': 324, 'id': 'GO:0043603', 'children': [{'name': 'amide biosynthetic process', 'namespace': 'biological_process', 'index': 70, 'id': 'GO:0043604'}]}, {'name': 'cellular nitrogen compound biosynthetic process', 'namespace': 'biological_process', 'index': 1825, 'id': 'GO:0044271'}]}, {'name': 'cellular biosynthetic process', 'namespace': 'biological_process', 'index': 5822, 'id': 'GO:0044249', 'children': [{'name': 'heterocycle biosynthetic process', 'namespace': 'biological_process', 'index': 138, 'id': 'GO:0018130', 'children': [{'name': 'nucleobase-containing compound biosynthetic process', 'namespace': 'biological_process', 'index': 7235, 'id': 'GO:0034654'}]}, {'name': 'aromatic compound biosynthetic process', 'namespace': 'biological_process', 'index': 1279, 'id': 'GO:0019438'}, {'name': 'sulfur compound biosynthetic process', 'namespace': 'biological_process', 'index': 117, 'id': 'GO:0044272'}]}, {'name': 'cellular lipid metabolic process', 'namespace': 'biological_process', 'index': 5530, 'id': 'GO:0044255'}, {'name': 'heterocycle metabolic process', 'namespace': 'biological_process', 'index': 325, 'id': 'GO:0046483'}]}, {'name': 'primary metabolic process', 'namespace': 'biological_process', 'index': 4914, 'id': 'GO:0044238', 'children': [{'name': 'lipid metabolic process', 'namespace': 'biological_process', 'index': 5720, 'id': 'GO:0006629'}]}, {'name': 'small molecule metabolic process', 'namespace': 'biological_process', 'index': 4946, 'id': 'GO:0044281', 'children': [{'name': 'organic acid metabolic process', 'namespace': 'biological_process', 'index': 5074, 'id': 'GO:0006082', 'children': [{'name': 'oxoacid metabolic process', 'namespace': 'biological_process', 'index': 1953, 'id': 'GO:0043436', 'children': [{'name': 'carboxylic acid metabolic process', 'namespace': 'biological_process', 'index': 5027, 'id': 'GO:0019752', 'children': [{'name': 'monocarboxylic acid metabolic process', 'namespace': 'biological_process', 'index': 5042, 'id': 'GO:0032787', 'children': [{'name': 'fatty acid metabolic process', 'namespace': 'biological_process', 'index': 58, 'id': 'GO:0006631'}, {'name': 'monocarboxylic acid biosynthetic process', 'namespace': 'biological_process', 'index': 1945, 'id': 'GO:0072330', 'children': [{'name': 'fatty acid biosynthetic process', 'namespace': 'biological_process', 'index': 846, 'id': 'GO:0006633'}]}]}, {'name': 'carboxylic acid biosynthetic process', 'namespace': 'biological_process', 'index': 839, 'id': 'GO:0046394'}]}]}]}, {'name': 'small molecule biosynthetic process', 'namespace': 'biological_process', 'index': 1956, 'id': 'GO:0044283'}, {'name': 'nucleobase-containing small molecule metabolic process', 'namespace': 'biological_process', 'index': 5900, 'id': 'GO:0055086'}]}, {'name': 'organic substance metabolic process', 'namespace': 'biological_process', 'index': 4915, 'id': 'GO:0071704', 'children': [{'name': 'carbohydrate derivative metabolic process', 'namespace': 'biological_process', 'index': 4960, 'id': 'GO:1901135'}, {'name': 'organic cyclic compound metabolic process', 'namespace': 'biological_process', 'index': 326, 'id': 'GO:1901360', 'children': [{'name': 'nucleobase-containing compound metabolic process', 'namespace': 'biological_process', 'index': 5133, 'id': 'GO:0006139'}]}]}]}, {'name': 'cellular process', 'namespace': 'biological_process', 'index': 94, 'id': 'GO:0009987'}]}, 'MF': {'name': 'molecular_function', 'namespace': 'molecular_function', 'index': 3019, 'id': 'GO:0003674', 'children': [{'name': 'catalytic activity', 'namespace': 'molecular_function', 'index': 3074, 'id': 'GO:0003824', 'children': [{'name': 'transferase activity', 'namespace': 'molecular_function', 'index': 44, 'id': 'GO:0016740', 'children': [{'name': 'transferase activity, transferring one-carbon groups', 'namespace': 'molecular_function', 'index': 6876, 'id': 'GO:0016741', 'children': [{'name': 'carboxyl- or carbamoyltransferase activity', 'namespace': 'molecular_function', 'index': 3346, 'id': 'GO:0016743'}]}]}, {'name': 'ligase activity', 'namespace': 'molecular_function', 'index': 3086, 'id': 'GO:0016874', 'children': [{'name': 'ligase activity, forming carbon-carbon bonds', 'namespace': 'molecular_function', 'index': 3927, 'id': 'GO:0016885', 'children': [{'name': 'CoA carboxylase activity', 'namespace': 'molecular_function', 'index': 3261, 'id': 'GO:0016421', 'children': [{'name': 'acetyl-CoA carboxylase activity', 'namespace': 'molecular_function', 'index': 3260, 'id': 'GO:0003989'}]}]}]}]}, {'name': 'binding', 'namespace': 'molecular_function', 'index': 53, 'id': 'GO:0005488', 'children': [{'name': 'small molecule binding', 'namespace': 'molecular_function', 'index': 231, 'id': 'GO:0036094'}, {'name': 'ion binding', 'namespace': 'molecular_function', 'index': 18172, 'id': 'GO:0043167', 'children': [{'name': 'anion binding', 'namespace': 'molecular_function', 'index': 763, 'id': 'GO:0043168'}, {'name': 'cation binding', 'namespace': 'molecular_function', 'index': 10486, 'id': 'GO:0043169', 'children': [{'name': 'metal ion binding', 'namespace': 'molecular_function', 'index': 372, 'id': 'GO:0046872', 'children': [{'name': 'transition metal ion binding', 'namespace': 'molecular_function', 'index': 4528, 'id': 'GO:0046914', 'children': [{'name': 'zinc ion binding', 'namespace': 'molecular_function', 'index': 6933, 'id': 'GO:0008270'}]}]}]}]}, {'name': 'organic cyclic compound binding', 'namespace': 'molecular_function', 'index': 1563, 'id': 'GO:0097159'}, {'name': 'carbohydrate derivative binding', 'namespace': 'molecular_function', 'index': 1097, 'id': 'GO:0097367'}, {'name': 'heterocyclic compound binding', 'namespace': 'molecular_function', 'index': 1564, 'id': 'GO:1901363', 'children': [{'name': 'nucleoside phosphate binding', 'namespace': 'molecular_function', 'index': 232, 'id': 'GO:1901265', 'children': [{'name': 'nucleotide binding', 'namespace': 'molecular_function', 'index': 230, 'id': 'GO:0000166', 'children': [{'name': 'purine nucleotide binding', 'namespace': 'molecular_function', 'index': 10877, 'id': 'GO:0017076', 'children': [{'name': 'adenyl nucleotide binding', 'namespace': 'molecular_function', 'index': 706, 'id': 'GO:0030554'}]}, {'name': 'ribonucleotide binding', 'namespace': 'molecular_function', 'index': 8588, 'id': 'GO:0032553', 'children': [{'name': 'purine ribonucleotide binding', 'namespace': 'molecular_function', 'index': 14293, 'id': 'GO:0032555', 'children': [{'name': 'adenyl ribonucleotide binding', 'namespace': 'molecular_function', 'index': 4542, 'id': 'GO:0032559', 'children': [{'name': 'ATP binding', 'namespace': 'molecular_function', 'index': 4541, 'id': 'GO:0005524'}]}]}]}]}, {'name': 'purine ribonucleoside triphosphate binding', 'namespace': 'molecular_function', 'index': 4543, 'id': 'GO:0035639'}]}]}]}]}, 'CC': {'name': 'cellular_component', 'namespace': 'cellular_component', 'index': 4569, 'id': 'GO:0005575', 'children': [{'name': 'protein-containing complex', 'namespace': 'cellular_component', 'index': 175, 'id': 'GO:0032991', 'children': [{'name': 'catalytic complex', 'namespace': 'cellular_component', 'index': 21, 'id': 'GO:1902494', 'children': [{'name': 'acetyl-CoA carboxylase complex', 'namespace': 'cellular_component', 'index': 7812, 'id': 'GO:0009317'}]}]}, {'name': 'cellular anatomical entity', 'namespace': 'cellular_component', 'index': 170, 'id': 'GO:0110165', 'children': [{'name': 'plastid stroma', 'namespace': 'cellular_component', 'index': 7963, 'id': 'GO:0009532', 'children': [{'name': 'chloroplast stroma', 'namespace': 'cellular_component', 'index': 7991, 'id': 'GO:0009570'}]}, {'name': 'organelle', 'namespace': 'cellular_component', 'index': 4876, 'id': 'GO:0043226', 'children': [{'name': 'membrane-bounded organelle', 'namespace': 'cellular_component', 'index': 13807, 'id': 'GO:0043227', 'children': [{'name': 'intracellular membrane-bounded organelle', 'namespace': 'cellular_component', 'index': 4622, 'id': 'GO:0043231', 'children': [{'name': 'plastid', 'namespace': 'cellular_component', 'index': 7933, 'id': 'GO:0009536', 'children': [{'name': 'chloroplast', 'namespace': 'cellular_component', 'index': 7940, 'id': 'GO:0009507'}]}]}]}, {'name': 'intracellular organelle', 'namespace': 'cellular_component', 'index': 18205, 'id': 'GO:0043229'}]}]}]}};
+
+    
+var margin = ({top: 40, right: 120, bottom: 40, left: 100});
+var dx = 20;
+var width = 1000;
+var dy = 100;
+    
+function separation(a, b) {
+//  
+  if (!('lineNumber' in a)) {
+      return a.parent == b.parent ? 1 : 3;
+  } else {
+      return (a.lineNumber + b.lineNumber) / 3.;
+  }
+//  return a.parent == b.parent ? 1 : 3;
+}
+    
+var tree = d3.tree()
+    .nodeSize([dx, dy])
+    .separation(separation);
+
+    
+var diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x);
+   
+// Define the div for the tooltip
+var div = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+    
+function draw_tree(data) {
+
+    const root = d3.hierarchy(data);
+
+    root.x0 = dy / 2;
+    root.y0 = 0;
+    root.descendants().forEach((d, i) => {
+    d.id = i;
+    d._children = d.children;
+    });
+
+    var svg = d3.select("body").append("svg")
+      .attr("viewBox", [-margin.left, -margin.top, width, dx])
+      .style("font", "10px sans-serif")
+      .style("user-select", "none");
+
+    const gLink = svg.append("g")
+      .attr("fill", "none")
+      .attr("stroke", "#555")
+      .attr("stroke-opacity", 0.4)
+      .attr("stroke-width", 1.5);
+
+    const gNode = svg.append("g")
+      .attr("cursor", "pointer")
+      .attr("pointer-events", "all");
+
+    function update(source) {
+        const duration = d3.event && d3.event.altKey ? 2500 : 250;
+        const nodes = root.descendants().reverse();
+        const links = root.links();
+
+        // Compute the new tree layout.
+        tree(root);
+
+        let left = root;
+        let right = root;
+        root.eachBefore(node => {
+          if (node.x < left.x) left = node;
+          if (node.x > right.x) right = node;
+        });
+
+        const height = right.x - left.x + margin.top + margin.bottom;
+
+        const transition = svg.transition()
+            .duration(duration)
+            .attr("viewBox", [-margin.left, left.x - margin.top, width, height])
+            .tween("resize", window.ResizeObserver ? null : () => () => svg.dispatch("toggle"));
+
+        // Update the nodes…
+        const node = gNode.selectAll("g")
+          .data(nodes, d => d.id);
+
+        // Enter any new nodes at the parent's previous position.
+        const nodeEnter = node.enter().append("g")
+            .attr("transform", d => `translate(${source.y0},${source.x0})`)
+            .attr("fill-opacity", 0)
+            .attr("stroke-opacity", 0)
+            .on("click", d => {
+              d.children = d.children ? null : d._children;
+              update(d);
+            })
+            .on("mouseover", function(d) {
+                div .transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                div .html(d.data.id)
+                    .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px");
+            })
+            .on("mouseout", function(d) {
+                div.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+            });
+
+        nodeEnter.append("circle")
+            .attr("r", 2.5)
+            .attr("fill", d => d._children ? "#555" : "#999")
+            .attr("stroke-width", 10);
+
+        nodeEnter.append("text")
+            .attr("dy", "0.31em")
+            .attr("x", d => -6)
+            .attr("text-anchor", "end")
+            .text(d => d.data.name)
+            .call(wrap, 80)
+          .clone(true).lower()
+            .attr("stroke-linejoin", "round")
+            .attr("stroke-width", 3)
+            .attr("stroke", "white");
+
+        // Transition nodes to their new position.
+        const nodeUpdate = node.merge(nodeEnter).transition(transition)
+            .attr("transform", d => `translate(${d.y},${d.x})`)
+            .attr("fill-opacity", 1)
+            .attr("stroke-opacity", 1);
+
+        // Transition exiting nodes to the parent's new position.
+        const nodeExit = node.exit().transition(transition).remove()
+            .attr("transform", d => `translate(${source.y},${source.x})`)
+            .attr("fill-opacity", 0)
+            .attr("stroke-opacity", 0);
+
+        // Update the links…
+        const link = gLink.selectAll("path")
+          .data(links, d => d.target.id);
+
+        // Enter any new links at the parent's previous position.
+        const linkEnter = link.enter().append("path")
+            .attr("d", d => {
+              const o = {x: source.x0, y: source.y0};
+              return diagonal({source: o, target: o});
+            });
+
+        // Transition links to their new position.
+        link.merge(linkEnter).transition(transition)
+            .attr("d", diagonal);
+
+        // Transition exiting nodes to the parent's new position.
+        link.exit().transition(transition).remove()
+            .attr("d", d => {
+              const o = {x: source.x, y: source.y};
+              return diagonal({source: o, target: o});
+            });
+
+        // Stash the old positions for transition.
+        root.eachBefore(d => {
+          d.x0 = d.x;
+          d.y0 = d.y;
+        });
+    }
+
+    update(root);
+    update(root);    
+    return svg.node();
+}
+
+    
+function wrap(text, width) {
+  text.each(function() {
+    var text = d3.select(this),
+        words = text.text().split(/\s+/).reverse(),
+        word, line = [],
+        lineNumber = 0,
+        lineHeight = 1.1, // ems
+        y = text.attr("y"),
+        x = text.attr("x"),
+        dy = parseFloat(text.attr("dy")),
+        tspan = text.text(null).append("tspan").attr("x", x).attr("y", y).attr("dy", dy + "em");
+    while (word = words.pop()) {
+      line.push(word);
+      tspan.text(line.join(" "));
+      if (tspan.node().getComputedTextLength() > width && line.length > 1) {
+        lineNumber = ++lineNumber;
+        line.pop();
+        tspan.text(line.join(" "));
+        line = [word];
+        tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", lineHeight + "em").text(word);
+      }
+    }
+    text.attr("transform", "translate(0," + (10*lineHeight*parseFloat(lineNumber)/2*-1) + ")");
+    text.data()[0]['lineNumber'] = lineNumber + 1;
+  });
+}
+
+    
+draw_tree(data.BP);
+draw_tree(data.MF);
+draw_tree(data.CC);
+
+</script>
+</body>

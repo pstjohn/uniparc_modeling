@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style> /* set the CSS */
+
+svg {
+  margin-bottom: 2em;
+  overflow: scroll;
+}
+    
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 2px;
+}
+    
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+
+</style>
+<body>
+
+<!-- load the d3.js library -->    	
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script>
+
+var data = {'BP': {'name': 'biological_process', 'namespace': 'biological_process', 'index': 6, 'id': 'GO:0008150', 'children': [{'name': 'metabolic process', 'namespace': 'biological_process', 'index': 5875, 'id': 'GO:0008152', 'children': [{'name': 'nitrogen compound metabolic process', 'namespace': 'biological_process', 'index': 5949, 'id': 'GO:0006807'}, {'name': 'cellular metabolic process', 'namespace': 'biological_process', 'index': 1572, 'id': 'GO:0044237', 'children': [{'name': 'cellular aromatic compound metabolic process', 'namespace': 'biological_process', 'index': 5134, 'id': 'GO:0006725'}, {'name': 'cellular nitrogen compound metabolic process', 'namespace': 'biological_process', 'index': 5135, 'id': 'GO:0034641'}, {'name': 'cellular macromolecule metabolic process', 'namespace': 'biological_process', 'index': 5332, 'id': 'GO:0044260'}, {'name': 'heterocycle metabolic process', 'namespace': 'biological_process', 'index': 325, 'id': 'GO:0046483'}]}, {'name': 'primary metabolic process', 'namespace': 'biological_process', 'index': 4914, 'id': 'GO:0044238'}, {'name': 'organic substance metabolic process', 'namespace': 'biological_process', 'index': 4915, 'id': 'GO:0071704', 'children': [{'name': 'macromolecule metabolic process', 'namespace': 'biological_process', 'index': 4916, 'id': 'GO:0043170'}, {'name': 'organic cyclic compound metabolic process', 'namespace': 'biological_process', 'index': 326, 'id': 'GO:1901360', 'children': [{'name': 'nucleobase-containing compound metabolic process', 'namespace': 'biological_process', 'index': 5133, 'id': 'GO:0006139', 'children': [{'name': 'nucleic acid metabolic process', 'namespace': 'biological_process', 'index': 5333, 'id': 'GO:0090304', 'children': [{'name': 'RNA metabolic process', 'namespace': 'biological_process', 'index': 476, 'id': 'GO:0016070'}]}]}]}]}]}, {'name': 'cellular process', 'namespace': 'biological_process', 'index': 94, 'id': 'GO:0009987'}, {'name': 'biological regulation', 'namespace': 'biological_process', 'index': 21500, 'id': 'GO:0065007', 'children': [{'name': 'regulation of biological process', 'namespace': 'biological_process', 'index': 2414, 'id': 'GO:0050789', 'children': [{'name': 'regulation of metabolic process', 'namespace': 'biological_process', 'index': 8265, 'id': 'GO:0019222', 'children': [{'name': 'regulation of biosynthetic process', 'namespace': 'biological_process', 'index': 8264, 'id': 'GO:0009889', 'children': [{'name': 'regulation of macromolecule biosynthetic process', 'namespace': 'biological_process', 'index': 2382, 'id': 'GO:0010556'}, {'name': 'regulation of cellular biosynthetic process', 'namespace': 'biological_process', 'index': 2520, 'id': 'GO:0031326', 'children': [{'name': 'regulation of cellular macromolecule biosynthetic process', 'namespace': 'biological_process', 'index': 5351, 'id': 'GO:2000112', 'children': [{'name': 'regulation of transcription, DNA-templated', 'namespace': 'biological_process', 'index': 107, 'id': 'GO:0006355'}]}, {'name': 'regulation of RNA biosynthetic process', 'namespace': 'biological_process', 'index': 22145, 'id': 'GO:2001141', 'children': [{'name': 'regulation of nucleic acid-templated transcription', 'namespace': 'biological_process', 'index': 5411, 'id': 'GO:1903506'}]}]}]}, {'name': 'regulation of cellular metabolic process', 'namespace': 'biological_process', 'index': 1616, 'id': 'GO:0031323'}, {'name': 'regulation of nitrogen compound metabolic process', 'namespace': 'biological_process', 'index': 8880, 'id': 'GO:0051171', 'children': [{'name': 'regulation of nucleobase-containing compound metabolic process', 'namespace': 'biological_process', 'index': 5137, 'id': 'GO:0019219', 'children': [{'name': 'regulation of RNA metabolic process', 'namespace': 'biological_process', 'index': 853, 'id': 'GO:0051252'}]}]}, {'name': 'regulation of macromolecule metabolic process', 'namespace': 'biological_process', 'index': 1617, 'id': 'GO:0060255', 'children': [{'name': 'regulation of gene expression', 'namespace': 'biological_process', 'index': 1470, 'id': 'GO:0010468'}]}, {'name': 'regulation of primary metabolic process', 'namespace': 'biological_process', 'index': 5104, 'id': 'GO:0080090'}]}, {'name': 'regulation of cellular process', 'namespace': 'biological_process', 'index': 2819, 'id': 'GO:0050794'}]}]}]}, 'MF': {'name': 'molecular_function', 'namespace': 'molecular_function', 'index': 3019, 'id': 'GO:0003674', 'children': [{'name': 'binding', 'namespace': 'molecular_function', 'index': 53, 'id': 'GO:0005488', 'children': [{'name': 'heterocyclic compound binding', 'namespace': 'molecular_function', 'index': 1564, 'id': 'GO:1901363'}]}]}, 'CC': {'name': 'cellular_component', 'namespace': 'cellular_component', 'index': 4569, 'id': 'GO:0005575', 'children': [{'name': 'protein-containing complex', 'namespace': 'cellular_component', 'index': 175, 'id': 'GO:0032991', 'children': [{'name': 'catalytic complex', 'namespace': 'cellular_component', 'index': 21, 'id': 'GO:1902494', 'children': [{'name': 'transferase complex', 'namespace': 'cellular_component', 'index': 202, 'id': 'GO:1990234'}]}]}, {'name': 'cellular anatomical entity', 'namespace': 'cellular_component', 'index': 170, 'id': 'GO:0110165', 'children': [{'name': 'organelle', 'namespace': 'cellular_component', 'index': 4876, 'id': 'GO:0043226', 'children': [{'name': 'membrane-bounded organelle', 'namespace': 'cellular_component', 'index': 13807, 'id': 'GO:0043227', 'children': [{'name': 'intracellular membrane-bounded organelle', 'namespace': 'cellular_component', 'index': 4622, 'id': 'GO:0043231', 'children': [{'name': 'nucleus', 'namespace': 'cellular_component', 'index': 4621, 'id': 'GO:0005634'}]}]}, {'name': 'intracellular organelle', 'namespace': 'cellular_component', 'index': 18205, 'id': 'GO:0043229'}]}]}]}};
+
+    
+var margin = ({top: 40, right: 120, bottom: 40, left: 100});
+var dx = 20;
+var width = 1000;
+var dy = 100;
+    
+function separation(a, b) {
+//  
+  if (!('lineNumber' in a)) {
+      return a.parent == b.parent ? 1 : 3;
+  } else {
+      return (a.lineNumber + b.lineNumber) / 3.;
+  }
+//  return a.parent == b.parent ? 1 : 3;
+}
+    
+var tree = d3.tree()
+    .nodeSize([dx, dy])
+    .separation(separation);
+
+    
+var diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x);
+   
+// Define the div for the tooltip
+var div = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+    
+function draw_tree(data) {
+
+    const root = d3.hierarchy(data);
+
+    root.x0 = dy / 2;
+    root.y0 = 0;
+    root.descendants().forEach((d, i) => {
+    d.id = i;
+    d._children = d.children;
+    });
+
+    var svg = d3.select("body").append("svg")
+      .attr("viewBox", [-margin.left, -margin.top, width, dx])
+      .style("font", "10px sans-serif")
+      .style("user-select", "none");
+
+    const gLink = svg.append("g")
+      .attr("fill", "none")
+      .attr("stroke", "#555")
+      .attr("stroke-opacity", 0.4)
+      .attr("stroke-width", 1.5);
+
+    const gNode = svg.append("g")
+      .attr("cursor", "pointer")
+      .attr("pointer-events", "all");
+
+    function update(source) {
+        const duration = d3.event && d3.event.altKey ? 2500 : 250;
+        const nodes = root.descendants().reverse();
+        const links = root.links();
+
+        // Compute the new tree layout.
+        tree(root);
+
+        let left = root;
+        let right = root;
+        root.eachBefore(node => {
+          if (node.x < left.x) left = node;
+          if (node.x > right.x) right = node;
+        });
+
+        const height = right.x - left.x + margin.top + margin.bottom;
+
+        const transition = svg.transition()
+            .duration(duration)
+            .attr("viewBox", [-margin.left, left.x - margin.top, width, height])
+            .tween("resize", window.ResizeObserver ? null : () => () => svg.dispatch("toggle"));
+
+        // Update the nodes…
+        const node = gNode.selectAll("g")
+          .data(nodes, d => d.id);
+
+        // Enter any new nodes at the parent's previous position.
+        const nodeEnter = node.enter().append("g")
+            .attr("transform", d => `translate(${source.y0},${source.x0})`)
+            .attr("fill-opacity", 0)
+            .attr("stroke-opacity", 0)
+            .on("click", d => {
+              d.children = d.children ? null : d._children;
+              update(d);
+            })
+            .on("mouseover", function(d) {
+                div .transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                div .html(d.data.id)
+                    .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px");
+            })
+            .on("mouseout", function(d) {
+                div.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+            });
+
+        nodeEnter.append("circle")
+            .attr("r", 2.5)
+            .attr("fill", d => d._children ? "#555" : "#999")
+            .attr("stroke-width", 10);
+
+        nodeEnter.append("text")
+            .attr("dy", "0.31em")
+            .attr("x", d => -6)
+            .attr("text-anchor", "end")
+            .text(d => d.data.name)
+            .call(wrap, 80)
+          .clone(true).lower()
+            .attr("stroke-linejoin", "round")
+            .attr("stroke-width", 3)
+            .attr("stroke", "white");
+
+        // Transition nodes to their new position.
+        const nodeUpdate = node.merge(nodeEnter).transition(transition)
+            .attr("transform", d => `translate(${d.y},${d.x})`)
+            .attr("fill-opacity", 1)
+            .attr("stroke-opacity", 1);
+
+        // Transition exiting nodes to the parent's new position.
+        const nodeExit = node.exit().transition(transition).remove()
+            .attr("transform", d => `translate(${source.y},${source.x})`)
+            .attr("fill-opacity", 0)
+            .attr("stroke-opacity", 0);
+
+        // Update the links…
+        const link = gLink.selectAll("path")
+          .data(links, d => d.target.id);
+
+        // Enter any new links at the parent's previous position.
+        const linkEnter = link.enter().append("path")
+            .attr("d", d => {
+              const o = {x: source.x0, y: source.y0};
+              return diagonal({source: o, target: o});
+            });
+
+        // Transition links to their new position.
+        link.merge(linkEnter).transition(transition)
+            .attr("d", diagonal);
+
+        // Transition exiting nodes to the parent's new position.
+        link.exit().transition(transition).remove()
+            .attr("d", d => {
+              const o = {x: source.x, y: source.y};
+              return diagonal({source: o, target: o});
+            });
+
+        // Stash the old positions for transition.
+        root.eachBefore(d => {
+          d.x0 = d.x;
+          d.y0 = d.y;
+        });
+    }
+
+    update(root);
+    update(root);    
+    return svg.node();
+}
+
+    
+function wrap(text, width) {
+  text.each(function() {
+    var text = d3.select(this),
+        words = text.text().split(/\s+/).reverse(),
+        word, line = [],
+        lineNumber = 0,
+        lineHeight = 1.1, // ems
+        y = text.attr("y"),
+        x = text.attr("x"),
+        dy = parseFloat(text.attr("dy")),
+        tspan = text.text(null).append("tspan").attr("x", x).attr("y", y).attr("dy", dy + "em");
+    while (word = words.pop()) {
+      line.push(word);
+      tspan.text(line.join(" "));
+      if (tspan.node().getComputedTextLength() > width && line.length > 1) {
+        lineNumber = ++lineNumber;
+        line.pop();
+        tspan.text(line.join(" "));
+        line = [word];
+        tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", lineHeight + "em").text(word);
+      }
+    }
+    text.attr("transform", "translate(0," + (10*lineHeight*parseFloat(lineNumber)/2*-1) + ")");
+    text.data()[0]['lineNumber'] = lineNumber + 1;
+  });
+}
+
+    
+draw_tree(data.BP);
+draw_tree(data.MF);
+draw_tree(data.CC);
+
+</script>
+</body>

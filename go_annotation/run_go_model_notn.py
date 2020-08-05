@@ -15,10 +15,8 @@ sys.path.append('..')
 
 from bert.dataset import encode
 from bert.model import create_model
-from bert.go import TreeNorm
-from bert.go import Ontology
-
-ont = Ontology(threshold=500)
+from bert.go import TreeNorm, Ontology
+from bert.go.layers import LogitSplitFmax
 
 parser = argparse.ArgumentParser(description='GO model training')
 parser.add_argument('--modelName', default='go-model',
@@ -41,10 +39,13 @@ parser.add_argument('--stepsPerEpoch', type=int, default=500,
                     help='steps per epoch')
 parser.add_argument('--validationSteps', type=int, default=25, 
                     help='validation steps')
+parser.add_argument('--ontThres', type=int, default=500, 
+                    help='ontology count threshold')
 
 arguments = parser.parse_args()
 print(arguments)
 
+ont = Ontology(threshold=arguments.ontThres)
 
 ## Create the dataset iterators
 def parse_example(example):
@@ -60,7 +61,7 @@ def parse_example(example):
 
 swissprot_dir = '/gpfs/alpine/bie108/proj-shared/swissprot/'
 train_dataset = tf.data.TFRecordDataset(
-    os.path.join(swissprot_dir, 'tfrecords', 'go_train.tfrecord.gz'),
+    os.path.join(swissprot_dir, 'tfrecords_1', 'go_train.tfrecord.gz'),
     compression_type='GZIP', num_parallel_reads=tf.data.experimental.AUTOTUNE)\
     .map(parse_example, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
     .repeat().shuffle(buffer_size=5000)\
@@ -69,7 +70,7 @@ train_dataset = tf.data.TFRecordDataset(
     .prefetch(tf.data.experimental.AUTOTUNE)
 
 valid_dataset = tf.data.TFRecordDataset(
-    os.path.join(swissprot_dir, 'tfrecords', 'go_valid.tfrecord.gz'),
+    os.path.join(swissprot_dir, 'tfrecords_1', 'go_valid.tfrecord.gz'),
     compression_type='GZIP', num_parallel_reads=tf.data.experimental.AUTOTUNE)\
     .map(parse_example, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
     .repeat().shuffle(buffer_size=5000)\
@@ -78,7 +79,7 @@ valid_dataset = tf.data.TFRecordDataset(
     .prefetch(tf.data.experimental.AUTOTUNE)
 
 
-initial_bias = np.load(os.path.join(swissprot_dir, 'tfrecords', 'bias.npy'))
+initial_bias = np.load(os.path.join(swissprot_dir, 'tfrecords_1', 'bias.npy'))
 
 ## Load the original model
 # checkpoint_dir = '/ccs/home/pstjohn/member_work/uniparc_checkpoints/12_layer_relative_adam_20200625.186949'
@@ -96,7 +97,7 @@ with strategy.scope():
                          max_relative_position=64,
                          attention_type='relative')
 
-    model.load_weights(tf.train.latest_checkpoint(arguments.checkpointDir)).expect_partial()
+    #model.load_weights(tf.train.latest_checkpoint(arguments.checkpointDir)).expect_partial()
 
     ## Append the GO annotations
     final_embedding = model.layers[-2].input
@@ -118,7 +119,9 @@ with strategy.scope():
     optimizer = tf.keras.optimizers.Adam(arguments.lr)
 
     metrics = [
-        tf.keras.metrics.BinaryAccuracy(name='accuracy', threshold=0.0),
+        LogitSplitFmax(ont, 0),
+        LogitSplitFmax(ont, 1),
+        LogitSplitFmax(ont, 2),
     ]
 
     go_model.compile(
@@ -143,7 +146,7 @@ file_writer.set_as_default()
 
 callbacks = [
     tf.keras.callbacks.ModelCheckpoint(
-        filepath=os.path.join(checkpoint_dir, "weights.{epoch:03d}-{val_loss:.2f}"),
+        filepath=os.path.join(checkpoint_dir, "weights.{epoch:03d}-{val_loss:.3f}"),
         save_best_only=True,
         save_weights_only=True,
         mode='min',

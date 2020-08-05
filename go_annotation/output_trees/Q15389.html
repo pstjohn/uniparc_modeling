@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style> /* set the CSS */
+
+svg {
+  margin-bottom: 2em;
+  overflow: scroll;
+}
+    
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 2px;
+}
+    
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+
+</style>
+<body>
+
+<!-- load the d3.js library -->    	
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script>
+
+var data = {'BP': {'name': 'biological_process', 'namespace': 'biological_process', 'index': 6, 'id': 'GO:0008150', 'children': [{'name': 'metabolic process', 'namespace': 'biological_process', 'index': 5875, 'id': 'GO:0008152', 'children': [{'name': 'nitrogen compound metabolic process', 'namespace': 'biological_process', 'index': 5949, 'id': 'GO:0006807', 'children': [{'name': 'organonitrogen compound metabolic process', 'namespace': 'biological_process', 'index': 327, 'id': 'GO:1901564'}]}, {'name': 'biosynthetic process', 'namespace': 'biological_process', 'index': 2607, 'id': 'GO:0009058', 'children': [{'name': 'cellular biosynthetic process', 'namespace': 'biological_process', 'index': 5822, 'id': 'GO:0044249'}, {'name': 'organic substance biosynthetic process', 'namespace': 'biological_process', 'index': 5613, 'id': 'GO:1901576'}]}, {'name': 'primary metabolic process', 'namespace': 'biological_process', 'index': 4914, 'id': 'GO:0044238', 'children': [{'name': 'protein metabolic process', 'namespace': 'biological_process', 'index': 5548, 'id': 'GO:0019538'}]}, {'name': 'organic substance metabolic process', 'namespace': 'biological_process', 'index': 4915, 'id': 'GO:0071704', 'children': [{'name': 'macromolecule metabolic process', 'namespace': 'biological_process', 'index': 4916, 'id': 'GO:0043170', 'children': [{'name': 'macromolecule biosynthetic process', 'namespace': 'biological_process', 'index': 346, 'id': 'GO:0009059'}, {'name': 'cellular macromolecule metabolic process', 'namespace': 'biological_process', 'index': 5332, 'id': 'GO:0044260', 'children': [{'name': 'cellular macromolecule biosynthetic process', 'namespace': 'biological_process', 'index': 5334, 'id': 'GO:0034645'}, {'name': 'cellular protein metabolic process', 'namespace': 'biological_process', 'index': 5130, 'id': 'GO:0044267'}]}]}]}]}, {'name': 'cellular process', 'namespace': 'biological_process', 'index': 94, 'id': 'GO:0009987', 'children': [{'name': 'signal transduction', 'namespace': 'biological_process', 'index': 1035, 'id': 'GO:0007165'}, {'name': 'cellular metabolic process', 'namespace': 'biological_process', 'index': 1572, 'id': 'GO:0044237'}, {'name': 'cellular developmental process', 'namespace': 'biological_process', 'index': 1303, 'id': 'GO:0048869', 'children': [{'name': 'cell differentiation', 'namespace': 'biological_process', 'index': 1154, 'id': 'GO:0030154'}]}, {'name': 'cellular response to stimulus', 'namespace': 'biological_process', 'index': 13602, 'id': 'GO:0051716'}, {'name': 'cellular component organization or biogenesis', 'namespace': 'biological_process', 'index': 10380, 'id': 'GO:0071840', 'children': [{'name': 'cellular component organization', 'namespace': 'biological_process', 'index': 5391, 'id': 'GO:0016043'}]}]}, {'name': 'multicellular organismal process', 'namespace': 'biological_process', 'index': 1060, 'id': 'GO:0032501'}, {'name': 'developmental process', 'namespace': 'biological_process', 'index': 2640, 'id': 'GO:0032502', 'children': [{'name': 'anatomical structure development', 'namespace': 'biological_process', 'index': 1150, 'id': 'GO:0048856'}]}, {'name': 'response to stimulus', 'namespace': 'biological_process', 'index': 6094, 'id': 'GO:0050896'}, {'name': 'biological regulation', 'namespace': 'biological_process', 'index': 21500, 'id': 'GO:0065007', 'children': [{'name': 'regulation of biological process', 'namespace': 'biological_process', 'index': 2414, 'id': 'GO:0050789', 'children': [{'name': 'regulation of metabolic process', 'namespace': 'biological_process', 'index': 8265, 'id': 'GO:0019222', 'children': [{'name': 'regulation of biosynthetic process', 'namespace': 'biological_process', 'index': 8264, 'id': 'GO:0009889', 'children': [{'name': 'regulation of cellular biosynthetic process', 'namespace': 'biological_process', 'index': 2520, 'id': 'GO:0031326'}]}, {'name': 'positive regulation of metabolic process', 'namespace': 'biological_process', 'index': 8269, 'id': 'GO:0009893', 'children': [{'name': 'positive regulation of macromolecule metabolic process', 'namespace': 'biological_process', 'index': 1623, 'id': 'GO:0010604'}, {'name': 'positive regulation of nitrogen compound metabolic process', 'namespace': 'biological_process', 'index': 14839, 'id': 'GO:0051173', 'children': [{'name': 'positive regulation of protein metabolic process', 'namespace': 'biological_process', 'index': 14047, 'id': 'GO:0051247', 'children': [{'name': 'positive regulation of cellular protein metabolic process', 'namespace': 'biological_process', 'index': 13379, 'id': 'GO:0032270', 'children': [{'name': 'positive regulation of protein modification process', 'namespace': 'biological_process', 'index': 1651, 'id': 'GO:0031401'}]}]}]}]}, {'name': 'regulation of cellular metabolic process', 'namespace': 'biological_process', 'index': 1616, 'id': 'GO:0031323', 'children': [{'name': 'regulation of phosphorus metabolic process', 'namespace': 'biological_process', 'index': 9005, 'id': 'GO:0051174', 'children': [{'name': 'positive regulation of phosphorus metabolic process', 'namespace': 'biological_process', 'index': 9004, 'id': 'GO:0010562'}, {'name': 'regulation of phosphate metabolic process', 'namespace': 'biological_process', 'index': 5138, 'id': 'GO:0019220', 'children': [{'name': 'regulation of phosphorylation', 'namespace': 'biological_process', 'index': 1646, 'id': 'GO:0042325'}, {'name': 'positive regulation of phosphate metabolic process', 'namespace': 'biological_process', 'index': 16141, 'id': 'GO:0045937', 'children': [{'name': 'positive regulation of phosphorylation', 'namespace': 'biological_process', 'index': 1652, 'id': 'GO:0042327'}]}]}]}]}, {'name': 'regulation of nitrogen compound metabolic process', 'namespace': 'biological_process', 'index': 8880, 'id': 'GO:0051171'}, {'name': 'regulation of macromolecule metabolic process', 'namespace': 'biological_process', 'index': 1617, 'id': 'GO:0060255', 'children': [{'name': 'regulation of gene expression', 'namespace': 'biological_process', 'index': 1470, 'id': 'GO:0010468'}]}, {'name': 'regulation of primary metabolic process', 'namespace': 'biological_process', 'index': 5104, 'id': 'GO:0080090', 'children': [{'name': 'regulation of protein metabolic process', 'namespace': 'biological_process', 'index': 12433, 'id': 'GO:0051246', 'children': [{'name': 'regulation of cellular protein metabolic process', 'namespace': 'biological_process', 'index': 5461, 'id': 'GO:0032268', 'children': [{'name': 'regulation of protein modification process', 'namespace': 'biological_process', 'index': 1645, 'id': 'GO:0031399', 'children': [{'name': 'regulation of protein phosphorylation', 'namespace': 'biological_process', 'index': 1644, 'id': 'GO:0001932', 'children': [{'name': 'positive regulation of protein phosphorylation', 'namespace': 'biological_process', 'index': 1650, 'id': 'GO:0001934'}]}]}]}]}]}]}, {'name': 'regulation of signaling', 'namespace': 'biological_process', 'index': 1615, 'id': 'GO:0023051'}, {'name': 'regulation of localization', 'namespace': 'biological_process', 'index': 14551, 'id': 'GO:0032879', 'children': [{'name': 'regulation of transport', 'namespace': 'biological_process', 'index': 14026, 'id': 'GO:0051049'}, {'name': 'regulation of cellular component movement', 'namespace': 'biological_process', 'index': 21711, 'id': 'GO:0051270'}]}, {'name': 'positive regulation of biological process', 'namespace': 'biological_process', 'index': 2416, 'id': 'GO:0048518'}, {'name': 'negative regulation of biological process', 'namespace': 'biological_process', 'index': 2415, 'id': 'GO:0048519', 'children': [{'name': 'negative regulation of metabolic process', 'namespace': 'biological_process', 'index': 8267, 'id': 'GO:0009892', 'children': [{'name': 'negative regulation of macromolecule metabolic process', 'namespace': 'biological_process', 'index': 1619, 'id': 'GO:0010605'}, {'name': 'negative regulation of nitrogen compound metabolic process', 'namespace': 'biological_process', 'index': 9401, 'id': 'GO:0051172'}]}, {'name': 'negative regulation of cellular process', 'namespace': 'biological_process', 'index': 6275, 'id': 'GO:0048523', 'children': [{'name': 'negative regulation of cellular metabolic process', 'namespace': 'biological_process', 'index': 1621, 'id': 'GO:0031324'}]}, {'name': 'negative regulation of response to stimulus', 'namespace': 'biological_process', 'index': 2546, 'id': 'GO:0048585'}]}, {'name': 'regulation of response to stimulus', 'namespace': 'biological_process', 'index': 2544, 'id': 'GO:0048583', 'children': [{'name': 'regulation of signal transduction', 'namespace': 'biological_process', 'index': 1695, 'id': 'GO:0009966'}, {'name': 'positive regulation of response to stimulus', 'namespace': 'biological_process', 'index': 2547, 'id': 'GO:0048584'}, {'name': 'regulation of response to stress', 'namespace': 'biological_process', 'index': 8634, 'id': 'GO:0080134'}]}, {'name': 'regulation of developmental process', 'namespace': 'biological_process', 'index': 12271, 'id': 'GO:0050793'}, {'name': 'regulation of cellular process', 'namespace': 'biological_process', 'index': 2819, 'id': 'GO:0050794', 'children': [{'name': 'regulation of cell communication', 'namespace': 'biological_process', 'index': 3018, 'id': 'GO:0010646'}, {'name': 'regulation of cell death', 'namespace': 'biological_process', 'index': 9448, 'id': 'GO:0010941', 'children': [{'name': 'regulation of programmed cell death', 'namespace': 'biological_process', 'index': 8806, 'id': 'GO:0043067'}]}, {'name': 'positive regulation of cellular process', 'namespace': 'biological_process', 'index': 6942, 'id': 'GO:0048522', 'children': [{'name': 'positive regulation of cell communication', 'namespace': 'biological_process', 'index': 8350, 'id': 'GO:0010647'}, {'name': 'positive regulation of cellular metabolic process', 'namespace': 'biological_process', 'index': 1625, 'id': 'GO:0031325'}, {'name': 'positive regulation of cellular component movement', 'namespace': 'biological_process', 'index': 2937, 'id': 'GO:0051272'}]}]}, {'name': 'regulation of multicellular organismal process', 'namespace': 'biological_process', 'index': 1471, 'id': 'GO:0051239', 'children': [{'name': 'positive regulation of multicellular organismal process', 'namespace': 'biological_process', 'index': 1477, 'id': 'GO:0051240'}, {'name': 'regulation of multicellular organismal development', 'namespace': 'biological_process', 'index': 2387, 'id': 'GO:2000026'}]}]}, {'name': 'regulation of biological quality', 'namespace': 'biological_process', 'index': 1065, 'id': 'GO:0065008'}, {'name': 'regulation of molecular function', 'namespace': 'biological_process', 'index': 8913, 'id': 'GO:0065009', 'children': [{'name': 'positive regulation of molecular function', 'namespace': 'biological_process', 'index': 14157, 'id': 'GO:0044093'}, {'name': 'regulation of catalytic activity', 'namespace': 'biological_process', 'index': 6304, 'id': 'GO:0050790', 'children': [{'name': 'positive regulation of catalytic activity', 'namespace': 'biological_process', 'index': 9415, 'id': 'GO:0043085'}]}]}]}]}, 'MF': {'name': 'molecular_function', 'namespace': 'molecular_function', 'index': 3019, 'id': 'GO:0003674', 'children': [{'name': 'binding', 'namespace': 'molecular_function', 'index': 53, 'id': 'GO:0005488', 'children': [{'name': 'protein binding', 'namespace': 'molecular_function', 'index': 204, 'id': 'GO:0005515'}, {'name': 'carbohydrate derivative binding', 'namespace': 'molecular_function', 'index': 1097, 'id': 'GO:0097367'}]}]}, 'CC': {'name': 'cellular_component', 'namespace': 'cellular_component', 'index': 4569, 'id': 'GO:0005575', 'children': [{'name': 'cellular anatomical entity', 'namespace': 'cellular_component', 'index': 170, 'id': 'GO:0110165', 'children': [{'name': 'extracellular region', 'namespace': 'cellular_component', 'index': 4570, 'id': 'GO:0005576'}, {'name': 'extracellular space', 'namespace': 'cellular_component', 'index': 4607, 'id': 'GO:0005615'}, {'name': 'cytoplasm', 'namespace': 'cellular_component', 'index': 4698, 'id': 'GO:0005737'}, {'name': 'organelle', 'namespace': 'cellular_component', 'index': 4876, 'id': 'GO:0043226', 'children': [{'name': 'membrane-bounded organelle', 'namespace': 'cellular_component', 'index': 13807, 'id': 'GO:0043227', 'children': [{'name': 'intracellular membrane-bounded organelle', 'namespace': 'cellular_component', 'index': 4622, 'id': 'GO:0043231'}]}, {'name': 'intracellular organelle', 'namespace': 'cellular_component', 'index': 18205, 'id': 'GO:0043229'}]}]}]}};
+
+    
+var margin = ({top: 40, right: 120, bottom: 40, left: 100});
+var dx = 20;
+var width = 1000;
+var dy = 100;
+    
+function separation(a, b) {
+//  
+  if (!('lineNumber' in a)) {
+      return a.parent == b.parent ? 1 : 3;
+  } else {
+      return (a.lineNumber + b.lineNumber) / 3.;
+  }
+//  return a.parent == b.parent ? 1 : 3;
+}
+    
+var tree = d3.tree()
+    .nodeSize([dx, dy])
+    .separation(separation);
+
+    
+var diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x);
+   
+// Define the div for the tooltip
+var div = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+    
+function draw_tree(data) {
+
+    const root = d3.hierarchy(data);
+
+    root.x0 = dy / 2;
+    root.y0 = 0;
+    root.descendants().forEach((d, i) => {
+    d.id = i;
+    d._children = d.children;
+    });
+
+    var svg = d3.select("body").append("svg")
+      .attr("viewBox", [-margin.left, -margin.top, width, dx])
+      .style("font", "10px sans-serif")
+      .style("user-select", "none");
+
+    const gLink = svg.append("g")
+      .attr("fill", "none")
+      .attr("stroke", "#555")
+      .attr("stroke-opacity", 0.4)
+      .attr("stroke-width", 1.5);
+
+    const gNode = svg.append("g")
+      .attr("cursor", "pointer")
+      .attr("pointer-events", "all");
+
+    function update(source) {
+        const duration = d3.event && d3.event.altKey ? 2500 : 250;
+        const nodes = root.descendants().reverse();
+        const links = root.links();
+
+        // Compute the new tree layout.
+        tree(root);
+
+        let left = root;
+        let right = root;
+        root.eachBefore(node => {
+          if (node.x < left.x) left = node;
+          if (node.x > right.x) right = node;
+        });
+
+        const height = right.x - left.x + margin.top + margin.bottom;
+
+        const transition = svg.transition()
+            .duration(duration)
+            .attr("viewBox", [-margin.left, left.x - margin.top, width, height])
+            .tween("resize", window.ResizeObserver ? null : () => () => svg.dispatch("toggle"));
+
+        // Update the nodes…
+        const node = gNode.selectAll("g")
+          .data(nodes, d => d.id);
+
+        // Enter any new nodes at the parent's previous position.
+        const nodeEnter = node.enter().append("g")
+            .attr("transform", d => `translate(${source.y0},${source.x0})`)
+            .attr("fill-opacity", 0)
+            .attr("stroke-opacity", 0)
+            .on("click", d => {
+              d.children = d.children ? null : d._children;
+              update(d);
+            })
+            .on("mouseover", function(d) {
+                div .transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                div .html(d.data.id)
+                    .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px");
+            })
+            .on("mouseout", function(d) {
+                div.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+            });
+
+        nodeEnter.append("circle")
+            .attr("r", 2.5)
+            .attr("fill", d => d._children ? "#555" : "#999")
+            .attr("stroke-width", 10);
+
+        nodeEnter.append("text")
+            .attr("dy", "0.31em")
+            .attr("x", d => -6)
+            .attr("text-anchor", "end")
+            .text(d => d.data.name)
+            .call(wrap, 80)
+          .clone(true).lower()
+            .attr("stroke-linejoin", "round")
+            .attr("stroke-width", 3)
+            .attr("stroke", "white");
+
+        // Transition nodes to their new position.
+        const nodeUpdate = node.merge(nodeEnter).transition(transition)
+            .attr("transform", d => `translate(${d.y},${d.x})`)
+            .attr("fill-opacity", 1)
+            .attr("stroke-opacity", 1);
+
+        // Transition exiting nodes to the parent's new position.
+        const nodeExit = node.exit().transition(transition).remove()
+            .attr("transform", d => `translate(${source.y},${source.x})`)
+            .attr("fill-opacity", 0)
+            .attr("stroke-opacity", 0);
+
+        // Update the links…
+        const link = gLink.selectAll("path")
+          .data(links, d => d.target.id);
+
+        // Enter any new links at the parent's previous position.
+        const linkEnter = link.enter().append("path")
+            .attr("d", d => {
+              const o = {x: source.x0, y: source.y0};
+              return diagonal({source: o, target: o});
+            });
+
+        // Transition links to their new position.
+        link.merge(linkEnter).transition(transition)
+            .attr("d", diagonal);
+
+        // Transition exiting nodes to the parent's new position.
+        link.exit().transition(transition).remove()
+            .attr("d", d => {
+              const o = {x: source.x, y: source.y};
+              return diagonal({source: o, target: o});
+            });
+
+        // Stash the old positions for transition.
+        root.eachBefore(d => {
+          d.x0 = d.x;
+          d.y0 = d.y;
+        });
+    }
+
+    update(root);
+    update(root);    
+    return svg.node();
+}
+
+    
+function wrap(text, width) {
+  text.each(function() {
+    var text = d3.select(this),
+        words = text.text().split(/\s+/).reverse(),
+        word, line = [],
+        lineNumber = 0,
+        lineHeight = 1.1, // ems
+        y = text.attr("y"),
+        x = text.attr("x"),
+        dy = parseFloat(text.attr("dy")),
+        tspan = text.text(null).append("tspan").attr("x", x).attr("y", y).attr("dy", dy + "em");
+    while (word = words.pop()) {
+      line.push(word);
+      tspan.text(line.join(" "));
+      if (tspan.node().getComputedTextLength() > width && line.length > 1) {
+        lineNumber = ++lineNumber;
+        line.pop();
+        tspan.text(line.join(" "));
+        line = [word];
+        tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", lineHeight + "em").text(word);
+      }
+    }
+    text.attr("transform", "translate(0," + (10*lineHeight*parseFloat(lineNumber)/2*-1) + ")");
+    text.data()[0]['lineNumber'] = lineNumber + 1;
+  });
+}
+
+    
+draw_tree(data.BP);
+draw_tree(data.MF);
+draw_tree(data.CC);
+
+</script>
+</body>
