@@ -62,10 +62,14 @@ class Ontology(object):
             
         self.G = self.create_graph(obo_file, with_relationships)
         
-        term_counts = pd.read_csv(term_count_file, index_col=0)['0']
-        self.to_include = set(term_counts[term_counts >= threshold].index)
-        self.term_index = {}
+        if not term_count_file:
+            self.to_include = set(self.G.nodes)
+            
+        else:
+            term_counts = pd.read_csv(term_count_file, index_col=0)['0']
+            self.to_include = set(term_counts[term_counts >= threshold].index)
         
+        self.term_index = {}
         for i, (node, data) in enumerate(filter(lambda x: x[0] in self.to_include,
                                                 self.G.nodes.items())):
             data['index'] = i
