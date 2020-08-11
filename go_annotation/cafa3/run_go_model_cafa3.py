@@ -39,13 +39,15 @@ parser.add_argument('--stepsPerEpoch', type=int, default=500,
                     help='steps per epoch')
 parser.add_argument('--validationSteps', type=int, default=25, 
                     help='validation steps')
-parser.add_argument('--ontThres', type=int, default=500, 
-                    help='ontology count threshold')
 
 arguments = parser.parse_args()
 print(arguments)
 
-ont = Ontology(threshold=arguments.ontThres)
+cafa_code_dir = '/ccs/home/pstjohn/uniparc_modeling/go_annotation/cafa3'
+ont = Ontology(threshold=1,
+               term_count_file=os.path.join(cafa_code_dir, 'cafa3_term_counts.csv.gz'),
+               obo_file=os.path.join(cafa_code_dir, 'go_cafa3.obo.gz'))
+print(ont.total_nodes)
 
 ## Create the dataset iterators
 def parse_example(example):
@@ -59,9 +61,9 @@ def parse_example(example):
     
     return sequence, annotation
 
-cafa3_dir = '/gpfs/alpine/bie108/proj-shared/swissprot/'
+cafa3_dir = '/gpfs/alpine/bie108/proj-shared/cafa3/'
 train_dataset = tf.data.TFRecordDataset(
-    os.path.join(swissprot_dir, 'tfrecords_1', 'go_train.tfrecord.gz'),
+    os.path.join(cafa3_dir, 'tfrecords', 'go_train.tfrecord.gz'),
     compression_type='GZIP', num_parallel_reads=tf.data.experimental.AUTOTUNE)\
     .map(parse_example, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
     .repeat().shuffle(buffer_size=5000)\
@@ -70,7 +72,7 @@ train_dataset = tf.data.TFRecordDataset(
     .prefetch(tf.data.experimental.AUTOTUNE)
 
 valid_dataset = tf.data.TFRecordDataset(
-    os.path.join(swissprot_dir, 'tfrecords_1', 'go_valid.tfrecord.gz'),
+    os.path.join(cafa3_dir, 'tfrecords', 'go_valid.tfrecord.gz'),
     compression_type='GZIP', num_parallel_reads=tf.data.experimental.AUTOTUNE)\
     .map(parse_example, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
     .repeat().shuffle(buffer_size=5000)\
@@ -79,7 +81,7 @@ valid_dataset = tf.data.TFRecordDataset(
     .prefetch(tf.data.experimental.AUTOTUNE)
 
 
-initial_bias = np.load(os.path.join(swissprot_dir, 'tfrecords_1', 'bias.npy'))
+initial_bias = np.load(os.path.join(cafa3_dir, 'tfrecords', 'bias.npy'))
 
 ## Load the original model
 # checkpoint_dir = '/ccs/home/pstjohn/member_work/uniparc_checkpoints/12_layer_relative_adam_20200625.186949'
@@ -140,8 +142,8 @@ if not os.path.exists(checkpoint_dir):
 # Make sure this script is available later
 shutil.copy(__file__, checkpoint_dir)
 
-file_writer = tf.summary.create_file_writer(logdir + "/metrics")
-file_writer.set_as_default()
+# file_writer = tf.summary.create_file_writer(logdir + "/metrics")
+# file_writer.set_as_default()
 
 
 callbacks = [
@@ -161,12 +163,14 @@ callbacks = [
         embeddings_freq=0)
 ]
 
-go_model.fit(
-    train_dataset,
-    validation_data=valid_dataset,
-    verbose=1,
-    epochs=arguments.epochs,
-    steps_per_epoch=arguments.stepsPerEpoch,
-    validation_steps=arguments.validationSteps,
-    callbacks=callbacks)
-    
+if __name__ == "__main__":
+
+    go_model.fit(
+        train_dataset,
+        validation_data=valid_dataset,
+        verbose=1,
+        epochs=arguments.epochs,
+        steps_per_epoch=arguments.stepsPerEpoch,
+        validation_steps=arguments.validationSteps,
+        callbacks=callbacks)
+
