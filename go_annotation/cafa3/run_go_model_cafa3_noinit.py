@@ -11,7 +11,7 @@ policy = mixed_precision.Policy('mixed_float16')
 mixed_precision.set_policy(policy)
 
 import sys
-sys.path.append('..')
+sys.path.append('../..')
 
 from bert.dataset import encode
 from bert.model import create_model
@@ -43,7 +43,9 @@ parser.add_argument('--validationSteps', type=int, default=25,
 arguments = parser.parse_args()
 print(arguments)
 
-ont = Ontology()
+cafa_code_dir = '/ccs/home/pstjohn/uniparc_modeling/go_annotation/cafa3'
+ont = Ontology(obo_file=os.path.join(cafa_code_dir, 'go_cafa3.obo.gz'))
+print(ont.total_nodes)
 
 ## Create the dataset iterators
 def parse_example(example):
@@ -51,15 +53,15 @@ def parse_example(example):
         'sequence': tf.io.FixedLenFeature([], tf.string, default_value=''),
         'annotation': tf.io.FixedLenFeature([], tf.string, default_value=''),
     })
-   
+    
     sequence = encode(parsed['sequence'], arguments.sequenceLength)
     annotation = tf.io.parse_tensor(parsed['annotation'], out_type=tf.int64)
     
     return sequence, annotation
 
-swissprot_dir = '/gpfs/alpine/bie108/proj-shared/swissprot/'
+cafa3_dir = '/gpfs/alpine/bie108/proj-shared/cafa3/'
 train_dataset = tf.data.TFRecordDataset(
-    os.path.join(swissprot_dir, 'tfrecords_1', 'go_train.tfrecord.gz'),
+    os.path.join(cafa3_dir, 'tfrecords', 'go_train.tfrecord.gz'),
     compression_type='GZIP', num_parallel_reads=tf.data.experimental.AUTOTUNE)\
     .map(parse_example, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
     .repeat().shuffle(buffer_size=5000)\
@@ -68,7 +70,7 @@ train_dataset = tf.data.TFRecordDataset(
     .prefetch(tf.data.experimental.AUTOTUNE)
 
 valid_dataset = tf.data.TFRecordDataset(
-    os.path.join(swissprot_dir, 'tfrecords_1', 'go_valid.tfrecord.gz'),
+    os.path.join(cafa3_dir, 'tfrecords', 'go_valid.tfrecord.gz'),
     compression_type='GZIP', num_parallel_reads=tf.data.experimental.AUTOTUNE)\
     .map(parse_example, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
     .repeat().shuffle(buffer_size=5000)\
@@ -76,8 +78,7 @@ valid_dataset = tf.data.TFRecordDataset(
                   padded_shapes=(([arguments.sequenceLength], [ont.total_nodes])))\
     .prefetch(tf.data.experimental.AUTOTUNE)
 
-
-initial_bias = np.load(os.path.join(swissprot_dir, 'tfrecords_1', 'bias.npy'))
+initial_bias = np.load(os.path.join(cafa3_dir, 'tfrecords', 'bias.npy'))
 
 ## Load the original model
 # checkpoint_dir = '/ccs/home/pstjohn/member_work/uniparc_checkpoints/12_layer_relative_adam_20200625.186949'
@@ -95,7 +96,7 @@ with strategy.scope():
                          max_relative_position=64,
                          attention_type='relative')
 
-    #model.load_weights(tf.train.latest_checkpoint(arguments.checkpointDir)).expect_partial()
+#    model.load_weights(tf.train.latest_checkpoint(arguments.checkpointDir)).expect_partial()
 
     ## Append the GO annotations
     final_embedding = model.layers[-2].input
@@ -138,8 +139,8 @@ if not os.path.exists(checkpoint_dir):
 # Make sure this script is available later
 shutil.copy(__file__, checkpoint_dir)
 
-file_writer = tf.summary.create_file_writer(logdir + "/metrics")
-file_writer.set_as_default()
+# file_writer = tf.summary.create_file_writer(logdir + "/metrics")
+# file_writer.set_as_default()
 
 
 callbacks = [
@@ -159,12 +160,14 @@ callbacks = [
         embeddings_freq=0)
 ]
 
-go_model.fit(
-    train_dataset,
-    validation_data=valid_dataset,
-    verbose=1,
-    epochs=arguments.epochs,
-    steps_per_epoch=arguments.stepsPerEpoch,
-    validation_steps=arguments.validationSteps,
-    callbacks=callbacks)
-    
+if __name__ == "__main__":
+
+    go_model.fit(
+        train_dataset,
+        validation_data=valid_dataset,
+        verbose=1,
+        epochs=arguments.epochs,
+        steps_per_epoch=arguments.stepsPerEpoch,
+        validation_steps=arguments.validationSteps,
+        callbacks=callbacks)
+

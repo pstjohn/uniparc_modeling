@@ -44,9 +44,7 @@ arguments = parser.parse_args()
 print(arguments)
 
 cafa_code_dir = '/ccs/home/pstjohn/uniparc_modeling/go_annotation/cafa3'
-ont = Ontology(threshold=1,
-               term_count_file=os.path.join(cafa_code_dir, 'cafa3_term_counts.csv.gz'),
-               obo_file=os.path.join(cafa_code_dir, 'go_cafa3.obo.gz'))
+ont = Ontology(obo_file=os.path.join(cafa_code_dir, 'go_cafa3.obo.gz'))
 print(ont.total_nodes)
 
 ## Create the dataset iterators
@@ -79,7 +77,6 @@ valid_dataset = tf.data.TFRecordDataset(
     .padded_batch(batch_size=arguments.batchSize,
                   padded_shapes=(([arguments.sequenceLength], [ont.total_nodes])))\
     .prefetch(tf.data.experimental.AUTOTUNE)
-
 
 initial_bias = np.load(os.path.join(cafa3_dir, 'tfrecords', 'bias.npy'))
 

@@ -40,8 +40,7 @@ add_rels = False
 
 
 class Ontology(object):
-    def __init__(self, obo_file=None, with_relationships=False,
-                 term_count_file=None, threshold=500):
+    def __init__(self, obo_file=None, with_relationships=False, restrict_terms=True):
         """ Class to parse an .obo.gz file containing a gene ontology description,
         and build a networkx graph. Allows for propogating scores and annotations
         to descendent nodes.
@@ -57,21 +56,20 @@ class Ontology(object):
         if obo_file is None:
             obo_file = os.path.join(dir_path, 'go-basic.obo.gz')
             
-        if term_count_file is None:
-            term_count_file = os.path.join(dir_path, 'term_counts.csv.gz')            
-            
         self.G = self.create_graph(obo_file, with_relationships)
         
-        if not term_count_file:
-            self.to_include = set(self.G.nodes)
+        if restrict_terms is False:
+            to_include = set(self.G.nodes)
             
         else:
-            term_counts = pd.read_csv(term_count_file, index_col=0)['0']
-            self.to_include = set(term_counts[term_counts >= threshold].index)
-        
+            term_file = os.path.join(dir_path, 'terms.csv.gz')
+            to_include = set(pd.read_csv(term_file, header=None)[0])
+            
+
         self.term_index = {}
-        for i, (node, data) in enumerate(filter(lambda x: x[0] in self.to_include,
-                                                self.G.nodes.items())):
+        for i, (node, data) in enumerate(filter(
+            lambda x: x[0] in to_include, self.G.nodes.items())):
+        
             data['index'] = i
             self.term_index[i] = node
         
@@ -102,7 +100,6 @@ class Ontology(object):
                     for type_, target in data['relationship']:
                         G.add_edge(target, data['id'], type=type_)
         
-        # Initialize the 
         nx.set_node_attributes(G, None, 'index')
 
         return G
@@ -130,10 +127,6 @@ class Ontology(object):
             
         return set.union(set(terms), *(nx.descendants(self.G, term) for term in terms))    
     
-#     def get_canoconical_terms(self, terms):
-#         subgraph = self.G.subgraph(self.get_ancestor_list(terms))
-#         return {node for node, degree in subgraph.out_degree if degree == 0}
-    
     
     def termlist_to_array(self, terms, dtype=bool):
         """ Propogate labels to ancestor nodes """
@@ -145,6 +138,7 @@ class Ontology(object):
     def array_to_termlist(self, array):
         """ Return term ids where array evaluates to True. Uses np.where """
         return [self.term_index[i] for i in np.where(array)[1]]
+    
     
     def iter_ancestor_array(self):
         """ Constructs the necessary arrays for the tensorflow segment operation.

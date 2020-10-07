@@ -1,14 +1,16 @@
+import os
+from functools import partial
+import sys
+sys.path.append('..')
+
 import numpy as np
+import pandas as pd
 import tensorflow as tf
 from tqdm import tqdm
-import os
 
 from tensorflow.keras.mixed_precision import experimental as mixed_precision
 policy = mixed_precision.Policy('mixed_float16')
 mixed_precision.set_policy(policy)
-
-import sys
-sys.path.append('..')
 
 from bert.dataset import encode
 from bert.model import create_model
@@ -18,25 +20,20 @@ from bert.go import Ontology
 ont = Ontology()
 swissprot_dir = '/gpfs/alpine/bie108/proj-shared/swissprot/'
 
-def parse_example(example):
-    parsed = tf.io.parse_single_example(example, features={
-        'sequence': tf.io.FixedLenFeature([], tf.string, default_value=''),
-        'annotation': tf.io.FixedLenFeature([], tf.string, default_value=''),
-    })
-   
-    sequence = encode(parsed['sequence'], 1024)
-    annotation = tf.io.parse_tensor(parsed['annotation'], out_type=tf.int64)
-    
-    return sequence, annotation
+swissprot = pd.read_parquet(os.path.join(swissprot_dir, 'parsed_swissprot_uniref_clusters.parquet'))
+go_terms = pd.read_parquet(os.path.join(swissprot_dir, 'swissprot_quickgo.parquet'))
+swissprot_annotated = swissprot[swissprot.accession.isin(go_terms['GENE PRODUCT ID'].unique())]
+swissprot_annotated = swissprot_annotated[swissprot_annotated.length < 10000]
 
+test = np.load('uniref50_split.npz', allow_pickle=True)['test']
+swissprot_test = swissprot_annotated[swissprot_annotated['UniRef50 ID'].isin(test)]
 
-valid_dataset = tf.data.TFRecordDataset(
-    os.path.join(swissprot_dir, 'tfrecords_1', 'go_valid.tfrecord.gz'),
-    compression_type='GZIP', num_parallel_reads=tf.data.experimental.AUTOTUNE)\
-    .map(parse_example, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
+test_data = tf.data.Dataset.from_tensor_slices(swissprot_test.sequence.values)\
+    .map(partial(encode, max_sequence_length=1024), num_parallel_calls=tf.data.experimental.AUTOTUNE)\
     .padded_batch(batch_size=16,
-                  padded_shapes=(([1024], [ont.total_nodes])))\
+                  padded_shapes=([1024]))\
     .prefetch(tf.data.experimental.AUTOTUNE)
+
 
 dimension = 768
 model = create_model(model_dimension=dimension,
@@ -59,6 +56,7 @@ treenorm = TreeNorm(segments, ids)
 normed = treenorm(protein_predictions)
 
 go_model_sigmoid = tf.keras.Model(model.inputs, tf.nn.sigmoid(normed))
+
 checkpoint = tf.train.latest_checkpoint(
     '/ccs/home/pstjohn/member_work/uniparc_checkpoints/go_finetuning_new_split_1024_ont1.258061')
 go_model_sigmoid.load_weights(checkpoint).expect_partial()

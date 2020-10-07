@@ -39,13 +39,12 @@ parser.add_argument('--stepsPerEpoch', type=int, default=500,
                     help='steps per epoch')
 parser.add_argument('--validationSteps', type=int, default=25, 
                     help='validation steps')
-parser.add_argument('--ontThres', type=int, default=500, 
-                    help='ontology count threshold')
 
 arguments = parser.parse_args()
 print(arguments)
 
-ont = Ontology(threshold=arguments.ontThres)
+ont = Ontology()
+print(ont.total_nodes, flush=True)
 
 ## Create the dataset iterators
 def parse_example(example):
@@ -82,8 +81,8 @@ valid_dataset = tf.data.TFRecordDataset(
 initial_bias = np.load(os.path.join(swissprot_dir, 'tfrecords_1', 'bias.npy'))
 
 ## Load the original model
-# checkpoint_dir = '/ccs/home/pstjohn/member_work/uniparc_checkpoints/12_layer_relative_adam_20200625.186949'
-# tf.train.latest_checkpoint(arguments.checkpointDir)
+checkpoint_dir = '/ccs/home/pstjohn/member_work/uniparc_checkpoints/12_layer_relative_adam_20200625.186949'
+tf.train.latest_checkpoint(arguments.checkpointDir)
 
 with strategy.scope():   
 
