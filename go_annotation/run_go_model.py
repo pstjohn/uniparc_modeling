@@ -63,6 +63,7 @@ swissprot_dir = '/gpfs/alpine/bie108/proj-shared/swissprot/'
 train_dataset = tf.data.TFRecordDataset(
     os.path.join(swissprot_dir, 'tfrecords_1', 'go_train.tfrecord.gz'),
     compression_type='GZIP', num_parallel_reads=tf.data.experimental.AUTOTUNE)\
+    .take(200000)\
     .map(parse_example, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
     .repeat().shuffle(buffer_size=5000)\
     .padded_batch(batch_size=arguments.batchSize,
@@ -97,7 +98,9 @@ with strategy.scope():
                          max_relative_position=64,
                          attention_type='relative')
 
-    model.load_weights(tf.train.latest_checkpoint(arguments.checkpointDir)).expect_partial()
+    latest_checkpoint = tf.train.latest_checkpoint(arguments.checkpointDir)
+    print(latest_checkpoint)
+    model.load_weights(latest_checkpoint).expect_partial()
 
     ## Append the GO annotations
     final_embedding = model.layers[-2].input
@@ -146,7 +149,7 @@ file_writer.set_as_default()
 
 callbacks = [
     tf.keras.callbacks.ModelCheckpoint(
-        filepath=os.path.join(checkpoint_dir, "weights.{epoch:03d}-{val_loss:.3f}"),
+        filepath=os.path.join(checkpoint_dir, "weights.{epoch:03d}-{val_loss:.4f}"),
         save_best_only=True,
         save_weights_only=True,
         mode='min',
@@ -169,4 +172,3 @@ go_model.fit(
     steps_per_epoch=arguments.stepsPerEpoch,
     validation_steps=arguments.validationSteps,
     callbacks=callbacks)
-    

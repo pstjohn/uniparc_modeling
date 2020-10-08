@@ -4,7 +4,7 @@
 #BSUB -W 6:00
 #BSUB -nnodes 1
 #BSUB -q batch-hm
-#BSUB -J go_finetuning_new_split_1024_ont1_noinit
+#BSUB -J go_finetuning_new_split_1024_ont1
 #BSUB -o /ccs/home/pstjohn/job_output/%J.out
 #BSUB -e /ccs/home/pstjohn/job_output/%J.err
 
@@ -20,9 +20,9 @@ export OMP_NUM_THREADS=4
 
 mkdir -p  $MEMBERWORK/bie108/$LSB_JOBNAME/$LSB_JOBID
 cd  $MEMBERWORK/bie108/$LSB_JOBNAME/$LSB_JOBID
-cp $HOME/uniparc_modeling/go_annotation/run_go_model_noinit.py .
+cp $HOME/uniparc_modeling/go_annotation/run_go_model.py .
 
-jsrun -n ${NODES} -g 6 -c 42 -r1 -a1 -b none python3 run_go_model_noinit.py \
+jsrun -n ${NODES} -g 6 -c 42 -r1 -a1 -b none python3 run_go_model.py \
     --modelName=$LSB_JOBNAME.$LSB_JOBID \
     --scratchDir="$MEMBERWORK/bie108/uniparc_checkpoints" \
     --checkpoint="/gpfs/alpine/scratch/pstjohn/bie108/uniparc_checkpoints/12_layer_relative_adam_20200625.186949/" \
