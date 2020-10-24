@@ -39,13 +39,12 @@ parser.add_argument('--stepsPerEpoch', type=int, default=500,
                     help='steps per epoch')
 parser.add_argument('--validationSteps', type=int, default=25, 
                     help='validation steps')
-parser.add_argument('--ontThres', type=int, default=500, 
-                    help='ontology count threshold')
 
 arguments = parser.parse_args()
 print(arguments)
 
-ont = Ontology(threshold=arguments.ontThres)
+ont = Ontology()
+print(ont.total_nodes, flush=True)
 
 ## Create the dataset iterators
 def parse_example(example):
@@ -61,7 +60,7 @@ def parse_example(example):
 
 swissprot_dir = '/gpfs/alpine/bie108/proj-shared/swissprot/'
 train_dataset = tf.data.TFRecordDataset(
-    os.path.join(swissprot_dir, 'tfrecords_1', 'go_train.tfrecord.gz'),
+    os.path.join(swissprot_dir, 'tfrecords_1', 'cafa3_train.tfrecord.gz'),
     compression_type='GZIP', num_parallel_reads=tf.data.experimental.AUTOTUNE)\
     .map(parse_example, num_parallel_calls=tf.data.experimental.AUTOTUNE)\
     .repeat().shuffle(buffer_size=5000)\
@@ -82,8 +81,8 @@ valid_dataset = tf.data.TFRecordDataset(
 initial_bias = np.load(os.path.join(swissprot_dir, 'tfrecords_1', 'bias.npy'))
 
 ## Load the original model
-# checkpoint_dir = '/ccs/home/pstjohn/member_work/uniparc_checkpoints/12_layer_relative_adam_20200625.186949'
-# tf.train.latest_checkpoint(arguments.checkpointDir)
+checkpoint_dir = '/ccs/home/pstjohn/member_work/uniparc_checkpoints/12_layer_relative_adam_20200625.186949'
+tf.train.latest_checkpoint(arguments.checkpointDir)
 
 with strategy.scope():   
 
@@ -97,7 +96,7 @@ with strategy.scope():
                          max_relative_position=64,
                          attention_type='relative')
 
-    #model.load_weights(tf.train.latest_checkpoint(arguments.checkpointDir)).expect_partial()
+#    model.load_weights(tf.train.latest_checkpoint(arguments.checkpointDir)).expect_partial()
 
     ## Append the GO annotations
     final_embedding = model.layers[-2].input
@@ -108,11 +107,11 @@ with strategy.scope():
     
     protein_predictions = tf.keras.layers.GlobalMaxPooling1D()(raw_residue_predictions)
     
-    #segments, ids = zip(*ont.iter_ancestor_array())
-    #treenorm = TreeNorm(segments, ids)
-    #normed = treenorm(protein_predictions)
+    segments, ids = zip(*ont.iter_ancestor_array())
+    treenorm = TreeNorm(segments, ids)
+    normed = treenorm(protein_predictions)
     
-    go_model = tf.keras.Model(model.inputs, protein_predictions)
+    go_model = tf.keras.Model(model.inputs, normed)
 
     go_model.summary()
 

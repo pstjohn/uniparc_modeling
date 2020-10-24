@@ -1,10 +1,10 @@
 #!/bin/bash
 
 #BSUB -P BIE108
-#BSUB -W 6:00
+#BSUB -W 1:00
 #BSUB -nnodes 1
-#BSUB -q batch-hm
-#BSUB -J 20201008_go_finetuning_cafa3_noinit
+#BSUB -q batch
+#BSUB -J 20201017_test_calcs
 #BSUB -o /ccs/home/pstjohn/job_output/%J.out
 #BSUB -e /ccs/home/pstjohn/job_output/%J.err
 
@@ -18,18 +18,9 @@ export NCCL_DEBUG=INFO
 export TF_ENABLE_AUTO_MIXED_PRECISION=1
 export OMP_NUM_THREADS=4
 
-export SCRIPT=run_go_model_cafa3_noinit.py
+export SCRIPT=run_test.py
 mkdir -p  $MEMBERWORK/bie108/$LSB_JOBNAME/$LSB_JOBID
 cd  $MEMBERWORK/bie108/$LSB_JOBNAME/$LSB_JOBID
 cp $HOME/uniparc_modeling/go_annotation/$SCRIPT .
 
-jsrun -n ${NODES} -g 6 -c 42 -r1 -a1 -b none python3 $SCRIPT \
-    --modelName=$LSB_JOBNAME.$LSB_JOBID \
-    --scratchDir="$MEMBERWORK/bie108/uniparc_checkpoints" \
-    --checkpoint="/gpfs/alpine/scratch/pstjohn/bie108/uniparc_checkpoints/12_layer_relative_adam_20200625.186949/" \
-    --batchSize=$BATCH_SIZE \
-    --lr=3E-5 \
-    --sequenceLength=1024 \
-    --stepsPerEpoch=500 \
-    --validationSteps=25 \
-    --epochs=100
+jsrun -n ${NODES} -g 6 -c 42 -r1 -a1 -b none python3 $SCRIPT --batchSize=$BATCH_SIZE

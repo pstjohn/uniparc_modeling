@@ -72,3 +72,6 @@ class LogitFmax(LogitMixin, Fmax):
 
 class LogitSplitFmax(OntSplitMixin, LogitMixin, Fmax):
     pass
+
+class SplitFmax(OntSplitMixin, Fmax):
+    pass

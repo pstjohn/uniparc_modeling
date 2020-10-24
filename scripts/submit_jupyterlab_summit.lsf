@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#BSUB -P BIE108
+#BSUB -W 2:00
+#BSUB -nnodes 1
+#BSUB -J jupyterlab
+#BSUB -o job_output/%J.out
+#BSUB -e job_output/%J.err
+
+module load ibm-wml-ce/1.7.0-2
+conda activate tf21-ibm
+jupyter lab --no-browser --ip=0.0.0.0
