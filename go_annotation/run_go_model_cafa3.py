@@ -115,7 +115,7 @@ with strategy.scope():
 
     go_model.summary()
 
-    optimizer = tf.keras.optimizers.Adam(arguments.lr)
+    optimizer = tf.keras.optimizers.Adam(arguments.lr, epsilon=1E-6)
 
     metrics = [
         LogitSplitFmax(ont, 0),

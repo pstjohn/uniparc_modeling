@@ -4,7 +4,7 @@
 #BSUB -W 6:00
 #BSUB -nnodes 1
 #BSUB -q batch-hm
-#BSUB -J 20201008_go_finetuning_cafa3_shuffle3
+#BSUB -J 20201008_go_finetuning_cafa3_eps6_lr4
 #BSUB -o /ccs/home/pstjohn/job_output/%J.out
 #BSUB -e /ccs/home/pstjohn/job_output/%J.err
 
