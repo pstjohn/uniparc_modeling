@@ -1,0 +1,735 @@
+,GO_dg,GO_bg,p_val,fold_enrichment,significant,name,namespace
+GO:0031224,379,8302,1.6954325075225687e-47,1.9946944087751595,True,intrinsic component of membrane,cellular_component
+GO:0016021,379,8302,1.6954325075225687e-47,1.9946944087751595,True,integral component of membrane,cellular_component
+GO:0016020,399,9415,1.493977907883212e-42,1.8517078203335495,True,membrane,cellular_component
+GO:0005886,146,2284,9.164595115611694e-30,2.7930367213483507,True,plasma membrane,cellular_component
+GO:0031090,185,3488,8.154655876647513e-28,2.3174754466164464,True,organelle membrane,cellular_component
+GO:0046873,43,216,1.1189422979622595e-27,8.6983042388719,True,metal ion transmembrane transporter activity,molecular_function
+GO:0071805,25,54,6.2508736273672896e-27,20.22861450900442,True,potassium ion transmembrane transport,biological_process
+GO:0098660,53,366,9.469229018766024e-27,6.327245325111546,True,inorganic ion transmembrane transport,biological_process
+GO:0015079,23,44,1.7902969126735277e-26,22.839944745621352,True,potassium ion transmembrane transporter activity,molecular_function
+GO:0006813,25,56,1.9825891177872593e-26,19.506163990825687,True,potassium ion transport,biological_process
+GO:0030001,45,292,4.92508834234519e-24,6.733634692723388,True,metal ion transport,biological_process
+GO:0008324,61,556,5.0367544911741755e-24,4.793745049831694,True,cation transmembrane transporter activity,molecular_function
+GO:0015075,61,556,5.0367544911741755e-24,4.793745049831694,True,ion transmembrane transporter activity,molecular_function
+GO:0022890,46,316,1.7936356494491605e-23,6.360490941818604,True,inorganic cation transmembrane transporter activity,molecular_function
+GO:0015318,64,649,1.228642913444055e-22,4.308788397110587,True,inorganic molecular entity transmembrane transporter activity,molecular_function
+GO:0034220,65,692,7.752751407601995e-22,4.104187105584133,True,ion transmembrane transport,biological_process
+GO:0055085,99,1467,7.805790762713536e-22,2.948661844993527,True,transmembrane transport,biological_process
+GO:0006811,70,799,1.013647592300439e-21,3.827993133618859,True,ion transport,biological_process
+GO:0098655,47,376,4.059418447068694e-21,5.461725917431194,True,cation transmembrane transport,biological_process
+GO:0022857,96,1433,5.7347896716367545e-21,2.927149689174568,True,transmembrane transporter activity,molecular_function
+GO:0005215,96,1433,5.7347896716367545e-21,2.927149689174568,True,transporter activity,molecular_function
+GO:0006812,48,427,1.365095326664634e-19,4.911716047525944,True,cation transport,biological_process
+GO:0031966,64,754,3.0307432231745536e-19,3.7087581826588467,True,mitochondrial membrane,cellular_component
+GO:0098662,41,316,3.500926106140505e-19,5.669133230751364,True,inorganic cation transmembrane transport,biological_process
+GO:0015077,31,178,1.510365402618864e-18,7.609595660241213,True,monovalent inorganic cation transmembrane transporter activity,molecular_function
+GO:1902600,29,162,8.895410887334299e-18,7.821730943481708,True,proton transmembrane transport,biological_process
+GO:0015672,29,169,2.9323706796464656e-17,7.497753922154064,True,monovalent inorganic cation transport,biological_process
+GO:0005739,107,2010,4.519459170219245e-16,2.3259887489159707,True,mitochondrion,cellular_component
+GO:0009507,73,1125,2.0041396294274486e-15,2.835242609582059,True,chloroplast,cellular_component
+GO:0009536,73,1125,2.0041396294274486e-15,2.835242609582059,True,plastid,cellular_component
+GO:0009987,606,21633,4.029487224694334e-15,1.2239840635929562,True,cellular process,biological_process
+GO:0004672,84,1457,1.1656633300718122e-14,2.519066449220152,True,protein kinase activity,molecular_function
+GO:0042910,17,59,1.2559431318445944e-14,12.589741097807496,True,xenobiotic transmembrane transporter activity,molecular_function
+GO:0006468,84,1461,1.3567177535239768e-14,2.512169621159317,True,protein phosphorylation,biological_process
+GO:0140096,138,3068,1.3589863303380598e-14,1.9653668229608985,True,"catalytic activity, acting on a protein",molecular_function
+GO:0004674,82,1409,1.4856106505323167e-14,2.542861747221336,True,protein serine/threonine kinase activity,molecular_function
+GO:0042908,17,62,3.139365650107484e-14,11.980560076945842,True,xenobiotic transport,biological_process
+GO:0019866,47,607,5.34558293562343e-13,3.383210782461497,True,organelle inner membrane,cellular_component
+GO:0015297,19,99,1.076607507846663e-12,8.385680196460013,True,antiporter activity,molecular_function
+GO:0051179,127,2921,1.9670224555393317e-12,1.8997307538891104,True,localization,biological_process
+GO:0051234,127,2921,1.9670224555393317e-12,1.8997307538891104,True,establishment of localization,biological_process
+GO:0006810,127,2921,1.9670224555393317e-12,1.8997307538891104,True,transport,biological_process
+GO:0005743,44,565,2.456555952244785e-12,3.4027035804173096,True,mitochondrial inner membrane,cellular_component
+GO:0016773,84,1614,2.806054569798857e-12,2.274027147778043,True,"phosphotransferase activity, alcohol group as acceptor",molecular_function
+GO:0015103,12,33,4.373354102420598e-12,15.88865721434529,True,inorganic anion transmembrane transporter activity,molecular_function
+GO:0016301,84,1675,1.8606473320105004e-11,2.1912118307544843,True,kinase activity,molecular_function
+GO:0016310,85,1737,4.806562050700476e-11,2.138154072454353,True,phosphorylation,biological_process
+GO:0071496,6,6,1.413075060263298e-10,43.69380733944954,True,cellular response to external stimulus,biological_process
+GO:0009991,6,6,1.413075060263298e-10,43.69380733944954,True,response to extracellular stimulus,biological_process
+GO:0016772,85,1826,5.527302512213933e-10,2.033939553041189,True,"transferase activity, transferring phosphorus-containing groups",molecular_function
+GO:0004185,12,51,1.340948282406972e-09,10.280895844576362,True,serine-type carboxypeptidase activity,molecular_function
+GO:0006796,105,2506,1.6026958635909811e-09,1.8307461175747015,True,phosphate-containing compound metabolic process,biological_process
+GO:0006793,105,2507,1.6374079658126923e-09,1.8300158638381339,True,phosphorus metabolic process,biological_process
+GO:0098796,36,505,2.6365032908448927e-09,3.1148060677627396,True,membrane protein complex,cellular_component
+GO:0030554,120,3040,3.231287012632956e-09,1.7247555528730083,True,adenyl nucleotide binding,molecular_function
+GO:0070008,12,55,3.40770026249544e-09,9.533194328607173,True,serine-type exopeptidase activity,molecular_function
+GO:0022829,6,8,3.803951878334131e-09,32.77035550458716,True,wide pore channel activity,molecular_function
+GO:0046930,6,8,3.803951878334131e-09,32.77035550458716,True,pore complex,cellular_component
+GO:0015288,6,8,3.803951878334131e-09,32.77035550458716,True,porin activity,molecular_function
+GO:0015291,20,176,4.781529399871423e-09,4.965205379482902,True,secondary active transmembrane transporter activity,molecular_function
+GO:0004180,12,57,5.2680907799468395e-09,9.198696281989378,True,carboxypeptidase activity,molecular_function
+GO:0005524,118,3000,5.4579334020062466e-09,1.7186230886850153,True,ATP binding,molecular_function
+GO:0031668,5,5,6.209055074658625e-09,43.69380733944955,True,cellular response to extracellular stimulus,biological_process
+GO:0030026,5,5,6.209055074658625e-09,43.69380733944955,True,cellular manganese ion homeostasis,biological_process
+GO:0007154,5,5,6.209055074658625e-09,43.69380733944955,True,cell communication,biological_process
+GO:0009432,5,5,6.209055074658625e-09,43.69380733944955,True,SOS response,biological_process
+GO:0005741,9,28,7.730910623930479e-09,14.044438073394495,True,mitochondrial outer membrane,cellular_component
+GO:0032559,118,3019,7.783607590313011e-09,1.7078069778254539,True,adenyl ribonucleotide binding,molecular_function
+GO:0015116,6,9,1.1189668523547137e-08,29.129204892966364,True,sulfate transmembrane transporter activity,molecular_function
+GO:1901682,6,9,1.1189668523547137e-08,29.129204892966364,True,sulfur compound transmembrane transporter activity,molecular_function
+GO:0098798,24,266,1.4693327843648484e-08,3.9422984065668762,True,mitochondrial protein complex,cellular_component
+GO:0031968,9,31,2.1217967584047353e-08,12.685298905001481,True,organelle outer membrane,cellular_component
+GO:0016887,34,502,2.565615211123134e-08,2.959341532950766,True,ATPase activity,molecular_function
+GO:0055071,5,6,3.654779291443974e-08,36.41150611620795,True,manganese ion homeostasis,biological_process
+GO:0005783,57,1142,4.399573796450742e-08,2.180864289272,True,endoplasmic reticulum,cellular_component
+GO:0009535,18,168,6.95449029294255e-08,4.681479357798166,True,chloroplast thylakoid membrane,cellular_component
+GO:0055035,18,168,6.95449029294255e-08,4.681479357798166,True,plastid thylakoid membrane,cellular_component
+GO:0042651,18,168,6.95449029294255e-08,4.681479357798166,True,thylakoid membrane,cellular_component
+GO:0098661,8,26,7.903901840230127e-08,13.444248412138322,True,inorganic anion transmembrane transport,biological_process
+GO:0019538,165,4856,1.0559530744823099e-07,1.4846536678354971,True,protein metabolic process,biological_process
+GO:0034357,18,174,1.1903554295529767e-07,4.52004903511547,True,photosynthetic membrane,cellular_component
+GO:0035639,120,3245,1.195755755438322e-07,1.61579564891647,True,purine ribonucleoside triphosphate binding,molecular_function
+GO:0008272,5,7,1.2549257823846135e-07,31.209862385321102,True,sulfate transport,biological_process
+GO:0072348,5,7,1.2549257823846135e-07,31.209862385321102,True,sulfur compound transport,biological_process
+GO:1902358,5,7,1.2549257823846135e-07,31.209862385321102,True,sulfate transmembrane transport,biological_process
+GO:0019867,9,41,3.0040382292210046e-07,9.591323562318193,True,outer membrane,cellular_component
+GO:0008271,5,8,3.2830695554085836e-07,27.308629587155966,True,secondary active sulfate transmembrane transporter activity,molecular_function
+GO:0032555,119,3275,3.379888432053042e-07,1.5876528468380138,True,purine ribonucleotide binding,molecular_function
+GO:0032553,119,3275,3.379888432053042e-07,1.5876528468380138,True,ribonucleotide binding,molecular_function
+GO:0097367,120,3330,4.576649536999837e-07,1.5745516158360198,True,carbohydrate derivative binding,molecular_function
+GO:0015698,8,33,6.095435573998902e-07,10.59243814289686,True,inorganic anion transport,biological_process
+GO:0004722,14,120,6.937829568937505e-07,5.097610856269114,True,protein serine/threonine phosphatase activity,molecular_function
+GO:0008238,12,87,7.053205913948985e-07,6.0267320468206265,True,exopeptidase activity,molecular_function
+GO:0005253,6,16,9.297896384871162e-07,16.38517775229358,True,anion channel activity,molecular_function
+GO:0008308,6,16,9.297896384871162e-07,16.38517775229358,True,voltage-gated anion channel activity,molecular_function
+GO:0005757,4,5,1.3377580836422899e-06,34.95504587155964,True,mitochondrial permeability transition pore complex,cellular_component
+GO:0022804,24,345,1.7753459359628425e-06,3.039569206222577,True,active transmembrane transporter activity,molecular_function
+GO:0017076,121,3479,2.3921309578001042e-06,1.5196753918003434,True,purine nucleotide binding,molecular_function
+GO:0000166,121,3479,2.3921309578001042e-06,1.5196753918003434,True,nucleotide binding,molecular_function
+GO:0003684,5,11,2.557649035977932e-06,19.86082151793161,True,damaged DNA binding,molecular_function
+GO:0036211,115,3280,3.037367200247786e-06,1.5319475134258222,True,protein modification process,biological_process
+GO:0006464,114,3248,3.2099001819661682e-06,1.5335880654856058,True,cellular protein modification process,biological_process
+GO:0044267,143,4310,3.3402526953670605e-06,1.4497017284318523,True,cellular protein metabolic process,biological_process
+GO:0140323,4,6,3.940178664936452e-06,29.129204892966364,True,solute:anion antiporter activity,molecular_function
+GO:0015301,4,6,3.940178664936452e-06,29.129204892966364,True,anion:anion antiporter activity,molecular_function
+GO:1901265,121,3517,4.032202412793391e-06,1.503255811223598,True,nucleoside phosphate binding,molecular_function
+GO:0005789,38,743,4.530660995536371e-06,2.2346765530270294,True,endoplasmic reticulum membrane,cellular_component
+GO:0071421,5,13,6.858115716110287e-06,16.805310515172902,True,manganese ion transmembrane transport,biological_process
+GO:0006828,5,13,6.858115716110287e-06,16.805310515172902,True,manganese ion transport,biological_process
+GO:0043412,120,3539,8.751972779831525e-06,1.4815645325611602,True,macromolecule modification,biological_process
+GO:0006839,13,130,9.654572881039249e-06,4.369380733944954,True,mitochondrial transport,biological_process
+GO:0034755,5,14,1.0466725567093802e-05,15.604931192660551,True,iron ion transmembrane transport,biological_process
+GO:0005384,5,14,1.0466725567093802e-05,15.604931192660551,True,manganese ion transmembrane transporter activity,molecular_function
+GO:0016462,35,687,1.159586094229911e-05,2.226030941602233,True,pyrophosphatase activity,molecular_function
+GO:0017111,35,687,1.159586094229911e-05,2.226030941602233,True,nucleoside-triphosphatase activity,molecular_function
+GO:0043168,124,3731,1.5472028898496907e-05,1.4521662047954285,True,anion binding,molecular_function
+GO:0004721,14,159,1.918088226471568e-05,3.8472534764295196,True,phosphoprotein phosphatase activity,molecular_function
+GO:0006826,5,16,2.198286079793676e-05,13.654314793577983,True,iron ion transport,biological_process
+GO:0016818,35,715,2.656615158856162e-05,2.1388577019310966,True,"hydrolase activity, acting on acid anhydrides, in phosphorus-containing anhydrides",molecular_function
+GO:0016817,35,715,2.656615158856162e-05,2.1388577019310966,True,"hydrolase activity, acting on acid anhydrides",molecular_function
+GO:0006470,14,164,2.7141624695874422e-05,3.7299591631237417,True,protein dephosphorylation,biological_process
+GO:0043618,5,17,3.055527778429941e-05,12.851119805720453,True,regulation of transcription from RNA polymerase II promoter in response to stress,biological_process
+GO:0043620,5,17,3.055527778429941e-05,12.851119805720453,True,regulation of DNA-templated transcription in response to stress,biological_process
+GO:0036003,5,17,3.055527778429941e-05,12.851119805720453,True,positive regulation of transcription from RNA polymerase II promoter in response to stress,biological_process
+GO:0036094,124,3798,3.452986433619255e-05,1.4265487388340556,True,small molecule binding,molecular_function
+GO:1901564,191,6366,3.460864436409396e-05,1.3109514925910872,True,organonitrogen compound metabolic process,biological_process
+GO:0070838,11,112,5.45132068331459e-05,4.291356077981652,True,divalent metal ion transport,biological_process
+GO:0072511,11,112,5.45132068331459e-05,4.291356077981652,True,divalent inorganic cation transport,biological_process
+GO:0016614,18,278,8.518934517611606e-05,2.8290954392449343,False,"oxidoreductase activity, acting on CH-OH group of donors",molecular_function
+GO:0016616,18,278,8.518934517611606e-05,2.8290954392449343,False,"oxidoreductase activity, acting on the CH-OH group of donors, NAD or NADP as acceptor",molecular_function
+GO:0005244,6,33,9.226220838484308e-05,7.944328607172645,False,voltage-gated ion channel activity,molecular_function
+GO:0022832,6,33,9.226220838484308e-05,7.944328607172645,False,voltage-gated channel activity,molecular_function
+GO:0003824,302,10986,9.724808191935785e-05,1.2011223208186566,False,catalytic activity,molecular_function
+GO:0016783,5,22,0.00011824824668202822,9.930410758965804,False,sulfurtransferase activity,molecular_function
+GO:0008509,14,188,0.00011977974863931583,3.25379416357603,False,anion transmembrane transporter activity,molecular_function
+GO:0009605,34,745,0.00013331282243488459,1.9940797980419924,False,response to external stimulus,biological_process
+GO:0008236,14,192,0.00014952209083196556,3.1860067851681957,False,serine-type peptidase activity,molecular_function
+GO:0016825,14,193,0.00015788525957746434,3.1694989779911587,False,"hydrolase activity, acting on acid phosphorus-nitrogen bonds",molecular_function
+GO:0017171,14,193,0.00015788525957746434,3.1694989779911587,False,serine hydrolase activity,molecular_function
+GO:0098588,42,1020,0.00021757506587052812,1.7991567728008635,False,bounding membrane of organelle,cellular_component
+GO:0044260,168,5675,0.00022831676396974597,1.2934906842339249,False,cellular macromolecule metabolic process,biological_process
+GO:0043231,431,16621,0.0002809631361743677,1.1330263499971573,False,intracellular membrane-bounded organelle,cellular_component
+GO:1990542,9,94,0.0003101962481496197,4.183449638883467,False,mitochondrial transmembrane transport,biological_process
+GO:0005381,3,7,0.0003903223722622076,18.72591743119266,False,iron ion transmembrane transporter activity,molecular_function
+GO:0046916,5,30,0.0005499790385175164,7.282301223241591,False,cellular transition metal ion homeostasis,biological_process
+GO:0005216,9,102,0.0005682889100775598,3.855335941716136,False,ion channel activity,molecular_function
+GO:0016782,6,48,0.0007641981519115584,5.461725917431193,False,"transferase activity, transferring sulfur-containing groups",molecular_function
+GO:0043227,440,17200,0.0008173800662432796,1.1177485598463837,False,membrane-bounded organelle,cellular_component
+GO:0000978,5,34,0.000995846007099825,6.425559902860226,False,RNA polymerase II cis-regulatory region sequence-specific DNA binding,molecular_function
+GO:0022836,7,69,0.0010111051976877965,4.432705092407925,False,gated channel activity,molecular_function
+GO:0000987,5,35,0.0011401449126667463,6.241972477064221,False,cis-regulatory region sequence-specific DNA binding,molecular_function
+GO:0016485,4,21,0.0011953350756915007,8.322629969418962,False,protein processing,biological_process
+GO:0044419,38,979,0.0012563448435418331,1.695980264452587,False,interspecies interaction between organisms,biological_process
+GO:0006807,249,9183,0.001264626420446496,1.184771646251,False,nitrogen compound metabolic process,biological_process
+GO:0034605,2,3,0.0015457249692384467,29.129204892966364,False,cellular response to heat,biological_process
+GO:0061408,2,3,0.0015457249692384467,29.129204892966364,False,positive regulation of transcription from RNA polymerase II promoter in response to heat stress,biological_process
+GO:0043170,211,7659,0.0015862257589087264,1.2037333005123192,False,macromolecule metabolic process,biological_process
+GO:0098542,18,357,0.0016494347101540562,2.2030491095520777,False,defense response to other organism,biological_process
+GO:0001401,3,11,0.0017181268836382016,11.916492910758965,False,SAM complex,cellular_component
+GO:0003697,3,11,0.0017181268836382016,11.916492910758965,False,single-stranded DNA binding,molecular_function
+GO:0031300,7,77,0.001926343979747448,3.972164303586322,False,intrinsic component of organelle membrane,cellular_component
+GO:0031301,7,77,0.001926343979747448,3.972164303586322,False,integral component of organelle membrane,cellular_component
+GO:0070011,25,577,0.001987270177203454,1.8931458985896683,False,"peptidase activity, acting on L-amino acid peptides",molecular_function
+GO:0008233,25,577,0.001987270177203454,1.8931458985896683,False,peptidase activity,molecular_function
+GO:0098656,13,224,0.0021095669440531566,2.5358013188073394,False,anion transmembrane transport,biological_process
+GO:0051707,20,427,0.0022386716064391092,2.04654835313581,False,response to other organism,biological_process
+GO:0009579,11,177,0.0026718163131120363,2.7154343544290676,False,thylakoid,cellular_component
+GO:0022803,10,154,0.0029959042225919507,2.837260216847373,False,passive transmembrane transporter activity,molecular_function
+GO:0015267,10,154,0.0029959042225919507,2.837260216847373,False,channel activity,molecular_function
+GO:0016740,127,4381,0.0031102929190811824,1.2666317124195599,False,transferase activity,molecular_function
+GO:0042170,5,44,0.003221210336013886,4.965205379482902,False,plastid membrane,cellular_component
+GO:0031969,5,44,0.003221210336013886,4.965205379482902,False,chloroplast membrane,cellular_component
+GO:0051604,5,44,0.003221210336013886,4.965205379482902,False,protein maturation,biological_process
+GO:0016311,17,353,0.0034951629743033676,2.1042343477921874,False,dephosphorylation,biological_process
+GO:0055076,5,45,0.0035566705641928513,4.854867482161061,False,transition metal ion homeostasis,biological_process
+GO:0046915,5,45,0.0035566705641928513,4.854867482161061,False,transition metal ion transmembrane transporter activity,molecular_function
+GO:0098799,3,14,0.0036010357192143433,9.36295871559633,False,outer mitochondrial membrane protein complex,cellular_component
+GO:0016787,98,3292,0.004491769057324695,1.3007269499593122,False,hydrolase activity,molecular_function
+GO:0043226,442,17636,0.00467706160225887,1.0950704719911941,False,organelle,cellular_component
+GO:0043229,442,17636,0.00467706160225887,1.0950704719911941,False,intracellular organelle,cellular_component
+GO:0031226,6,69,0.004985107187296103,3.7994615077782212,False,intrinsic component of plasma membrane,cellular_component
+GO:0005887,6,69,0.004985107187296103,3.7994615077782212,False,integral component of plasma membrane,cellular_component
+GO:0004792,2,5,0.004997178804114088,17.47752293577982,False,thiosulfate sulfurtransferase activity,molecular_function
+GO:0006310,5,51,0.006113564391073644,4.283706601906818,False,DNA recombination,biological_process
+GO:0008152,348,13662,0.006709443862463697,1.1129735729855394,False,metabolic process,biological_process
+GO:0006882,2,6,0.0073823132937606405,14.564602446483182,False,cellular zinc ion homeostasis,biological_process
+GO:0006821,3,19,0.008805499646163275,6.899022211492033,False,chloride transport,biological_process
+GO:1902476,3,19,0.008805499646163275,6.899022211492033,False,chloride transmembrane transport,biological_process
+GO:0006820,14,296,0.008828457125492259,2.066598995784776,False,anion transport,biological_process
+GO:0110165,829,35462,0.008893725304370232,1.0214360804354992,False,cellular anatomical entity,cellular_component
+GO:0000139,19,453,0.008994784974703157,1.8326320959151021,False,Golgi membrane,cellular_component
+GO:0006952,34,963,0.009113592264560086,1.5426681719016455,False,defense response,biological_process
+GO:0003724,6,79,0.009551502243732302,3.31851701312275,False,RNA helicase activity,molecular_function
+GO:0098800,7,104,0.010057321801294147,2.940929340155258,False,inner mitochondrial membrane protein complex,cellular_component
+GO:0055069,2,7,0.010179109661733647,12.48394495412844,False,zinc ion homeostasis,biological_process
+GO:0009266,3,21,0.011683882946452468,6.241972477064221,False,response to temperature stimulus,biological_process
+GO:0034613,11,221,0.013437927442472153,2.174804890198846,False,cellular protein localization,biological_process
+GO:0070727,11,221,0.013437927442472153,2.174804890198846,False,cellular macromolecule localization,biological_process
+GO:0044237,278,10845,0.01372620770751209,1.1200441162164103,False,cellular metabolic process,biological_process
+GO:0005730,8,137,0.01380505777963187,2.5514632023036232,False,nucleolus,cellular_component
+GO:0000041,5,64,0.015590209346731424,3.413578698394496,False,transition metal ion transport,biological_process
+GO:0005575,835,35844,0.016575957914956134,1.0178643323412666,False,cellular_component,cellular_component
+GO:0000460,3,24,0.016903363095116967,5.461725917431193,False,maturation of 5.8S rRNA,biological_process
+GO:0045040,2,9,0.016928193423134032,9.70973496432212,False,protein insertion into mitochondrial outer membrane,biological_process
+GO:0016675,2,9,0.016928193423134032,9.70973496432212,False,"oxidoreductase activity, acting on a heme group of donors",molecular_function
+GO:0016676,2,9,0.016928193423134032,9.70973496432212,False,"oxidoreductase activity, acting on a heme group of donors, oxygen as acceptor",molecular_function
+GO:0032865,2,9,0.016928193423134032,9.70973496432212,False,ERMES complex,cellular_component
+GO:0042578,16,389,0.018403096601867137,1.7971745949387987,False,phosphoric ester hydrolase activity,molecular_function
+GO:0070585,5,68,0.019798582733062196,3.212779951430113,False,protein localization to mitochondrion,biological_process
+GO:0009607,25,701,0.020584133240972233,1.5582670235181721,False,response to biotic stimulus,biological_process
+GO:0022406,3,26,0.020995864987506416,5.041593154551871,False,membrane docking,biological_process
+GO:0098805,15,366,0.02258462933560576,1.790729808993834,False,whole membrane,cellular_component
+GO:0004534,1,1,0.022886538410909856,43.69380733944954,False,5'-3' exoribonuclease activity,molecular_function
+GO:0002939,1,1,0.022886538410909856,43.69380733944954,False,tRNA N1-guanine methylation,biological_process
+GO:0006875,5,71,0.02340064756212413,3.0770286858767286,False,cellular metal ion homeostasis,biological_process
+GO:0072594,7,124,0.024237880561880816,2.466585898194732,False,establishment of protein localization to organelle,biological_process
+GO:0033365,7,124,0.024237880561880816,2.466585898194732,False,protein localization to organelle,biological_process
+GO:0007008,2,11,0.02509231503613874,7.944328607172643,False,outer mitochondrial membrane organization,biological_process
+GO:0016791,14,341,0.026593698270477497,1.7938806532325327,False,phosphatase activity,molecular_function
+GO:0032991,84,2986,0.02934156294123113,1.2291626980957004,False,protein-containing complex,cellular_component
+GO:0051204,2,12,0.029660376381140385,7.282301223241591,False,protein insertion into mitochondrial membrane,biological_process
+GO:0043207,20,551,0.030355710214894655,1.5859821175843754,False,response to external biotic stimulus,biological_process
+GO:0051649,23,657,0.030634107131293192,1.529615782050745,False,establishment of localization in cell,biological_process
+GO:0007005,3,30,0.03066159667889746,4.369380733944954,False,mitochondrion organization,biological_process
+GO:0051205,3,30,0.03066159667889746,4.369380733944954,False,protein insertion into membrane,biological_process
+GO:0098803,4,53,0.03297236243703275,3.297645836939588,False,respiratory chain complex,cellular_component
+GO:0030003,5,78,0.03337281134785289,2.80088508586215,False,cellular cation homeostasis,biological_process
+GO:0006873,5,78,0.03337281134785289,2.80088508586215,False,cellular ion homeostasis,biological_process
+GO:0090151,2,13,0.034529890372345946,6.722124206069161,False,establishment of protein localization to mitochondrial membrane,biological_process
+GO:0009408,2,13,0.034529890372345946,6.722124206069161,False,response to heat,biological_process
+GO:0022613,7,135,0.03611509288371538,2.265604825008495,False,ribonucleoprotein complex biogenesis,biological_process
+GO:0044085,7,135,0.03611509288371538,2.265604825008495,False,cellular component biogenesis,biological_process
+GO:0042254,7,135,0.03611509288371538,2.265604825008495,False,ribosome biogenesis,biological_process
+GO:0006364,8,166,0.03784997703036717,2.105725654913231,False,rRNA processing,biological_process
+GO:0016072,8,167,0.038992988308140554,2.093116519255068,False,rRNA metabolic process,biological_process
+GO:0055082,5,84,0.04374235533001526,2.6008218654434256,False,cellular chemical homeostasis,biological_process
+GO:0007006,2,15,0.0451092263808334,5.8258409785932725,False,mitochondrial membrane organization,biological_process
+GO:0043934,1,2,0.04524987012723063,21.84690366972477,False,sporulation,biological_process
+GO:0009235,1,2,0.04524987012723063,21.84690366972477,False,cobalamin metabolic process,biological_process
+GO:0009019,1,2,0.04524987012723063,21.84690366972477,False,tRNA (guanine-N1-)-methyltransferase activity,molecular_function
+GO:0052906,1,2,0.04524987012723063,21.84690366972477,False,tRNA (guanine(37)-N(1))-methyltransferase activity,molecular_function
+GO:0009236,1,2,0.04524987012723063,21.84690366972477,False,cobalamin biosynthetic process,biological_process
+GO:0072655,4,61,0.05105158264579731,2.865167694390134,False,establishment of protein localization to mitochondrion,biological_process
+GO:0009628,3,37,0.05223318491605104,3.542741135631044,False,response to abiotic stimulus,biological_process
+GO:0072503,3,38,0.0557802286861139,3.4495111057460166,False,cellular divalent inorganic cation homeostasis,biological_process
+GO:0000463,2,17,0.05670791749760807,5.140447922288181,False,"maturation of LSU-rRNA from tricistronic rRNA transcript (SSU-rRNA, 5.8S rRNA, LSU-rRNA)",biological_process
+GO:0000470,2,17,0.05670791749760807,5.140447922288181,False,maturation of LSU-rRNA,biological_process
+GO:0072507,3,39,0.05943885046303831,3.36106210303458,False,divalent inorganic cation homeostasis,biological_process
+GO:0071704,265,10662,0.059866581132104094,1.0859931480917395,False,organic substance metabolic process,biological_process
+GO:0034470,10,248,0.06057823314035989,1.7618470701390945,False,ncRNA processing,biological_process
+GO:0006066,4,65,0.06176077818532225,2.688849682427664,False,alcohol metabolic process,biological_process
+GO:0022853,7,155,0.06634718279677013,1.973268718555786,False,active ion transmembrane transporter activity,molecular_function
+GO:0002229,1,3,0.06710194270887912,14.564602446483182,False,defense response to oomycetes,biological_process
+GO:0015370,1,3,0.06710194270887912,14.564602446483182,False,solute:sodium symporter activity,molecular_function
+GO:0015293,4,68,0.07050791051708824,2.5702239611440905,False,symporter activity,molecular_function
+GO:0008094,5,97,0.0721559635702565,2.2522581102809043,False,DNA-dependent ATPase activity,molecular_function
+GO:0046907,20,612,0.07277610595846981,1.427902200635606,False,intracellular transport,biological_process
+GO:0005759,4,69,0.07355726590844186,2.532974338518814,False,mitochondrial matrix,cellular_component
+GO:0055065,5,100,0.07986392852156264,2.184690366972477,False,metal ion homeostasis,biological_process
+GO:0055080,5,100,0.07986392852156264,2.184690366972477,False,cation homeostasis,biological_process
+GO:0098771,5,100,0.07986392852156264,2.184690366972477,False,inorganic ion homeostasis,biological_process
+GO:0050801,5,100,0.07986392852156264,2.184690366972477,False,ion homeostasis,biological_process
+GO:0005794,19,584,0.08134529150227479,1.4215451017971596,False,Golgi apparatus,cellular_component
+GO:0008409,1,4,0.08845443118418629,10.923451834862385,False,5'-3' exonuclease activity,molecular_function
+GO:0071885,1,4,0.08845443118418629,10.923451834862385,False,N-terminal protein N-methyltransferase activity,molecular_function
+GO:0015294,1,4,0.08845443118418629,10.923451834862385,False,solute:cation symporter activity,molecular_function
+GO:0009405,1,4,0.08845443118418629,10.923451834862385,False,pathogenesis,biological_process
+GO:0016043,44,1566,0.09583123582335445,1.2276676391671648,False,cellular component organization,biological_process
+GO:0071840,44,1575,0.1022312608722155,1.2206523955147808,False,cellular component organization or biogenesis,biological_process
+GO:0004386,7,173,0.10358793165393076,1.767957522405473,False,helicase activity,molecular_function
+GO:0035792,1,5,0.1093187442788262,8.73876146788991,False,host cell postsynaptic membrane,cellular_component
+GO:0005742,1,5,0.1093187442788262,8.73876146788991,False,mitochondrial outer membrane translocase complex,cellular_component
+GO:0031307,1,5,0.1093187442788262,8.73876146788991,False,integral component of mitochondrial outer membrane,cellular_component
+GO:0031306,1,5,0.1093187442788262,8.73876146788991,False,intrinsic component of mitochondrial outer membrane,cellular_component
+GO:0071554,9,244,0.10977853137962527,1.6116568280944503,False,cell wall organization or biogenesis,biological_process
+GO:0004190,4,84,0.12677482266496187,2.0806574923547405,False,aspartic-type endopeptidase activity,molecular_function
+GO:0033554,11,324,0.12716060436797644,1.483431730660324,False,cellular response to stress,biological_process
+GO:0045277,1,6,0.12970603046387982,7.282301223241591,False,respiratory chain complex IV,cellular_component
+GO:0016423,1,6,0.12970603046387982,7.282301223241591,False,tRNA (guanine) methyltransferase activity,molecular_function
+GO:0006281,6,150,0.1309137630077659,1.747752293577982,False,DNA repair,biological_process
+GO:0070001,4,87,0.13894926142631583,2.0089106822735423,False,aspartic-type peptidase activity,molecular_function
+GO:0051301,4,88,0.14310802136561976,1.9860821517931608,False,cell division,biological_process
+GO:0008514,6,155,0.1460277224676544,1.691373187333531,False,organic anion transmembrane transporter activity,molecular_function
+GO:0002239,1,7,0.14962718392545088,6.24197247706422,False,response to oomycetes,biological_process
+GO:0006508,30,1075,0.15533572961356618,1.2193620652869641,False,proteolysis,biological_process
+GO:0017038,3,60,0.15818177939131683,2.184690366972477,False,protein import,biological_process
+GO:0019725,6,160,0.16189316607936852,1.638517775229358,False,cellular homeostasis,biological_process
+GO:0034660,10,305,0.16432112747554323,1.4325838471950672,False,ncRNA metabolic process,biological_process
+GO:0042592,6,161,0.16515216822940973,1.6283406461906662,False,homeostatic process,biological_process
+GO:0048878,6,161,0.16515216822940973,1.6283406461906662,False,chemical homeostasis,biological_process
+GO:0005747,1,8,0.16909285033459293,5.461725917431193,False,mitochondrial respiratory chain complex I,cellular_component
+GO:0045271,1,8,0.16909285033459293,5.461725917431193,False,respiratory chain complex I,cellular_component
+GO:0005774,1,8,0.16909285033459293,5.461725917431193,False,vacuolar membrane,cellular_component
+GO:0030964,1,8,0.16909285033459293,5.461725917431193,False,NADH dehydrogenase complex,cellular_component
+GO:0010257,1,8,0.16909285033459293,5.461725917431193,False,NADH dehydrogenase complex assembly,biological_process
+GO:0032981,1,8,0.16909285033459293,5.461725917431193,False,mitochondrial respiratory chain complex I assembly,biological_process
+GO:0007165,26,930,0.17328155112823723,1.2215473019631056,False,signal transduction,biological_process
+GO:0140098,9,274,0.1789879239984586,1.435198051295788,False,"catalytic activity, acting on RNA",molecular_function
+GO:0051641,24,858,0.18397022074580488,1.2222044011034836,False,cellular localization,biological_process
+GO:0055036,1,9,0.18811343243910575,4.85486748216106,False,virion membrane,cellular_component
+GO:0019104,1,9,0.18811343243910575,4.85486748216106,False,DNA N-glycosylase activity,molecular_function
+GO:0031227,1,9,0.18811343243910575,4.85486748216106,False,intrinsic component of endoplasmic reticulum membrane,cellular_component
+GO:0030176,1,9,0.18811343243910575,4.85486748216106,False,integral component of endoplasmic reticulum membrane,cellular_component
+GO:0006665,2,35,0.19068750146938984,2.496788990825688,False,sphingolipid metabolic process,biological_process
+GO:0031974,5,134,0.19391879777131676,1.6303659455018487,False,membrane-enclosed lumen,cellular_component
+GO:0070013,5,134,0.19391879777131676,1.6303659455018487,False,intracellular organelle lumen,cellular_component
+GO:0043233,5,134,0.19391879777131676,1.6303659455018487,False,organelle lumen,cellular_component
+GO:0044238,260,10845,0.1951875240206724,1.0475232741592329,False,primary metabolic process,biological_process
+GO:0006974,6,173,0.20629451854622358,1.515392162061834,False,cellular response to DNA damage stimulus,biological_process
+GO:0031967,1,10,0.20669909575866974,4.369380733944955,False,organelle envelope,cellular_component
+GO:0070069,1,10,0.20669909575866974,4.369380733944955,False,cytochrome complex,cellular_component
+GO:0031975,1,10,0.20669909575866974,4.369380733944955,False,envelope,cellular_component
+GO:0017004,2,37,0.20742246531503788,2.3618274237540295,False,cytochrome complex assembly,biological_process
+GO:0022607,12,405,0.2208097136410063,1.2946313285762827,False,cellular component assembly,biological_process
+GO:1902652,1,11,0.22485977383139158,3.9721643035863217,False,secondary alcohol metabolic process,biological_process
+GO:0006950,48,1873,0.22818821224126476,1.1197558741556743,False,response to stress,biological_process
+GO:0000977,5,145,0.23908769369093083,1.5066830117051566,False,RNA polymerase II transcription regulatory region sequence-specific DNA binding,molecular_function
+GO:0051716,12,413,0.24009908705121855,1.269553724148655,False,cellular response to stimulus,biological_process
+GO:1901615,4,111,0.24977784062294747,1.5745516158360195,False,organic hydroxy compound metabolic process,biological_process
+GO:0043414,5,149,0.2561818978082822,1.4662351456191123,False,macromolecule methylation,biological_process
+GO:0042025,6,187,0.2582790116974985,1.4019403424422314,False,host cell nucleus,cellular_component
+GO:0071806,3,77,0.25847382701986643,1.7023561301084238,False,protein transmembrane transport,biological_process
+GO:0098573,1,13,0.2599447805386316,3.3610621030345804,False,intrinsic component of mitochondrial membrane,cellular_component
+GO:0016891,1,13,0.2599447805386316,3.3610621030345804,False,"endoribonuclease activity, producing 5'-phosphomonoesters",molecular_function
+GO:0006284,1,13,0.2599447805386316,3.3610621030345804,False,base-excision repair,biological_process
+GO:0015108,1,13,0.2599447805386316,3.3610621030345804,False,chloride transmembrane transporter activity,molecular_function
+GO:0032592,1,13,0.2599447805386316,3.3610621030345804,False,integral component of mitochondrial membrane,cellular_component
+GO:0007166,1,13,0.2599447805386316,3.3610621030345804,False,cell surface receptor signaling pathway,biological_process
+GO:0006814,1,14,0.2768878636993348,3.12098623853211,False,sodium ion transport,biological_process
+GO:0016799,1,14,0.2768878636993348,3.12098623853211,False,"hydrolase activity, hydrolyzing N-glycosyl compounds",molecular_function
+GO:0072657,3,81,0.28330695776802167,1.6182891607203536,False,protein localization to membrane,biological_process
+GO:0090150,3,81,0.28330695776802167,1.6182891607203536,False,establishment of protein localization to membrane,biological_process
+GO:0008173,2,46,0.28386614477716043,1.8997307538891106,False,RNA methyltransferase activity,molecular_function
+GO:0030488,1,15,0.2934434806464005,2.9129204892966363,False,tRNA methylation,biological_process
+GO:0008175,1,15,0.2934434806464005,2.9129204892966363,False,tRNA methyltransferase activity,molecular_function
+GO:0004521,1,15,0.2934434806464005,2.9129204892966363,False,endoribonuclease activity,molecular_function
+GO:0006119,1,15,0.2934434806464005,2.9129204892966363,False,oxidative phosphorylation,biological_process
+GO:0001510,2,48,0.3008640725036121,1.8205753058103977,False,RNA methylation,biological_process
+GO:0000413,2,50,0.3177917759648273,1.7477522935779817,False,protein peptidyl-prolyl isomerization,biological_process
+GO:0018208,2,50,0.3177917759648273,1.7477522935779817,False,peptidyl-proline modification,biological_process
+GO:0000165,2,52,0.33462083044495583,1.6805310515172902,False,MAPK cascade,biological_process
+GO:0004532,1,18,0.34087303815847336,2.42743374108053,False,exoribonuclease activity,molecular_function
+GO:0031163,1,18,0.34087303815847336,2.42743374108053,False,metallo-sulfur cluster assembly,biological_process
+GO:0007186,1,18,0.34087303815847336,2.42743374108053,False,G protein-coupled receptor signaling pathway,biological_process
+GO:0016896,1,18,0.34087303815847336,2.42743374108053,False,"exoribonuclease activity, producing 5'-phosphomonoesters",molecular_function
+GO:0034248,3,91,0.34595674105314883,1.4404551870148201,False,regulation of cellular amide metabolic process,biological_process
+GO:0050896,73,3041,0.35145233687156563,1.0488812679315411,False,response to stimulus,biological_process
+GO:0022884,1,19,0.355965302713952,2.2996740704973444,False,macromolecule transmembrane transporter activity,molecular_function
+GO:0045486,1,19,0.355965302713952,2.2996740704973444,False,naringenin 3-dioxygenase activity,molecular_function
+GO:0006996,12,461,0.36629276440180447,1.1373659177297062,False,organelle organization,biological_process
+GO:0019783,2,58,0.3842714005839806,1.5066830117051566,False,ubiquitin-like protein-specific protease activity,molecular_function
+GO:0033014,1,21,0.38512216076353556,2.0806574923547405,False,tetrapyrrole biosynthetic process,biological_process
+GO:0090502,1,21,0.38512216076353556,2.0806574923547405,False,"RNA phosphodiester bond hydrolysis, endonucleolytic",biological_process
+GO:0045543,1,22,0.39920234657665427,1.9860821517931608,False,gibberellin 2-beta-dioxygenase activity,molecular_function
+GO:0052634,1,22,0.39920234657665427,1.9860821517931608,False,C-19 gibberellin 2-beta-dioxygenase activity,molecular_function
+GO:0016758,16,642,0.3998495196623222,1.0889422389893968,False,"transferase activity, transferring hexosyl groups",molecular_function
+GO:0006396,19,770,0.40167742171080667,1.0781588824020019,False,RNA processing,biological_process
+GO:0006643,2,61,0.4084985150324822,1.432583847195067,False,membrane lipid metabolic process,biological_process
+GO:0031461,2,61,0.4084985150324822,1.432583847195067,False,cullin-RING ubiquitin ligase complex,cellular_component
+GO:0033013,1,23,0.41296046926597235,1.8997307538891106,False,tetrapyrrole metabolic process,biological_process
+GO:0030150,1,23,0.41296046926597235,1.8997307538891106,False,protein import into mitochondrial matrix,biological_process
+GO:0004222,2,62,0.4164710930724004,1.4094776561112756,False,metalloendopeptidase activity,molecular_function
+GO:0055114,51,2154,0.42129624092369367,1.0345330428560475,False,oxidation-reduction process,biological_process
+GO:0006417,2,63,0.42438903688495433,1.38710499490316,False,regulation of translation,biological_process
+GO:0090503,1,24,0.42640388727476985,1.8205753058103977,False,"RNA phosphodiester bond hydrolysis, exonucleolytic",biological_process
+GO:0005788,1,25,0.4395397910724188,1.7477522935779817,False,endoplasmic reticulum lumen,cellular_component
+GO:0050832,3,108,0.4504917391465572,1.2137168705402652,False,defense response to fungus,biological_process
+GO:0009620,3,108,0.4504917391465572,1.2137168705402652,False,response to fungus,biological_process
+GO:0009206,1,26,0.45237520718815316,1.6805310515172902,False,purine ribonucleoside triphosphate biosynthetic process,biological_process
+GO:0044743,1,26,0.45237520718815316,1.6805310515172902,False,protein transmembrane import into intracellular organelle,biological_process
+GO:0009145,1,26,0.45237520718815316,1.6805310515172902,False,purine nucleoside triphosphate biosynthetic process,biological_process
+GO:0008237,3,110,0.46238758804762065,1.1916492910758967,False,metallopeptidase activity,molecular_function
+GO:0031146,1,27,0.4649170014988965,1.6182891607203536,False,SCF-dependent proteasomal ubiquitin-dependent protein catabolic process,biological_process
+GO:0015081,1,27,0.4649170014988965,1.6182891607203536,False,sodium ion transmembrane transporter activity,molecular_function
+GO:0009205,1,27,0.4649170014988965,1.6182891607203536,False,purine ribonucleoside triphosphate metabolic process,biological_process
+GO:0065008,6,239,0.46708959789428217,1.0969156654255114,False,regulation of biological quality,biological_process
+GO:0023014,2,69,0.47066266152668684,1.266487169259407,False,signal transduction by protein phosphorylation,biological_process
+GO:0033108,1,28,0.477171883453232,1.560493119266055,False,mitochondrial respiratory chain complex assembly,biological_process
+GO:0009144,1,28,0.477171883453232,1.560493119266055,False,purine nucleoside triphosphate metabolic process,biological_process
+GO:0030148,1,28,0.477171883453232,1.560493119266055,False,sphingolipid biosynthetic process,biological_process
+GO:0004175,8,328,0.477522458641855,1.0657026180353546,False,endopeptidase activity,molecular_function
+GO:0042626,4,156,0.480109356937473,1.12035403434486,False,ATPase-coupled transmembrane transporter activity,molecular_function
+GO:0015399,4,156,0.480109356937473,1.12035403434486,False,primary active transmembrane transporter activity,molecular_function
+GO:0000398,4,158,0.4899694105437006,1.1061723377075832,False,"mRNA splicing, via spliceosome",biological_process
+GO:0000375,4,159,0.49487044446586936,1.0992152789798628,False,"RNA splicing, via transesterification reactions",biological_process
+GO:0000377,4,159,0.49487044446586936,1.0992152789798628,False,"RNA splicing, via transesterification reactions with bulged adenosine as nucleophile",biological_process
+GO:0016757,19,814,0.4977642850610564,1.0198800238937853,False,"transferase activity, transferring glycosyl groups",molecular_function
+GO:0004540,1,31,0.5122798719295449,1.4094776561112756,False,ribonuclease activity,molecular_function
+GO:0009522,1,32,0.5234511866388802,1.3654314793577982,False,photosystem I,cellular_component
+GO:0009055,3,121,0.5256204752615758,1.083317537341724,False,electron transfer activity,molecular_function
+GO:0042364,1,33,0.5343669071811786,1.3240547678621075,False,water-soluble vitamin biosynthetic process,biological_process
+GO:0051503,1,33,0.5343669071811786,1.3240547678621075,False,adenine nucleotide transport,biological_process
+GO:0006767,1,33,0.5343669071811786,1.3240547678621075,False,water-soluble vitamin metabolic process,biological_process
+GO:0015865,1,33,0.5343669071811786,1.3240547678621075,False,purine nucleotide transport,biological_process
+GO:0006766,1,33,0.5343669071811786,1.3240547678621075,False,vitamin metabolic process,biological_process
+GO:0006862,1,33,0.5343669071811786,1.3240547678621075,False,nucleotide transport,biological_process
+GO:0009110,1,33,0.5343669071811786,1.3240547678621075,False,vitamin biosynthetic process,biological_process
+GO:0008150,818,35743,0.5380672952765634,0.9999589962697514,False,biological_process,biological_process
+GO:0008276,2,79,0.5425684403203453,1.1061723377075832,False,protein methyltransferase activity,molecular_function
+GO:0006479,2,79,0.5425684403203453,1.1061723377075832,False,protein methylation,biological_process
+GO:0009201,1,34,0.5450328748046562,1.2851119805720452,False,ribonucleoside triphosphate biosynthetic process,biological_process
+GO:0016893,1,34,0.5450328748046562,1.2851119805720452,False,"endonuclease activity, active with either ribo- or deoxyribonucleic acids and producing 5'-phosphomonoesters",molecular_function
+GO:0008213,2,80,0.5493759344358037,1.0923451834862388,False,protein alkylation,biological_process
+GO:0009199,1,35,0.5554547975034513,1.248394495412844,False,ribonucleoside triphosphate metabolic process,biological_process
+GO:0019005,1,35,0.5554547975034513,1.248394495412844,False,SCF ubiquitin ligase complex,cellular_component
+GO:0000151,2,81,0.5561118578783609,1.0788594404802356,False,ubiquitin ligase complex,cellular_component
+GO:0022900,4,172,0.5565916539540859,1.0161350544058034,False,electron transport chain,biological_process
+GO:0033643,10,442,0.5588750971098835,0.9885476773631119,False,host cell part,cellular_component
+GO:0018995,10,442,0.5588750971098835,0.9885476773631119,False,host cellular component,cellular_component
+GO:0015298,1,36,0.5656382530342629,1.213716870540265,False,solute:cation antiporter activity,molecular_function
+GO:0015491,1,36,0.5656382530342629,1.213716870540265,False,cation:cation antiporter activity,molecular_function
+GO:0046903,1,36,0.5656382530342629,1.213716870540265,False,secretion,biological_process
+GO:0007049,4,175,0.5702531566825455,0.9987155963302753,False,cell cycle,biological_process
+GO:0004527,1,37,0.5755886915711362,1.1809137118770148,False,exonuclease activity,molecular_function
+GO:0009142,1,37,0.5755886915711362,1.1809137118770148,False,nucleoside triphosphate biosynthetic process,biological_process
+GO:0015216,1,37,0.5755886915711362,1.1809137118770148,False,purine nucleotide transmembrane transporter activity,molecular_function
+GO:0016796,1,37,0.5755886915711362,1.1809137118770148,False,"exonuclease activity, active with either ribo- or deoxyribonucleic acids and producing 5'-phosphomonoesters",molecular_function
+GO:1903311,1,37,0.5755886915711362,1.1809137118770148,False,regulation of mRNA metabolic process,biological_process
+GO:0000030,1,37,0.5755886915711362,1.1809137118770148,False,mannosyltransferase activity,molecular_function
+GO:0015215,1,37,0.5755886915711362,1.1809137118770148,False,nucleotide transmembrane transporter activity,molecular_function
+GO:0000295,1,37,0.5755886915711362,1.1809137118770148,False,adenine nucleotide transmembrane transporter activity,molecular_function
+GO:0050684,1,37,0.5755886915711362,1.1809137118770148,False,regulation of mRNA processing,biological_process
+GO:0035821,4,177,0.5792290502299082,0.9874306743378428,False,modulation of process of other organism,biological_process
+GO:0005762,1,38,0.585311439086911,1.1498370352486722,False,mitochondrial large ribosomal subunit,cellular_component
+GO:0004888,2,86,0.5887093920043033,1.0161350544058034,False,transmembrane signaling receptor activity,molecular_function
+GO:0038023,2,86,0.5887093920043033,1.0161350544058034,False,signaling receptor activity,molecular_function
+GO:0033646,8,362,0.5888711289179068,0.9656090019767855,False,host intracellular part,cellular_component
+GO:0033648,8,362,0.5888711289179068,0.9656090019767855,False,host intracellular membrane-bounded organelle,cellular_component
+GO:0033647,8,362,0.5888711289179068,0.9656090019767855,False,host intracellular organelle,cellular_component
+GO:0006259,6,271,0.5890538503479978,0.9673905684010969,False,DNA metabolic process,biological_process
+GO:0006397,8,365,0.5981562987781684,0.9576724896317709,False,mRNA processing,biological_process
+GO:0009141,1,40,0.6040945593098545,1.0923451834862388,False,nucleoside triphosphate metabolic process,biological_process
+GO:0044423,1,40,0.6040945593098545,1.0923451834862388,False,virion part,cellular_component
+GO:0010033,1,41,0.6131649868905481,1.0657026180353546,False,response to organic substance,biological_process
+GO:0010608,3,139,0.6194899175568249,0.9430318130816449,False,posttranscriptional regulation of gene expression,biological_process
+GO:0006400,1,42,0.6220278385171703,1.0403287461773703,False,tRNA modification,biological_process
+GO:0007010,1,42,0.6220278385171703,1.0403287461773703,False,cytoskeleton organization,biological_process
+GO:0009521,1,43,0.6306878591166882,1.0161350544058034,False,photosystem,cellular_component
+GO:0009523,1,43,0.6306878591166882,1.0161350544058034,False,photosystem II,cellular_component
+GO:1990204,1,43,0.6306878591166882,1.0161350544058034,False,oxidoreductase complex,cellular_component
+GO:0006487,1,43,0.6306878591166882,1.0161350544058034,False,protein N-linked glycosylation,biological_process
+GO:0015078,2,93,0.6313005023430891,0.9396517707408504,False,proton transmembrane transporter activity,molecular_function
+GO:0060089,2,94,0.6370958088307532,0.9296554753074372,False,molecular transducer activity,molecular_function
+GO:0051213,4,191,0.6389285089666351,0.9150535568471108,False,dioxygenase activity,molecular_function
+GO:0016788,21,973,0.6389377420578869,0.9430318130816449,False,"hydrolase activity, acting on ester bonds",molecular_function
+GO:0006829,1,44,0.6391496854520121,0.9930410758965804,False,zinc ion transport,biological_process
+GO:0061024,2,95,0.6428193464112765,0.9198696281989378,False,membrane organization,biological_process
+GO:0005179,2,96,0.648471360712637,0.9102876529051989,False,hormone activity,molecular_function
+GO:0009451,2,96,0.648471360712637,0.9102876529051989,False,RNA modification,biological_process
+GO:0048018,2,96,0.648471360712637,0.9102876529051989,False,receptor ligand activity,molecular_function
+GO:0048869,1,46,0.6554967750713481,0.9498653769445553,False,cellular developmental process,biological_process
+GO:0015605,1,46,0.6554967750713481,0.9498653769445553,False,organophosphate ester transmembrane transporter activity,molecular_function
+GO:0030154,1,46,0.6554967750713481,0.9498653769445553,False,cell differentiation,biological_process
+GO:0031418,1,47,0.663390791934705,0.9296554753074372,False,L-ascorbic acid binding,molecular_function
+GO:0035556,6,293,0.6637879220903831,0.8947537339136425,False,intracellular signal transduction,biological_process
+GO:0016667,2,99,0.6650011064252269,0.8827031785747383,False,"oxidoreductase activity, acting on a sulfur group of donors",molecular_function
+GO:0044403,1,48,0.6711041263805747,0.9102876529051989,False,symbiotic process,biological_process
+GO:0016032,1,48,0.6711041263805747,0.9102876529051989,False,viral process,biological_process
+GO:0045944,6,296,0.6732889061152072,0.885685283907761,False,positive regulation of transcription by RNA polymerase II,biological_process
+GO:0015748,1,49,0.6786409093576603,0.8917103538663171,False,organophosphate ester transport,biological_process
+GO:0005342,2,102,0.6808983630038838,0.8567413203813635,False,organic acid transmembrane transporter activity,molecular_function
+GO:0043167,172,7739,0.6816113976551543,0.971098961414307,False,ion binding,molecular_function
+GO:0005102,3,153,0.6832231150163398,0.8567413203813635,False,signaling receptor binding,molecular_function
+GO:0008234,3,153,0.6832231150163398,0.8567413203813635,False,cysteine-type peptidase activity,molecular_function
+GO:0008380,4,203,0.6854894224390966,0.8609617209743753,False,RNA splicing,biological_process
+GO:0090729,2,103,0.6860586402555975,0.8484234434844572,False,toxin activity,molecular_function
+GO:0005654,1,51,0.6932008748967794,0.8567413203813635,False,nucleoplasm,cellular_component
+GO:0002376,1,51,0.6932008748967794,0.8567413203813635,False,immune system process,biological_process
+GO:0046467,1,51,0.6932008748967794,0.8567413203813635,False,membrane lipid biosynthetic process,biological_process
+GO:0065003,5,256,0.6995120141914439,0.853394674598624,False,protein-containing complex assembly,biological_process
+GO:0001906,1,52,0.7002318561564584,0.8402655257586451,False,cell killing,biological_process
+GO:0031640,1,52,0.7002318561564584,0.8402655257586451,False,killing of cells of other organism,biological_process
+GO:0090501,1,52,0.7002318561564584,0.8402655257586451,False,RNA phosphodiester bond hydrolysis,biological_process
+GO:0016491,42,1967,0.7015743475949409,0.9329638577818409,False,oxidoreductase activity,molecular_function
+GO:0019012,1,53,0.7071018874902252,0.824411459234897,False,virion,cellular_component
+GO:0045184,16,781,0.7084387118473408,0.8951356177095937,False,establishment of protein localization,biological_process
+GO:0008104,16,781,0.7084387118473408,0.8951356177095937,False,protein localization,biological_process
+GO:0033036,16,781,0.7084387118473408,0.8951356177095937,False,macromolecule localization,biological_process
+GO:0048029,1,54,0.7138146491137968,0.8091445803601768,False,monosaccharide binding,molecular_function
+GO:0015711,4,212,0.7175256186988898,0.824411459234897,False,organic anion transport,biological_process
+GO:0022904,1,55,0.7203737372172988,0.7944328607172645,False,respiratory electron transport chain,biological_process
+GO:0015932,1,56,0.7267826659069694,0.7802465596330275,False,nucleobase-containing compound transmembrane transporter activity,molecular_function
+GO:0005856,5,265,0.7276107211286607,0.824411459234897,False,cytoskeleton,cellular_component
+GO:0016071,8,413,0.7307247985575276,0.8463691494324367,False,mRNA metabolic process,biological_process
+GO:0000315,1,57,0.7330448689722622,0.7665580234991148,False,organellar large ribosomal subunit,cellular_component
+GO:0004252,2,114,0.7383899961686546,0.7665580234991148,False,serine-type endopeptidase activity,molecular_function
+GO:0010628,9,465,0.7392568141737638,0.8456865936667654,False,positive regulation of gene expression,biological_process
+GO:0018193,6,319,0.7402826269577933,0.8218270972937218,False,peptidyl-amino acid modification,biological_process
+GO:0045229,4,219,0.7407331732611856,0.7980604080264756,False,external encapsulating structure organization,biological_process
+GO:0046943,1,59,0.7451424429959168,0.7405730057533821,False,carboxylic acid transmembrane transporter activity,molecular_function
+GO:0015171,1,59,0.7451424429959168,0.7405730057533821,False,amino acid transmembrane transporter activity,molecular_function
+GO:0005261,1,60,0.7509842964313277,0.7282301223241591,False,cation channel activity,molecular_function
+GO:0031225,4,224,0.756405196998813,0.7802465596330275,False,anchored component of membrane,cellular_component
+GO:0006413,1,62,0.7622697911728954,0.7047388280556378,False,translational initiation,biological_process
+GO:0004519,1,62,0.7622697911728954,0.7047388280556378,False,endonuclease activity,molecular_function
+GO:0065002,1,64,0.773044382475045,0.6827157396788991,False,intracellular protein transmembrane transport,biological_process
+GO:0070469,1,64,0.773044382475045,0.6827157396788991,False,respirasome,cellular_component
+GO:0048583,3,178,0.776575065624206,0.7364124832491497,False,regulation of response to stimulus,biological_process
+GO:0008194,8,434,0.7783174990520558,0.8054158034921575,False,UDP-glycosyltransferase activity,molecular_function
+GO:0030546,2,125,0.7830880268271938,0.6991009174311927,False,signaling receptor activator activity,molecular_function
+GO:0043933,5,287,0.7881646373753004,0.761216155739539,False,protein-containing complex subunit organization,biological_process
+GO:0022402,1,67,0.7882985781333615,0.6521463782007395,False,cell cycle process,biological_process
+GO:0008033,1,67,0.7882985781333615,0.6521463782007395,False,tRNA processing,biological_process
+GO:0031406,1,68,0.7931522259327867,0.6425559902860226,False,carboxylic acid binding,molecular_function
+GO:0008757,4,237,0.7937164209701741,0.7374482251383889,False,S-adenosylmethionine-dependent methyltransferase activity,molecular_function
+GO:0030246,2,128,0.7940552008708441,0.6827157396788991,False,carbohydrate binding,molecular_function
+GO:0010646,2,130,0.8010917001846316,0.672212420606916,False,regulation of cell communication,biological_process
+GO:0043177,1,70,0.8025286016726597,0.624197247706422,False,organic acid binding,molecular_function
+GO:0045893,7,398,0.8075346953052116,0.768484048683786,False,"positive regulation of transcription, DNA-templated",biological_process
+GO:0030545,2,132,0.8079140109860168,0.6620273839310538,False,receptor regulator activity,molecular_function
+GO:0015036,1,72,0.8114804130886817,0.6068584352701325,False,disulfide oxidoreductase activity,molecular_function
+GO:0046488,1,72,0.8114804130886817,0.6068584352701325,False,phosphatidylinositol metabolic process,biological_process
+GO:0016706,1,72,0.8114804130886817,0.6068584352701325,False,2-oxoglutarate-dependent dioxygenase activity,molecular_function
+GO:0015035,1,72,0.8114804130886817,0.6068584352701325,False,protein disulfide oxidoreductase activity,molecular_function
+GO:0034622,4,249,0.8239479194227541,0.7019085516377437,False,cellular protein-containing complex assembly,biological_process
+GO:0044283,9,509,0.8255058349312244,0.7725820551179683,False,small molecule biosynthetic process,biological_process
+GO:0006886,6,356,0.8263319776869664,0.7364124832491497,False,intracellular protein transport,biological_process
+GO:0048518,17,904,0.8265224862024991,0.8216755804984981,False,positive regulation of biological process,biological_process
+GO:0048522,17,904,0.8265224862024991,0.8216755804984981,False,positive regulation of cellular process,biological_process
+GO:0015979,1,79,0.8397378334602358,0.5530861688537916,False,photosynthesis,biological_process
+GO:0071555,3,201,0.8412932016940557,0.6521463782007394,False,cell wall organization,biological_process
+GO:0051254,9,519,0.8416773060573702,0.7576960810309169,False,positive regulation of RNA metabolic process,biological_process
+GO:0045935,9,519,0.8416773060573702,0.7576960810309169,False,positive regulation of nucleobase-containing compound metabolic process,biological_process
+GO:0051246,8,468,0.8418329591767707,0.74690268956324,False,regulation of protein metabolic process,biological_process
+GO:0016651,1,80,0.8434133005208598,0.5461725917431194,False,"oxidoreductase activity, acting on NAD(P)H",molecular_function
+GO:0018205,1,80,0.8434133005208598,0.5461725917431194,False,peptidyl-lysine modification,biological_process
+GO:0010498,2,147,0.8527506678694666,0.5944735692442115,False,proteasomal protein catabolic process,biological_process
+GO:0032259,5,317,0.853189086979555,0.6891767719156079,False,methylation,biological_process
+GO:0016070,19,1026,0.8553907394370989,0.8091445803601768,False,RNA metabolic process,biological_process
+GO:0009966,1,85,0.8605655297590548,0.5140447922288182,False,regulation of signal transduction,biological_process
+GO:0032268,7,428,0.8608655279102362,0.7146183443367916,False,regulation of cellular protein metabolic process,biological_process
+GO:1903508,7,428,0.8608655279102362,0.7146183443367916,False,positive regulation of nucleic acid-templated transcription,biological_process
+GO:1902680,7,428,0.8608655279102362,0.7146183443367916,False,positive regulation of RNA biosynthetic process,biological_process
+GO:0016741,5,322,0.8622298357447528,0.6784752692461109,False,"transferase activity, transferring one-carbon groups",molecular_function
+GO:0015931,1,87,0.8668888651403344,0.5022276705683856,False,nucleobase-containing compound transport,biological_process
+GO:0010557,7,437,0.8742919576706591,0.6999008040644092,False,positive regulation of macromolecule biosynthetic process,biological_process
+GO:0009891,7,437,0.8742919576706591,0.6999008040644092,False,positive regulation of biosynthetic process,biological_process
+GO:0031328,7,437,0.8742919576706591,0.6999008040644092,False,positive regulation of cellular biosynthetic process,biological_process
+GO:0140101,1,91,0.8786891521183791,0.48015172900494,False,"catalytic activity, acting on a tRNA",molecular_function
+GO:0007017,1,91,0.8786891521183791,0.48015172900494,False,microtubule-based process,biological_process
+GO:0030163,2,158,0.8793288474087326,0.5530861688537916,False,protein catabolic process,biological_process
+GO:0015934,1,92,0.8814721845022925,0.47493268847227765,False,large ribosomal subunit,cellular_component
+GO:0009570,1,97,0.8944594222384145,0.45045162205618083,False,chloroplast stroma,cellular_component
+GO:0009532,1,97,0.8944594222384145,0.45045162205618083,False,plastid stroma,cellular_component
+GO:0008135,1,100,0.9015590583452964,0.4369380733944954,False,"translation factor activity, RNA binding",molecular_function
+GO:0015031,11,670,0.9015716148944806,0.7173610160208135,False,protein transport,biological_process
+GO:0090079,1,101,0.9038179595372872,0.4326119538559361,False,"translation regulator activity, nucleic acid binding",molecular_function
+GO:0016779,1,103,0.9081816179903142,0.4242117217422286,False,nucleotidyltransferase activity,molecular_function
+GO:0015833,12,730,0.9090900764669916,0.7182543672238282,False,peptide transport,biological_process
+GO:0004518,1,109,0.9201214560700676,0.4008606177931151,False,nuclease activity,molecular_function
+GO:0042886,12,744,0.9207950312588181,0.7047388280556377,False,amide transport,biological_process
+GO:0003729,2,181,0.9211731283617739,0.4828045009883927,False,mRNA binding,molecular_function
+GO:0045182,1,111,0.9237461996089399,0.3936379039590049,False,translation regulator activity,molecular_function
+GO:0008168,4,308,0.9239282046610306,0.5674520433694746,False,methyltransferase activity,molecular_function
+GO:0008643,1,112,0.9254964842398293,0.39012327981651373,False,carbohydrate transport,biological_process
+GO:0090305,1,114,0.9288775826396156,0.3832790117495574,False,nucleic acid phosphodiester bond hydrolysis,biological_process
+GO:0010604,12,759,0.931899210808407,0.6908111832324039,False,positive regulation of macromolecule metabolic process,biological_process
+GO:0016810,1,116,0.9321054089844183,0.37667075292628915,False,"hydrolase activity, acting on carbon-nitrogen (but not peptide) bonds",molecular_function
+GO:0046034,1,116,0.9321054089844183,0.37667075292628915,False,ATP metabolic process,biological_process
+GO:0051336,1,116,0.9321054089844183,0.37667075292628915,False,regulation of hydrolase activity,biological_process
+GO:0044272,1,116,0.9321054089844183,0.37667075292628915,False,sulfur compound biosynthetic process,biological_process
+GO:0042742,1,118,0.9351869035582784,0.37028650287669107,False,defense response to bacterium,biological_process
+GO:0031325,12,768,0.937901551782282,0.6827157396788991,False,positive regulation of cellular metabolic process,biological_process
+GO:0009893,12,768,0.937901551782282,0.6827157396788991,False,positive regulation of metabolic process,biological_process
+GO:0051173,12,768,0.937901551782282,0.6827157396788991,False,positive regulation of nitrogen compound metabolic process,biological_process
+GO:0006399,1,120,0.9381286932561963,0.36411506116207953,False,tRNA metabolic process,biological_process
+GO:0023051,1,121,0.9395491871633579,0.36110584578057475,False,regulation of signaling,biological_process
+GO:0009617,1,121,0.9395491871633579,0.36110584578057475,False,response to bacterium,biological_process
+GO:0140097,1,121,0.9395491871633579,0.36110584578057475,False,"catalytic activity, acting on DNA",molecular_function
+GO:0006644,2,196,0.9406460660960092,0.44585517693315857,False,phospholipid metabolic process,biological_process
+GO:1990904,11,720,0.9413287602363543,0.6675442787971458,False,ribonucleoprotein complex,cellular_component
+GO:1990234,2,197,0.9417670339187618,0.4435919526847669,False,transferase complex,cellular_component
+GO:0005829,2,197,0.9417670339187618,0.4435919526847669,False,cytosol,cellular_component
+GO:0006091,4,327,0.9429827230143781,0.5344808237241534,False,generation of precursor metabolites and energy,biological_process
+GO:0043232,21,1248,0.9451909951686499,0.7352323350388144,False,intracellular non-membrane-bounded organelle,cellular_component
+GO:0043228,21,1248,0.9451909951686499,0.7352323350388144,False,non-membrane-bounded organelle,cellular_component
+GO:0044281,28,1604,0.9467199945360253,0.7627347914617127,False,small molecule metabolic process,biological_process
+GO:0006650,1,130,0.9509537556266875,0.336106210303458,False,glycerophospholipid metabolic process,biological_process
+GO:0043161,1,140,0.9611227673419409,0.312098623853211,False,proteasome-mediated ubiquitin-dependent protein catabolic process,biological_process
+GO:1901565,3,287,0.9611750420855857,0.45672969344372344,False,organonitrogen compound catabolic process,biological_process
+GO:0052689,2,220,0.9626169818424444,0.39721643035863224,False,carboxylic ester hydrolase activity,molecular_function
+GO:0071705,15,981,0.9640018380688054,0.6681010296551918,False,nitrogen compound transport,biological_process
+GO:0071702,26,1556,0.9649934469502776,0.730102179193887,False,organic substance transport,biological_process
+GO:0001932,1,149,0.9684606328388564,0.29324702912382244,False,regulation of protein phosphorylation,biological_process
+GO:0046486,1,152,0.9705851023239769,0.28745925881216805,False,glycerolipid metabolic process,biological_process
+GO:0042221,1,154,0.9719213919888076,0.2837260216847373,False,response to chemical,biological_process
+GO:0009165,1,154,0.9719213919888076,0.2837260216847373,False,nucleotide biosynthetic process,biological_process
+GO:1901293,1,154,0.9719213919888076,0.2837260216847373,False,nucleoside phosphate biosynthetic process,biological_process
+GO:0090304,26,1593,0.9744199213470028,0.7131443759106643,False,nucleic acid metabolic process,biological_process
+GO:0003924,1,159,0.9750027954904688,0.2748038197449657,False,GTPase activity,molecular_function
+GO:0000287,1,160,0.9755772923694909,0.2730862958715597,False,magnesium ion binding,molecular_function
+GO:0031399,1,164,0.977746384387276,0.26642565450883865,False,regulation of protein modification process,biological_process
+GO:0006357,10,750,0.9781527206107339,0.5825840978593273,False,regulation of transcription by RNA polymerase II,biological_process
+GO:1902494,5,453,0.9786312385959636,0.48227160418818477,False,catalytic complex,cellular_component
+GO:0097708,2,252,0.9800851321902995,0.34677624872579,False,intracellular vesicle,cellular_component
+GO:0031410,2,252,0.9800851321902995,0.34677624872579,False,cytoplasmic vesicle,cellular_component
+GO:0051174,1,171,0.9810895411813876,0.2555193411663716,False,regulation of phosphorus metabolic process,biological_process
+GO:0042325,1,171,0.9810895411813876,0.2555193411663716,False,regulation of phosphorylation,biological_process
+GO:0032501,1,171,0.9810895411813876,0.2555193411663716,False,multicellular organismal process,biological_process
+GO:0019220,1,171,0.9810895411813876,0.2555193411663716,False,regulation of phosphate metabolic process,biological_process
+GO:0031982,2,255,0.9812396175678145,0.3426965281525454,False,vesicle,cellular_component
+GO:0005509,1,175,0.9827695353995174,0.24967889908256882,False,calcium ion binding,molecular_function
+GO:0019842,1,179,0.984300435906979,0.24409948234329354,False,vitamin binding,molecular_function
+GO:1901362,7,599,0.9845130971285175,0.5106121058032501,False,organic cyclic compound biosynthetic process,biological_process
+GO:0051172,1,182,0.9853587646626918,0.24007586450247,False,negative regulation of nitrogen compound metabolic process,biological_process
+GO:0031324,1,184,0.9860244215763067,0.23746634423613883,False,negative regulation of cellular metabolic process,biological_process
+GO:0044255,9,730,0.9866255548384264,0.5386907754178711,False,cellular lipid metabolic process,biological_process
+GO:0044391,2,273,0.9869178246527378,0.32010115266996003,False,ribosomal subunit,cellular_component
+GO:0043632,3,349,0.9871305485169433,0.3755914671012855,False,modification-dependent macromolecule catabolic process,biological_process
+GO:0099080,1,191,0.9881250020218607,0.2287633892117777,False,supramolecular complex,cellular_component
+GO:0048523,2,281,0.9888671682049452,0.31098795259394696,False,negative regulation of cellular process,biological_process
+GO:1901360,42,2545,0.9916248243178772,0.7210765847767705,False,organic cyclic compound metabolic process,biological_process
+GO:0010605,1,207,0.9918172166129429,0.21108119487656785,False,negative regulation of macromolecule metabolic process,biological_process
+GO:0009892,1,207,0.9918172166129429,0.21108119487656785,False,negative regulation of metabolic process,biological_process
+GO:0000976,5,514,0.9918941210313535,0.4250370363759683,False,transcription regulatory region sequence-specific DNA binding,molecular_function
+GO:0006511,2,299,0.9922745399303097,0.2922662698290939,False,ubiquitin-dependent protein catabolic process,biological_process
+GO:0019941,2,299,0.9922745399303097,0.2922662698290939,False,modification-dependent protein catabolic process,biological_process
+GO:0016209,1,212,0.9927164101217144,0.20610286480872425,False,antioxidant activity,molecular_function
+GO:0009259,1,213,0.9928840390177407,0.20513524572511524,False,ribonucleotide metabolic process,biological_process
+GO:0098772,7,653,0.9929631951568625,0.46838690869241467,False,molecular function regulator,molecular_function
+GO:0098869,1,221,0.9940935239197057,0.19770953547262238,False,cellular oxidant detoxification,biological_process
+GO:1990748,1,221,0.9940935239197057,0.19770953547262238,False,cellular detoxification,biological_process
+GO:0098754,1,223,0.9943623324164508,0.19593635578228497,False,detoxification,biological_process
+GO:0048519,2,322,0.9951772173486437,0.27139010769844435,False,negative regulation of biological process,biological_process
+GO:0019693,1,233,0.9955337980124654,0.1875270701263929,False,ribose phosphate metabolic process,biological_process
+GO:0005525,1,234,0.9956366428670267,0.18672567239081,False,GTP binding,molecular_function
+GO:0001883,1,235,0.9957371221406095,0.18593109506148742,False,purine nucleoside binding,molecular_function
+GO:0032550,1,235,0.9957371221406095,0.18593109506148742,False,purine ribonucleoside binding,molecular_function
+GO:0030234,2,328,0.9957381327352057,0.26642565450883865,False,enzyme regulator activity,molecular_function
+GO:0006486,2,329,0.9958251759083911,0.26561585008783917,False,protein glycosylation,biological_process
+GO:0001882,1,237,0.9959311999900513,0.18436205628459723,False,nucleoside binding,molecular_function
+GO:0032561,1,237,0.9959311999900513,0.18436205628459723,False,guanyl ribonucleotide binding,molecular_function
+GO:0032549,1,237,0.9959311999900513,0.18436205628459723,False,ribonucleoside binding,molecular_function
+GO:0019001,1,238,0.9960249035609252,0.18358742579600648,False,guanyl nucleotide binding,molecular_function
+GO:0044265,3,413,0.9960987994547752,0.31738843103716374,False,cellular macromolecule catabolic process,biological_process
+GO:0003735,3,421,0.9966499958148813,0.31135729695569747,False,structural constituent of ribosome,molecular_function
+GO:1990837,5,584,0.9974860119712418,0.3740908162624105,False,sequence-specific double-stranded DNA binding,molecular_function
+GO:0016192,1,259,0.997563351243023,0.16870195883957353,False,vesicle-mediated transport,biological_process
+GO:0043413,2,355,0.9975650971806016,0.24616229487013827,False,macromolecule glycosylation,biological_process
+GO:0006412,4,522,0.9979011511570661,0.3348184470455904,False,translation,biological_process
+GO:0046483,35,2341,0.9979830926390576,0.653260682136153,False,heterocycle metabolic process,biological_process
+GO:0003723,14,1173,0.9980249422814689,0.5214947167538735,False,RNA binding,molecular_function
+GO:0009117,1,274,0.9982825067803278,0.15946645014397645,False,nucleotide metabolic process,biological_process
+GO:0006753,1,274,0.9982825067803278,0.15946645014397645,False,nucleoside phosphate metabolic process,biological_process
+GO:0051603,3,461,0.9984497811244671,0.28434147943242655,False,proteolysis involved in cellular protein catabolic process,biological_process
+GO:0006790,1,281,0.9985412243576762,0.15549397629697348,False,sulfur compound metabolic process,biological_process
+GO:0016829,1,284,0.9986398214995682,0.15385143429383644,False,lyase activity,molecular_function
+GO:0006139,27,1950,0.9986935889230883,0.6049911785462245,False,nucleobase-containing compound metabolic process,biological_process
+GO:0097159,155,8313,0.998777815411887,0.8146926666203149,False,organic cyclic compound binding,molecular_function
+GO:1901363,159,8520,0.9989103630875902,0.815412601757333,False,heterocyclic compound binding,molecular_function
+GO:0003674,726,33065,0.9989143710424548,0.959374085239388,False,molecular_function,molecular_function
+GO:0043043,4,565,0.9990461511285239,0.3093366891288463,False,peptide biosynthetic process,biological_process
+GO:0009057,4,565,0.9990461511285239,0.3093366891288463,False,macromolecule catabolic process,biological_process
+GO:0005576,38,2584,0.999104784385781,0.6425559902860227,False,extracellular region,cellular_component
+GO:0005198,3,494,0.9991873785631651,0.26534700813430895,False,structural molecule activity,molecular_function
+GO:0061659,1,310,0.9992585339001171,0.14094776561112757,False,ubiquitin-like protein ligase activity,molecular_function
+GO:0061630,1,310,0.9992585339001171,0.14094776561112757,False,ubiquitin protein ligase activity,molecular_function
+GO:0019787,1,310,0.9992585339001171,0.14094776561112757,False,ubiquitin-like protein transferase activity,molecular_function
+GO:0004842,1,310,0.9992585339001171,0.14094776561112757,False,ubiquitin-protein transferase activity,molecular_function
+GO:0043604,4,580,0.9992783166678489,0.3013366023410313,False,amide biosynthetic process,biological_process
+GO:0018130,3,501,0.9992921837291848,0.2616395649068835,False,heterocycle biosynthetic process,biological_process
+GO:0006518,5,664,0.9993799843564697,0.3290196335801923,False,peptide metabolic process,biological_process
+GO:0048856,1,320,0.9994129237782605,0.13654314793577985,False,anatomical structure development,biological_process
+GO:0090407,1,326,0.999489678987379,0.13403008386334217,False,organophosphate biosynthetic process,biological_process
+GO:0000981,2,430,0.9994984307788795,0.20322701088116066,False,"DNA-binding transcription factor activity, RNA polymerase II-specific",molecular_function
+GO:0016747,1,330,0.9995351951788556,0.13240547678621076,False,"transferase activity, transferring acyl groups other than amino-acyl groups",molecular_function
+GO:0016746,1,330,0.9995351951788556,0.13240547678621076,False,"transferase activity, transferring acyl groups",molecular_function
+GO:0008610,2,438,0.9995770037383622,0.1995151020066189,False,lipid biosynthetic process,biological_process
+GO:0043603,5,687,0.9995897154428718,0.3180044202288904,False,cellular amide metabolic process,biological_process
+GO:0070085,2,455,0.99970579786211,0.192060691601976,False,glycosylation,biological_process
+GO:0003690,5,706,0.9997092107273304,0.30944622761649815,False,double-stranded DNA binding,molecular_function
+GO:0034654,1,351,0.9997154281343358,0.12448378159387335,False,nucleobase-containing compound biosynthetic process,biological_process
+GO:0055086,1,353,0.999728423367439,0.12377849104659927,False,nucleobase-containing small molecule metabolic process,biological_process
+GO:0006629,9,997,0.9997391446495039,0.3944275487011493,False,lipid metabolic process,biological_process
+GO:0005840,2,465,0.9997625289760459,0.18793035414817008,False,ribosome,cellular_component
+GO:0050790,1,364,0.9997899967517282,0.120037932251235,False,regulation of catalytic activity,biological_process
+GO:0044248,7,876,0.9998058559204733,0.3491514285115831,False,cellular catabolic process,biological_process
+GO:0065009,1,374,0.9998337803972469,0.11682836187018594,False,regulation of molecular function,biological_process
+GO:1901566,14,1372,0.9998744139947828,0.44585517693315857,False,organonitrogen compound biosynthetic process,biological_process
+GO:1901135,3,589,0.9998786956898663,0.22254910359651722,False,carbohydrate derivative metabolic process,biological_process
+GO:0006725,33,2502,0.9998847122089876,0.5762972191054496,False,cellular aromatic compound metabolic process,biological_process
+GO:0019438,2,502,0.9998929153365042,0.17407891370298623,False,aromatic compound biosynthetic process,biological_process
+GO:0005737,101,6069,0.9999059468922833,0.7271501962900648,False,cytoplasm,cellular_component
+GO:0034641,45,3191,0.9999145564411072,0.6161771639847162,False,cellular nitrogen compound metabolic process,biological_process
+GO:0001067,6,855,0.9999227683564706,0.3066232093996459,False,regulatory region nucleic acid binding,molecular_function
+GO:0005506,1,417,0.9999392236188918,0.10478131256462721,False,iron ion binding,molecular_function
+GO:0016798,1,422,0.9999459377495912,0.10353982781860083,False,"hydrolase activity, acting on glycosyl bonds",molecular_function
+GO:0019637,3,650,0.9999652063644389,0.20166372618207482,False,organophosphate metabolic process,biological_process
+GO:0044271,9,1123,0.99996703120828,0.3501729884728815,False,cellular nitrogen compound biosynthetic process,biological_process
+GO:0009058,30,2448,0.9999714804409485,0.5354633252383522,False,biosynthetic process,biological_process
+GO:0050789,137,8051,0.9999827586604499,0.7435165327915274,False,regulation of biological process,biological_process
+GO:0016705,1,485,0.9999876485962464,0.09009032441123617,False,"oxidoreductase activity, acting on paired donors, with incorporation or reduction of molecular oxygen",molecular_function
+GO:0065007,137,8102,0.9999886196785722,0.7388362880158711,False,biological regulation,biological_process
+GO:1901576,27,2374,0.9999923864553881,0.49693883663232424,False,organic substance biosynthetic process,biological_process
+GO:0050794,127,7686,0.9999939618538035,0.7219767801340218,False,regulation of cellular process,biological_process
+GO:0009056,9,1230,0.9999947461074571,0.3197107854106064,False,catabolic process,biological_process
+GO:0043565,6,1007,0.9999953539538964,0.2603404608110201,False,sequence-specific DNA binding,molecular_function
+GO:0032502,2,652,0.9999959686712065,0.13403008386334217,False,developmental process,biological_process
+GO:0034645,5,940,0.9999965439942212,0.23241386882685927,False,cellular macromolecule biosynthetic process,biological_process
+GO:0008270,1,550,0.9999973144418803,0.07944328607172645,False,zinc ion binding,molecular_function
+GO:1901575,6,1042,0.9999976108059272,0.25159581961295324,False,organic substance catabolic process,biological_process
+GO:0005515,94,6188,0.9999986768299793,0.6637391548009466,False,protein binding,molecular_function
+GO:0044249,23,2262,0.9999988098246011,0.4442783239643411,False,cellular biosynthetic process,biological_process
+GO:0009059,5,1005,0.9999990415359759,0.21738212606691315,False,macromolecule biosynthetic process,biological_process
+GO:0046914,6,1199,0.9999998870112625,0.21865124606897188,False,transition metal ion binding,molecular_function
+GO:0016567,1,687,0.9999998931287885,0.06360088404577809,False,protein ubiquitination,biological_process
+GO:0070647,1,692,0.9999999050463365,0.06314134008590976,False,protein modification by small protein conjugation or removal,biological_process
+GO:0032446,1,692,0.9999999050463365,0.06314134008590976,False,protein modification by small protein conjugation,biological_process
+GO:0005488,318,17296,0.999999972436853,0.8033435900754483,False,binding,molecular_function
+GO:0019752,1,774,0.9999999862613668,0.05645194746698907,False,carboxylic acid metabolic process,biological_process
+GO:0043436,1,774,0.9999999862613668,0.05645194746698907,False,oxoacid metabolic process,biological_process
+GO:0006082,1,774,0.9999999862613668,0.05645194746698907,False,organic acid metabolic process,biological_process
+GO:0046872,51,4395,0.9999999975662907,0.5070271158843974,False,metal ion binding,molecular_function
+GO:0043169,51,4395,0.9999999975662907,0.5070271158843974,False,cation binding,molecular_function
+GO:0003700,7,1503,0.9999999984518946,0.2034974393720205,False,DNA-binding transcription factor activity,molecular_function
+GO:0140110,7,1503,0.9999999984518946,0.2034974393720205,False,transcription regulator activity,molecular_function
+GO:2000112,25,2841,0.9999999987659183,0.38449320080473026,False,regulation of cellular macromolecule biosynthetic process,biological_process
+GO:0031326,25,2841,0.9999999987659183,0.38449320080473026,False,regulation of cellular biosynthetic process,biological_process
+GO:0009889,25,2843,0.9999999987797348,0.3842227166676886,False,regulation of biosynthetic process,biological_process
+GO:0010556,25,2843,0.9999999987797348,0.3842227166676886,False,regulation of macromolecule biosynthetic process,biological_process
+GO:0010468,28,3067,0.9999999992093631,0.3989000996102338,False,regulation of gene expression,biological_process
+GO:0031323,39,3807,0.9999999995660257,0.44761189551839564,False,regulation of cellular metabolic process,biological_process
+GO:0051171,39,3814,0.9999999995861714,0.44679037394822557,False,regulation of nitrogen compound metabolic process,biological_process
+GO:0080090,39,3835,0.9999999996777951,0.44434380345202923,False,regulation of primary metabolic process,biological_process
+GO:0019222,39,3837,0.9999999997059896,0.4441121934424113,False,regulation of metabolic process,biological_process
+GO:0060255,39,3837,0.9999999997059896,0.4441121934424113,False,regulation of macromolecule metabolic process,biological_process
+GO:0003677,19,2523,0.9999999997186935,0.3290457151999768,False,DNA binding,molecular_function
+GO:0006355,18,2473,0.9999999997781219,0.3180301383380881,False,"regulation of transcription, DNA-templated",biological_process
+GO:0005634,98,7510,0.9999999999234616,0.5701721863203801,False,nucleus,cellular_component
+GO:0019219,21,2763,0.9999999999499625,0.3320919124605286,False,regulation of nucleobase-containing compound metabolic process,biological_process
+GO:0051252,21,2763,0.9999999999499625,0.3320919124605286,False,regulation of RNA metabolic process,biological_process
+GO:2001141,18,2514,0.9999999999506081,0.3128434893039347,False,regulation of RNA biosynthetic process,biological_process
+GO:1903506,18,2514,0.9999999999506081,0.3128434893039347,False,regulation of nucleic acid-templated transcription,biological_process
+GO:0003676,41,4103,0.9999999999538823,0.4366185963727593,False,nucleic acid binding,molecular_function

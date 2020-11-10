@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#BSUB -P BIE108
+#BSUB -W 0:30
+#BSUB -nnodes 1
+#BSUB -q batch-hm
+#BSUB -J run_go_preds_for_setaria
+#BSUB -o /ccs/home/pstjohn/job_output/%J.out
+#BSUB -e /ccs/home/pstjohn/job_output/%J.err
+
+NODES=$(cat ${LSB_DJOB_HOSTFILE} | sort | uniq | grep -v login | grep -v batch | wc -l)
+BATCH_SIZE=$(($NODES * 6 * 16))
+
+module load ibm-wml-ce/1.7.0-3
+conda activate tf21-ibm
+export PYTHONPATH=$HOME/uniparc_modeling:$PYTHONPATH
+export NCCL_DEBUG=INFO
+export TF_ENABLE_AUTO_MIXED_PRECISION=1
+export OMP_NUM_THREADS=4
+
+export SCRIPT=run_go_setaria.py
+mkdir -p  $MEMBERWORK/bie108/$LSB_JOBNAME/$LSB_JOBID
+cd  $MEMBERWORK/bie108/$LSB_JOBNAME/$LSB_JOBID
+cp /ccs/home/pstjohn/uniparc_modeling/go_annotation/go_enrichment/$SCRIPT .
+
+jsrun -n ${NODES} -g 6 -c 42 -r1 -a1 -b none python3 $SCRIPT \
+    --batchSize=$BATCH_SIZE \
