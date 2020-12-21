@@ -4,7 +4,7 @@
 #BSUB -W 6:00
 #BSUB -nnodes 16
 #BSUB -q batch-hm
-#BSUB -J 12_layer_relative_adam_20200625_opt_restart
+#BSUB -J 12_layer_20201110_adamW_test
 #BSUB -o /ccs/home/pstjohn/job_output/%J.out
 #BSUB -e /ccs/home/pstjohn/job_output/%J.err
 

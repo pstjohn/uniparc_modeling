@@ -4,7 +4,7 @@
 #BSUB -W 6:00
 #BSUB -nnodes 1
 #BSUB -q batch-hm
-#BSUB -J 20201008_go_finetuning_cafa3_eps6_lr4
+#BSUB -J 20201110_go_finetuning_cafa3_adamw_lesslr2
 #BSUB -o /ccs/home/pstjohn/job_output/%J.out
 #BSUB -e /ccs/home/pstjohn/job_output/%J.err
 
@@ -28,8 +28,9 @@ jsrun -n ${NODES} -g 6 -c 42 -r1 -a1 -b none python3 $SCRIPT \
     --scratchDir="$MEMBERWORK/bie108/uniparc_checkpoints" \
     --checkpoint="/gpfs/alpine/scratch/pstjohn/bie108/uniparc_checkpoints/12_layer_relative_adam_20200625.186949/" \
     --batchSize=$BATCH_SIZE \
-    --lr=3E-5 \
+    --lr=1E-5 \
     --sequenceLength=1024 \
     --stepsPerEpoch=500 \
     --validationSteps=25 \
-    --epochs=100
+    --totalSteps=20000 \
+    --warmup=2000

@@ -139,8 +139,8 @@ if not os.path.exists(checkpoint_dir):
 # Make sure this script is available later
 shutil.copy(__file__, checkpoint_dir)
 
-file_writer = tf.summary.create_file_writer(logdir + "/metrics")
-file_writer.set_as_default()
+# file_writer = tf.summary.create_file_writer(logdir + "/metrics")
+# file_writer.set_as_default()
 
 
 callbacks = [

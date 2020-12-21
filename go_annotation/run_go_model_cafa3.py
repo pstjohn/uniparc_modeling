@@ -17,15 +17,16 @@ from bert.dataset import encode
 from bert.model import create_model
 from bert.go import TreeNorm, Ontology
 from bert.go.layers import LogitSplitFmax
+from bert.optimization import create_optimizer
 
 parser = argparse.ArgumentParser(description='GO model training')
 parser.add_argument('--modelName', default='go-model',
                     help='model name for directory saving')
 parser.add_argument('--batchSize', type=int, default=24, 
                     help='batch size')
-parser.add_argument('--warmup', type=int, default=10000, 
+parser.add_argument('--warmup', type=int, default=1000, 
                     help='warmup steps')
-parser.add_argument('--epochs', type=int, default=10, 
+parser.add_argument('--totalSteps', type=int, default=5000, 
                     help='total steps')
 parser.add_argument('--lr', type=float, default=1E-4, 
                     help='initial learning rate')
@@ -115,8 +116,8 @@ with strategy.scope():
 
     go_model.summary()
 
-    optimizer = tf.keras.optimizers.Adam(arguments.lr, epsilon=1E-6)
-
+    optimizer = tf.keras.optimizers.Adam(arguments.lr)
+    
     metrics = [
         LogitSplitFmax(ont, 0),
         LogitSplitFmax(ont, 1),
@@ -164,7 +165,7 @@ go_model.fit(
     train_dataset,
     validation_data=valid_dataset,
     verbose=1,
-    epochs=arguments.epochs,
+    epochs=arguments.totalSteps//arguments.stepsPerEpoch,
     steps_per_epoch=arguments.stepsPerEpoch,
     validation_steps=arguments.validationSteps,
     callbacks=callbacks)

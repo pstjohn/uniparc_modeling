@@ -95,42 +95,9 @@ from bert.model import create_model, create_albert_model
 from bert.dataset import create_masked_input_dataset
 
 # Create the optimizer
-from bert.optimization import WarmUp, AdamWeightDecay
+from bert.optimization import create_optimizer
 
-def create_optimizer():
-    lr_schedule = tf.keras.optimizers.schedules.PolynomialDecay(
-        initial_learning_rate=arguments.lr,
-        decay_steps=arguments.totalSteps,
-        end_learning_rate=0.0)
-
-    lr_schedule = WarmUp(
-        initial_learning_rate=arguments.lr,
-        decay_schedule_fn=lr_schedule,
-        warmup_steps=arguments.warmup)
-
-
-    if arguments.weightDecay == 'true':
-        optimizer = AdamWeightDecay(
-            learning_rate=lr_schedule,
-            weight_decay_rate=0.01,
-            beta_1=0.9,
-            beta_2=0.999,
-            epsilon=1e-6,
-            exclude_from_weight_decay=['layer_norm', 'bias'])
-
-    elif arguments.weightDecay == 'false':
-        optimizer = tf.keras.optimizers.Adam(
-            learning_rate=lr_schedule,
-            beta_1=0.9,
-            beta_2=0.999,
-            epsilon=1e-6)
-        
-    else:
-        raise RuntimeError(f'invalid weight decay: {arguments.weightDecay}')
-        
-    return optimizer
-
-optimizer = create_optimizer()           
+optimizer = create_optimizer(arguments.lr, arguments.totalSteps, arguments.warmup, optimizer="lamb")
 
 # Training data path -- here the data's been sharded to allow multi-worker splits
 
@@ -201,14 +168,14 @@ with strategy.scope():
         metrics=[ECE],
         optimizer=optimizer)
 
-    if arguments.restart != 'false':
-        # Make sure we create the optimizer and recompile
-        optimizer = create_optimizer()  
-        model.compile(
-            loss=masked_sparse_categorical_crossentropy,
-            metrics=[ECE],
-            optimizer=optimizer)
-        print(optimizer.weights)
+#     if arguments.restart != 'false':
+#         # Make sure we create the optimizer and recompile
+#         optimizer = create_optimizer()  
+#         model.compile(
+#             loss=masked_sparse_categorical_crossentropy,
+#             metrics=[ECE],
+#             optimizer=optimizer)
+#         print(optimizer.weights)
 
 ## Create keras callbacks
 callbacks = []
