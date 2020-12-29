@@ -4,6 +4,7 @@ import tensorflow.keras.backend as K
 from tensorflow.keras import layers
 
 from bert.attention_utils import relative_attention_inner, initializer
+from bert.layernorm import MixedLayerNormalization
 
 def gelu(x):
     """
@@ -53,19 +54,21 @@ class Attention(layers.Layer):
         
         dense_units = self.units * self.num_heads  # N*H
         
-        self.qk_layer = layers.Dense(
-            dense_units, kernel_initializer=initializer(), name='qk')
+        self.query_layer = layers.Dense(
+            dense_units, kernel_initializer=initializer(), name='query')
+        self.key_layer = layers.Dense(
+            dense_units, kernel_initializer=initializer(), name='key')        
         self.value_layer = layers.Dense(
             dense_units, kernel_initializer=initializer(), name='value')
         
         self.dropout_layer = layers.Dropout(self.dropout)
         
-    def create_attention_mask(self, input_shape, input_mask):
-        mask = tf.cast(tf.expand_dims(input_mask, axis=1), tf.float32)                   # [B, 1, S]
-        ones = tf.expand_dims(tf.ones(shape=input_shape[:2], dtype=tf.float32), axis=-1)  # [B, S, 1]
+    def create_attention_mask(self, input_shape, input_mask, dtype):
+        mask = tf.cast(tf.expand_dims(input_mask, axis=1), dtype)                   # [B, 1, S]
+        ones = tf.expand_dims(tf.ones(shape=input_shape[:2], dtype=dtype), axis=-1)  # [B, S, 1]
         mask = ones * mask  # broadcast along two dimensions
         # Don't allow nodes to attend to themselves
-        mask = mask - tf.eye(tf.shape(input_mask)[-1]) 
+        mask = mask - tf.eye(tf.shape(input_mask)[-1], dtype=dtype) 
         mask = tf.clip_by_value(mask, 0, 1)
         return tf.expand_dims(mask, axis=1)  # [B,1,S,S]
     
@@ -79,23 +82,24 @@ class Attention(layers.Layer):
         output_shape = [input_shape[0], input_shape[1], self.num_heads * self.units]
         return output_shape  # [B, S, N*H]
 
-    def calculate_attention(self, qk, input_shape):
-        return (tf.matmul(qk, qk, transpose_b=True) 
-                / tf.sqrt(float(self.units)))        
+    def calculate_attention(self, query, key, input_shape):
+        return (tf.matmul(query, key, transpose_b=True) 
+                / tf.sqrt(tf.cast(self.units, query.dtype)))
         
     def call(self, inputs, mask=None, training=None):
 
         input_shape = tf.shape(inputs) # [B, S, N*H]
         
         # query and key can be the same vector
-        qk = self.transpose_scores(self.qk_layer(inputs))  # [B,N,S,H]
+        query = self.transpose_scores(self.query_layer(inputs))  # [B,N,S,H]
+        key = self.transpose_scores(self.key_layer(inputs))  # [B,N,S,H]        
         value = self.transpose_scores(self.value_layer(inputs))  # [B,N,S,H]
 
         # Equation 1 of "Attention is all you need"
-        attention_scores = self.calculate_attention(qk, input_shape)  # [B,N,S,S]
+        attention_scores = self.calculate_attention(query, key, input_shape)  # [B,N,S,S]
 
         # zero out masked values
-        attention_mask = self.create_attention_mask(input_shape, mask)
+        attention_mask = self.create_attention_mask(input_shape, mask, query.dtype)
         attention_scores = attention_scores + (1. - attention_mask) * -10000.0
         
         attention_probs = tf.nn.softmax(attention_scores)  # [B,N,S,S]
@@ -147,11 +151,11 @@ class RelativeAttention(Attention):
         final_mat = distance_mat_clipped + self.max_relative_position
         return final_mat
 
-    def calculate_attention(self, qk, input_shape):
+    def calculate_attention(self, query, key, input_shape):
         """ Eq. 4 of arXiv:1803.02155 """
         relative_positions = self._generate_relative_positions_matrix(input_shape[1])
-        relations_keys = self.relations_keys_embedding(relative_positions)
-        attention_scores = relative_attention_inner(qk, qk, relations_keys, True) 
+        relations_keys = tf.cast(self.relations_keys_embedding(relative_positions), query.dtype)
+        attention_scores = relative_attention_inner(query, key, relations_keys, True) 
         return attention_scores
 
     def get_config(self):
@@ -175,7 +179,7 @@ class Projection(layers.Layer):
                                         activation=gelu)
         
         self.dropout_layer = layers.Dropout(self.dropout)
-        self.layer_norm = layers.LayerNormalization()
+        self.layer_norm = MixedLayerNormalization()
 
     def call(self, inputs, training=None):
         
@@ -204,7 +208,7 @@ class Transformer(layers.Layer):
     def __init__(self, num_heads, 
                  intermediate_units, 
                  dropout=0.0,
-                 attention_type='attention',
+                 attention_type='absolute',
                  max_relative_position=10,
                  use_layernorm=True,
                  **kwargs):
@@ -240,7 +244,7 @@ class Transformer(layers.Layer):
         
         self.units = d_model // self.num_heads
         
-        if self.attention_type == 'attention':
+        if self.attention_type == 'absolute':
             self.attention_layer = Attention(self.units, self.num_heads, self.dropout)
             
         elif self.attention_type == 'relative':

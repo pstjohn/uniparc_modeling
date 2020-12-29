@@ -1,5 +1,6 @@
 import os
 import argparse
+import shutil
 
 parser = argparse.ArgumentParser(description='BERT model training')
 parser.add_argument('--modelName', default='albert-xlarge',
@@ -10,10 +11,10 @@ parser.add_argument('--batchSize', type=int, default=8,
                     help='batch size per gpu')
 parser.add_argument('--warmup', type=int, default=10000, 
                     help='warmup steps')
+parser.add_argument('--totalSteps', type=int, default=100000, 
+                    help='total steps')
 parser.add_argument('--lr', type=float, default=1E-4, 
                     help='initial learning rate')
-parser.add_argument('--weightDecay', type=float, default=0.01, 
-                    help='AdamW weight decay')
 parser.add_argument('--sequenceLength', type=int, default=1024, 
                     help='Protein AA sequence length')
 parser.add_argument('--scratchDir', default=None, 
@@ -24,152 +25,131 @@ parser.add_argument('--checkpoint', default=None,
                     help='Restore model from checkpoint')
 parser.add_argument('--initialEpoch', type=int, default=0, 
                     help='starting epoch')
+parser.add_argument('--stepsPerEpoch', type=int, default=500, 
+                    help='steps per epoch')
+parser.add_argument('--validationSteps', type=int, default=25, 
+                    help='validation steps')
+parser.add_argument('--maskingFreq', type=float, default=.15, 
+                    help='overall masking frequency')
+parser.add_argument('--attentionType', type=str, default='relative', 
+                    help='attention type')
+parser.add_argument('--modelDimension', type=int, default=512, 
+                    help='attention dimension')
+parser.add_argument('--numberXformerLayers', type=int, default=6, 
+                    help='number of tranformer layers')
+parser.add_argument('--dropout', type=float, default=0.0, 
+                    help='dropout')
 
 arguments = parser.parse_args()
+print(arguments)
 
 import numpy as np
 import tensorflow as tf
-import tensorflow_addons as tfa
 
-# tf.compat.v1.disable_eager_execution()
+from tensorflow.keras.mixed_precision import experimental as mixed_precision
+policy = mixed_precision.Policy('mixed_float16')
+mixed_precision.set_policy(policy)
 
-import horovod.tensorflow.keras as hvd
-# from bert.hvd_utils import is_using_hvd
-is_using_hvd = lambda: True
+from bert.losses import ECE, masked_sparse_categorical_crossentropy
+from bert.model import create_albert_model, load_model_from_checkpoint
+from bert.dataset import create_masked_input_dataset
 
-# Horovod: initialize Horovod.
-if is_using_hvd():
-    print('Initializing Horovod')
-    hvd.init()
+## Create the model
+# from bert.optimization import create_optimizer
+# optimizer = create_optimizer(arguments.lr, arguments.warmup, arguments.totalSteps)
 
-# Print runtime config on head node
-if hvd.rank() == 0:
-    print(arguments)
+from bert.optimization import WarmUp
+import tensorflow_addons.optimizers as tfa_optimizers
 
-# Horovod: pin GPU to be used to process local rank (one GPU per process)
-gpus = tf.config.experimental.list_physical_devices('GPU')
-print(f"HVD rank: {hvd.rank()}, GPUs: {gpus}")
-if gpus and is_using_hvd():
-    tf.config.experimental.set_visible_devices(gpus[hvd.local_rank()], 'GPU')
+lr_schedule = tf.keras.optimizers.schedules.PolynomialDecay(
+    initial_learning_rate=arguments.lr,
+    decay_steps=arguments.totalSteps,
+    end_learning_rate=0.0)
 
-hvd_size = hvd.size() if is_using_hvd() else None
-hvd_rank = hvd.rank() if is_using_hvd() else None
+lr_schedule = WarmUp(
+    initial_learning_rate=arguments.lr,
+    decay_schedule_fn=lr_schedule,
+    warmup_steps=arguments.warmup)
 
-# Create the model
-if not arguments.checkpoint:
-    from bert.model import create_albert_model
-    model = create_albert_model(model_dimension=512,
-                                transformer_dimension=512 * 4,
-                                num_attention_heads=512 // 64,
-                                num_transformer_layers=6,
-                                vocab_size=24,
-                                dropout_rate=0.,
-                                max_relative_position=64,
-                                weight_share=arguments.weightShare)
-else:
-    from bert.model import load_model_from_checkpoint
-    model = load_model_from_checkpoint(arguments.checkpoint)
+optimizer = tfa_optimizers.LAMB(
+    learning_rate=lr_schedule,
+    weight_decay_rate=0.01,
+    beta_1=0.9,
+    beta_2=0.999,
+    epsilon=1e-6,
+    exclude_from_weight_decay=['layer_norm', 'bias'])
 
+training_data = create_masked_input_dataset(
+    sequence_path=os.path.join(
+        arguments.dataDir, 'train_uniref100_split/train_100_*.txt.gz'),
+    max_sequence_length=arguments.sequenceLength,
+    batch_size=arguments.batchSize,
+    masking_freq=arguments.maskingFreq,
+    fix_sequence_length=True)
 
-if hvd_rank == 0:
-    model.summary()
+valid_data = create_masked_input_dataset(
+    sequence_path=os.path.join(
+        arguments.dataDir, 'dev_uniref50_split/dev_50_*.txt.gz'),
+    max_sequence_length=arguments.sequenceLength,
+    batch_size=arguments.batchSize,
+    masking_freq=arguments.maskingFreq,
+    fix_sequence_length=True)
+
+strategy = tf.distribute.MirroredStrategy()
+
+with strategy.scope():
     
-from bert.optimizers import (ECE, masked_sparse_categorical_crossentropy,
-                             BertLinearSchedule)
+    model = create_albert_model(model_dimension=arguments.modelDimension,
+                                transformer_dimension=arguments.modelDimension * 4,
+                                num_attention_heads=arguments.modelDimension // 64,
+                                num_transformer_layers=arguments.numberXformerLayers,
+                                vocab_size=24,
+                                dropout_rate=arguments.dropout,
+                                max_relative_position=64,
+                                final_layernorm=False)
+    
+    if arguments.checkpoint:
+        model.load_weights(arguments.checkpoint)
 
-opt = tf.optimizers.Adam(learning_rate=arguments.lr,
-                         beta_2=0.98,
-                         epsilon=1E-6)
+    model.compile(
+        loss=masked_sparse_categorical_crossentropy,
+        metrics=[ECE],
+        optimizer=optimizer)
 
+model.summary()
 
-# Horovod: add Horovod DistributedOptimizer.
-if is_using_hvd():
-    opt = hvd.DistributedOptimizer(opt)
-
-# Horovod: Specify `experimental_run_tf_function=False` to ensure TensorFlow
-# uses hvd.DistributedOptimizer() to compute gradients.
-true_labels = tf.keras.layers.Input(
-    shape=(None,), dtype=tf.int32, batch_size=None)
-
-model.compile(
-    target_tensors=true_labels,    
-    loss=masked_sparse_categorical_crossentropy,
-    metrics=[ECE],
-    optimizer=opt,
-    experimental_run_tf_function=True)
+## Create keras callbacks
+callbacks = []
 
 model_name = arguments.modelName
-checkpoint_dir = f'{arguments.scratchDir}/{model_name}_checkpoints'
+checkpoint_dir = f'{arguments.scratchDir}/{model_name}/'
+logdir = f'{arguments.scratchDir}/tblogs/{model_name}'
+
 if not os.path.exists(checkpoint_dir):
     os.makedirs(checkpoint_dir)
 
-callbacks = []
+# Make sure this script is available later
+shutil.copy(__file__, checkpoint_dir)
 
-if is_using_hvd():
-    callbacks += [
-    # Horovod: broadcast initial variable states from rank 0 to all other
-    # processes.  This is necessary to ensure consistent initialization of all
-    # workers when training is started with random weights or restored from a
-    # checkpoint.
-    hvd.callbacks.BroadcastGlobalVariablesCallback(0),
+callbacks = [
+    tf.keras.callbacks.ModelCheckpoint(
+        filepath=os.path.join(checkpoint_dir, "saved_weights"),
+        save_best_only=True,
+        save_weights_only=True,
+        mode='min',
+        monitor='val_ECE'),
+    tf.keras.callbacks.TensorBoard(
+        log_dir=logdir,
+        histogram_freq=0,
+        write_graph=False,
+        update_freq='epoch',
+        profile_batch=2,
+        embeddings_freq=0)
+]
 
-    # Horovod: average metrics among workers at the end of every epoch.
-    # Note: This callback must be in the list before the ReduceLROnPlateau,
-    # TensorBoard or other metrics-based callbacks.
-    hvd.callbacks.MetricAverageCallback(),
-
-    BertLinearSchedule(
-        arguments.lr, arguments.warmup, int(5E5),
-        write_summary=True if hvd.rank() == 0 else False),
-    ]
-
-# Horovod: save checkpoints only on worker 0 to prevent other workers from
-# corrupting them.
-if hvd.rank() == 0:
-    logdir = f'{arguments.scratchDir}/tblogs/{model_name}'
-    callbacks += [
-        tf.keras.callbacks.ModelCheckpoint(
-            filepath=os.path.join(checkpoint_dir, "ckpt.h5"),
-            save_best_only=True,
-            mode='min',
-            monitor='val_ECE'),
-        tf.keras.callbacks.TensorBoard(
-            log_dir=logdir,
-            histogram_freq=0,
-            write_graph=False,
-            update_freq='epoch',
-            profile_batch=20,
-            embeddings_freq=0)
-    ]
-
-    file_writer = tf.summary.create_file_writer(logdir + "/metrics")
-    file_writer.set_as_default()
-
-    
-# Horovod: write logs on worker 0.
-verbose = 1 if hvd.rank() == 0 else 0
-
-from bert.dataset import create_masked_input_dataset
-
-training_data = create_masked_input_dataset(
-    sequence_path=os.path.join(arguments.dataDir, 'train_uniref100.txt.gz'),
-    max_sequence_length=arguments.sequenceLength,
-    batch_size=arguments.batchSize,
-    shard_num_workers=hvd_size,
-    shard_worker_index=hvd_rank)
-
-training_data = training_data.repeat().prefetch(tf.data.experimental.AUTOTUNE)
-
-valid_data = create_masked_input_dataset(
-    sequence_path=os.path.join(arguments.dataDir, 'dev_uniref50.txt.gz'),
-    max_sequence_length=arguments.sequenceLength,
-    batch_size=arguments.batchSize,
-    shard_num_workers=hvd_size,
-    shard_worker_index=hvd_rank)
-
-valid_data = valid_data.repeat().prefetch(tf.data.experimental.AUTOTUNE)
-
-model.fit(training_data, steps_per_epoch=500, epochs=1000,
+model.fit(training_data, steps_per_epoch=arguments.stepsPerEpoch,
+          epochs=arguments.totalSteps//arguments.stepsPerEpoch,
           initial_epoch=arguments.initialEpoch,
-          verbose=verbose, validation_data=valid_data, validation_steps=25,
+          verbose=1, validation_data=valid_data,
+          validation_steps=arguments.validationSteps,
           callbacks=callbacks)

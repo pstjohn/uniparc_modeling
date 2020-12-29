@@ -1,0 +1,40 @@
+#!/bin/bash
+
+#BSUB -P BIE108
+#BSUB -W 24:00
+#BSUB -nnodes 28
+#BSUB -q killable
+#BSUB -J 12_layer_bs24_adamw_20200527
+#BSUB -o /ccs/home/pstjohn/job_output/%J.out
+#BSUB -e /ccs/home/pstjohn/job_output/%J.err
+
+NODES=$(cat ${LSB_DJOB_HOSTFILE} | sort | uniq | grep -v login | grep -v batch | wc -l)
+BATCH_SIZE=$(($NODES * 6 * 24))
+
+module load ibm-wml-ce/1.7.0-3
+conda activate tf21-ibm
+export PYTHONPATH=$HOME/uniparc_modeling:$PYTHONPATH
+export NCCL_DEBUG=INFO
+export TF_ENABLE_AUTO_MIXED_PRECISION=1
+export OMP_NUM_THREADS=4
+
+cd $MEMBERWORK/bie108
+cp $HOME/uniparc_modeling/run_model_multi_worker.py .
+
+jsrun -n ${NODES} -g 6 -c 42 -r1 -a1 -b none python3 run_model_multi_worker.py \
+    --modelName=$LSB_JOBNAME \
+    --scratchDir="$MEMBERWORK/bie108/uniparc_checkpoints" \
+    --dataDir="$PROJWORK/bie108/split_uniref100" \
+    --checkpoint="$MEMBERWORK/bie108/uniparc_checkpoints/$LSB_JOBNAME" \
+    --batchSize=$BATCH_SIZE \
+    --warmup=3125 \
+    --totalSteps=125000 \
+    --stepsPerEpoch=250 \
+    --validationSteps=5 \
+    --lr=0.00176 \
+    --maskingFreq=0.15 \
+    --sequenceLength=512 \
+    --modelDimension=768 \
+    --numberXformerLayers=12 \
+    --initialEpoch=0
+

@@ -1,0 +1,45 @@
+#!/bin/bash
+
+#BSUB -P BIE108
+#BSUB -q batch-hm
+#BSUB -W 00:10
+#BSUB -nnodes 2
+#BSUB -J wd_test_hm_1024
+#BSUB -o /ccs/home/pstjohn/job_output/%J.out
+#BSUB -e /ccs/home/pstjohn/job_output/%J.err
+
+NODES=$(cat ${LSB_DJOB_HOSTFILE} | sort | uniq | grep -v login | grep -v batch | wc -l)
+BATCH_SIZE=$(($NODES * 6 * 24))
+
+module load ibm-wml-ce/1.7.0-3
+conda activate tf21-ibm
+export PYTHONPATH=$HOME/uniparc_modeling:$PYTHONPATH
+export NCCL_DEBUG=INFO
+export TF_ENABLE_AUTO_MIXED_PRECISION=1
+export OMP_NUM_THREADS=4
+
+mkdir -p  $MEMBERWORK/bie108/$LSB_JOBNAME/$LSB_JOBID
+cd  $MEMBERWORK/bie108/$LSB_JOBNAME/$LSB_JOBID
+cp $HOME/uniparc_modeling/run_model_wd_at.py .
+
+jsrun -n ${NODES} -g 6 -c 42 -r1 -a1 -b none python run_model_wd_at.py \
+    --modelName=$LSB_JOBNAME.$LSB_JOBID \
+    --scratchDir="$MEMBERWORK/bie108/uniparc_checkpoints" \
+    --dataDir="$PROJWORK/bie108/split_uniref100" \
+    --checkpoint="/gpfs/alpine/scratch/pstjohn/bie108/uniparc_checkpoints/12_layer_relative_adam_20200625.186100/" \
+    --batchSize=$BATCH_SIZE \
+    --warmup=25 \
+    --totalSteps=100 \
+    --stepsPerEpoch=10 \
+    --validationSteps=10 \
+    --lr=2E-4 \
+    --maskingFreq=0.05 \
+    --sequenceLength=1024 \
+    --modelDimension=768 \
+    --numberXformerLayers=12 \
+    --attentionType='relative' \
+    --weightDecay='false' \
+    --initialEpoch=0 \
+    --restart='true'
+
+    #--checkpoint="$MEMBERWORK/bie108/uniparc_checkpoints/multinode_test_mixed_precision.113288" \

@@ -1,3 +1,5 @@
+# PSJ note: this file is from https://github.com/tensorflow/models/blob/master/official/nlp/optimization.py
+
 # Copyright 2019 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,12 +39,8 @@ class WarmUp(tf.keras.optimizers.schedules.LearningRateSchedule):
     self.initial_learning_rate = initial_learning_rate
     self.warmup_steps = warmup_steps
     self.power = power
+    self.decay_schedule_fn = decay_schedule_fn
     self.name = name
-    try:
-        self.decay_schedule_fn = tf.keras.optimizers.schedules.deserialize(decay_schedule_fn)
-
-    except TypeError:
-        self.decay_schedule_fn = decay_schedule_fn            
 
   def __call__(self, step):
     with tf.name_scope(self.name or 'WarmUp') as name:
@@ -54,15 +52,19 @@ class WarmUp(tf.keras.optimizers.schedules.LearningRateSchedule):
       warmup_learning_rate = (
           self.initial_learning_rate *
           tf.math.pow(warmup_percent_done, self.power))
-      return tf.cond(global_step_float < warmup_steps_float,
+
+      learning_rate = tf.cond(global_step_float < warmup_steps_float,
                      lambda: warmup_learning_rate,
                      lambda: self.decay_schedule_fn(step),
                      name=name)
 
+      tf.summary.scalar('learning rate', data=learning_rate, step=tf.cast(step, tf.int64))
+      return learning_rate
+
   def get_config(self):
     return {
         'initial_learning_rate': self.initial_learning_rate,
-        'decay_schedule_fn': tf.keras.optimizers.schedules.serialize(self.decay_schedule_fn),
+        'decay_schedule_fn': self.decay_schedule_fn,
         'warmup_steps': self.warmup_steps,
         'power': self.power,
         'name': self.name
@@ -92,11 +94,9 @@ def create_optimizer(init_lr, num_train_steps, num_warmup_steps):
 
 class AdamWeightDecay(tf.keras.optimizers.Adam):
   """Adam enables L2 weight decay and clip_by_global_norm on gradients.
-
   Just adding the square of the weights to the loss function is *not* the
   correct way of using L2 regularization/weight decay with Adam, since that will
   interact with the m and v parameters in strange ways.
-
   Instead we want ot decay the weights in a manner that doesn't interact with
   the m/v parameters. This is equivalent to adding the square of the weights to
   the loss with plain (non-momentum) SGD.
@@ -109,12 +109,14 @@ class AdamWeightDecay(tf.keras.optimizers.Adam):
                epsilon=1e-7,
                amsgrad=False,
                weight_decay_rate=0.0,
+               include_in_weight_decay=None,
                exclude_from_weight_decay=None,
                name='AdamWeightDecay',
                **kwargs):
     super(AdamWeightDecay, self).__init__(
         learning_rate, beta_1, beta_2, epsilon, amsgrad, name, **kwargs)
     self.weight_decay_rate = weight_decay_rate
+    self._include_in_weight_decay = include_in_weight_decay
     self._exclude_from_weight_decay = exclude_from_weight_decay
 
   @classmethod
@@ -182,6 +184,12 @@ class AdamWeightDecay(tf.keras.optimizers.Adam):
     """Whether to use L2 weight decay for `param_name`."""
     if self.weight_decay_rate == 0:
       return False
+
+    if self._include_in_weight_decay:
+      for r in self._include_in_weight_decay:
+        if re.search(r, param_name) is not None:
+          return True
+
     if self._exclude_from_weight_decay:
       for r in self._exclude_from_weight_decay:
         if re.search(r, param_name) is not None:
